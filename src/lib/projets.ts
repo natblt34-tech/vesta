@@ -1,0 +1,78 @@
+/* Les films livrés. Trois projets exemplaires plutôt que douze moyens. */
+
+export type Projet = {
+  slug: string;
+  titre: string;
+  type: string;
+  surface: number;
+  quartier: string;
+  photos: number;
+  traversees: { nom: string; duree: number }[];
+  duree: number;
+  image: string;
+  posPlate: string;
+  brief: string;
+  resultat: string;
+};
+
+export const PROJETS: Projet[] = [
+  {
+    slug: "maison-cote-pavee",
+    titre: "Maison Côte Pavée",
+    type: "T4",
+    surface: 112,
+    quartier: "CÔTE PAVÉE",
+    photos: 9,
+    traversees: [
+      { nom: "SALON → CUISINE", duree: 6 },
+      { nom: "ENTRÉE → SÉJOUR", duree: 5 },
+    ],
+    duree: 47,
+    image: "salon-apres",
+    posPlate: "center 40%",
+    brief:
+      "Neuf photos d'agent, prises au téléphone en fin de journée. Un séjour magnifique mais sous-exposé, une brique invisible dans l'annonce d'origine.",
+    resultat:
+      "Un film de 47 secondes, deux traversées, la brique rendue à sa lumière du soir. L'annonce est passée en tête de sa recherche Se Loger dès la première semaine.",
+  },
+  {
+    slug: "t3-saint-aubin",
+    titre: "T3 Saint-Aubin",
+    type: "T3",
+    surface: 78,
+    quartier: "SAINT-AUBIN",
+    photos: 11,
+    traversees: [
+      { nom: "COULOIR → CUISINE", duree: 6 },
+      { nom: "CUISINE → SÉJOUR", duree: 5 },
+      { nom: "SÉJOUR → BALCON", duree: 4 },
+    ],
+    duree: 52,
+    image: "cuisine-porte",
+    posPlate: "center 55%",
+    brief:
+      "Onze photos, un appartement traversant dont les enfilades ne se lisaient pas du tout en photo fixe. C'est le cas d'usage exact des traversées.",
+    resultat:
+      "Trois traversées bout à bout : le film fait ce que la visite fait — il enchaîne les pièces. 52 secondes, livré en 72 h.",
+  },
+  {
+    slug: "appartement-carmes",
+    titre: "Appartement Carmes",
+    type: "T2",
+    surface: 64,
+    quartier: "CARMES",
+    photos: 8,
+    traversees: [{ nom: "SÉJOUR → CHAMBRE", duree: 5 }],
+    duree: 38,
+    image: "salon-meuble",
+    posPlate: "center 60%",
+    brief:
+      "Huit photos d'un bien vendu meublé. L'agence voulait l'heure dorée sans attendre le bon créneau météo.",
+    resultat:
+      "Étalonnage chaud sur tout le film, lampes allumées, 38 secondes. Le bien s'est vendu sur la deuxième visite.",
+  },
+];
+
+export function getProjet(slug: string) {
+  return PROJETS.find((p) => p.slug === slug);
+}

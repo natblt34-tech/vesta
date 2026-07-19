@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+/* ————————————————————————————————————————————
+   VESTA — tokens (source : DESIGN_PLAN.md §1)
+   Aucune valeur en dur hors de ce fichier.
+   ———————————————————————————————————————————— */
+
+@theme {
+  /* Couleur — braise sur basalte */
+  --color-basalte: #12151a;
+  --color-basalte-2: #1b1f26;
+  --color-pierre: #e9e4da;
+  --color-pierre-claire: #e5e0d6;
+  --color-encre: #16191e;
+  --color-gris-pierre: #8f8b82;
+  --color-filet: #3a3e45;
+  --color-filet-clair: #c9c3b6;
+  --color-braise: #c2551e;
+  --color-braise-vive: #e8863c;
+  --color-bronze: #96794c;
+
+  /* Typo */
+  --font-display: var(--font-anybody), "Arial Black", sans-serif;
+  --font-texte: var(--font-switzer), system-ui, sans-serif;
+  --font-mono: var(--font-martian), "Courier New", monospace;
+
+  /* Échelle */
+  --text-colossal: clamp(5.5rem, 16vw, 16.25rem);
+  --text-display: clamp(3rem, 8vw, 7.5rem);
+  --text-titre: clamp(1.75rem, 4vw, 3.5rem);
+  --text-corps: 1.0625rem;
+  --text-mono-s: 0.6875rem;
+  --text-mono-m: 0.8125rem;
+
+  /* Motion */
+  --ease-pierre: cubic-bezier(0.65, 0, 0.15, 1);
+  --ease-braise: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-poids: cubic-bezier(0.34, 1.28, 0.44, 1);
+
+  /* Rythme */
+  --spacing-section: clamp(6rem, 14vh, 15rem);
+  --spacing-marge: max(4vw, 1.25rem);
+}
+
+/* ————— Fond de page pilotable (retouche : basalte → pierre) ————— */
+:root {
+  --page-bg: var(--color-basalte);
+  --page-fg: var(--color-pierre);
+  --page-fg-2: var(--color-gris-pierre);
+  --page-filet: var(--color-filet);
+}
+
+html {
+  background: var(--color-basalte);
+}
+
+body {
+  background: var(--page-bg);
+  color: var(--page-fg);
+  font-family: var(--font-texte);
+  font-size: var(--text-corps);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-braise);
+  color: var(--color-pierre);
+}
+
+/* ————— Voix typographiques ————— */
+
+.voix-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 125%;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.92;
+}
+
+.voix-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ————— Dispositifs récurrents ————— */
+
+.filet {
+  border-top: 1px solid var(--page-filet);
+}
+
+.marge {
+  padding-inline: var(--spacing-marge);
+}
+
+/* Le grain — une seule couche fixe, mix-blend, quasi gratuite */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: 80;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  animation: grain-shift 0.9s steps(4) infinite;
+}
+
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, 1%); }
+  50% { transform: translate(1%, -2%); }
+  75% { transform: translate(-1%, 2%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* La braise qui respire (loader, curseur, index) */
+@keyframes braise-respire {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.braise-point {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-braise-vive) 0%, var(--color-braise) 55%, transparent 100%);
+  box-shadow: 0 0 12px 2px color-mix(in srgb, var(--color-braise) 60%, transparent);
+  animation: braise-respire 2.4s ease-in-out infinite;
+}
+
+/* ————— Focus clavier — bronze, jamais supprimé ————— */
+:focus-visible {
+  outline: 2px solid var(--color-bronze);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+/* ————— Liens ————— */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ————— Reduced motion : couper les boucles décoratives ————— */
+@media (prefers-reduced-motion: reduce) {
+  .grain::after,
+  .braise-point {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Curseur custom actif : on ne masque le curseur natif que sur pointeurs fins */
+@media (pointer: fine) {
+  body[data-cursor-active="true"] {
+    cursor: none;
+  }
+  body[data-cursor-active="true"] a,
+  body[data-cursor-active="true"] button {
+    cursor: none;
+  }
+}
