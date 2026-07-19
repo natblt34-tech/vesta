@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import IndexProjets from "@/components/projets/IndexProjets";
 import RendezVous from "@/components/chrome/RendezVous";
 import Ajuste from "@/components/Ajuste";
+import FragmentVesta from "@/components/vesta/FragmentVesta";
 
 export const metadata: Metadata = {
   title: "Les projets",
@@ -12,7 +13,10 @@ export const metadata: Metadata = {
 export default function Projets() {
   return (
     <main>
-      <header className="marge flex flex-col justify-end pb-8 pt-32">
+      <header className="marge relative flex flex-col justify-end pb-8 pt-32">
+        <div className="absolute right-[2vw] top-24 hidden w-[10vw] max-w-36 lg:block">
+          <FragmentVesta variant="vesta" miroir />
+        </div>
         <h1 className="voix-display" style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)" }}>
           <Ajuste>Les projets</Ajuste>
         </h1>

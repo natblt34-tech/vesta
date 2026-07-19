@@ -35,10 +35,12 @@ type Props = {
   variant: keyof typeof TRACES;
   className?: string;
   /* Couleur du trait : pierre par défaut, bronze pour les marges. */
-  ton?: "pierre" | "bronze" | "encre";
+  ton?: "pierre" | "bronze" | "encre" | "braise";
+  /* false : trait complet immédiatement (couches de survol, états statiques). */
+  dessine?: boolean;
 };
 
-export default function LigneClaire({ variant, className, ton = "bronze" }: Props) {
+export default function LigneClaire({ variant, className, ton = "bronze", dessine = true }: Props) {
   const svg = useRef<SVGSVGElement>(null);
   const trace = TRACES[variant];
 
@@ -51,7 +53,7 @@ export default function LigneClaire({ variant, className, ton = "bronze" }: Prop
     const length = path.getTotalLength();
     path.style.strokeDasharray = `${length}`;
 
-    if (prefersReducedMotion()) {
+    if (!dessine || prefersReducedMotion()) {
       path.style.strokeDashoffset = "0";
       return;
     }
@@ -68,14 +70,16 @@ export default function LigneClaire({ variant, className, ton = "bronze" }: Prop
     });
 
     return () => st.kill();
-  }, [variant]);
+  }, [variant, dessine]);
 
   const stroke =
     ton === "pierre"
       ? "var(--color-pierre)"
       : ton === "encre"
         ? "var(--color-encre)"
-        : "var(--color-bronze)";
+        : ton === "braise"
+          ? "var(--color-braise-vive)"
+          : "var(--color-bronze)";
 
   return (
     <svg

@@ -88,8 +88,8 @@ export default function NeufPhotos() {
           Un film.
         </h2>
         <p className="mt-6 max-w-md" style={{ color: "var(--color-gris-pierre)" }}>
-          Vous envoyez les photos de l&apos;annonce. La génération est faite par IA —
-          Higgsfield, Kling. Le montage est fait par un humain, image par image :
+          Vous envoyez les photos de l&apos;annonce. La génération est faite par IA.
+          Le montage est fait par un humain, image par image :
           choix des plans, raccords, rythme, étalonnage. C&apos;est la différence
           entre un effet et un film.
         </p>

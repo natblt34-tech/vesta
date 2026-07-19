@@ -6,7 +6,7 @@ import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { CAL_URL } from "@/lib/site";
 import { media } from "@/lib/media";
 import { useFitText } from "@/lib/useFitText";
-import LigneClaire from "@/components/vesta/LigneClaire";
+import FragmentVesta from "@/components/vesta/FragmentVesta";
 import { setPlan } from "./homeStatus";
 
 /* Le hero : VESTA en colossal, le film vit dans les contreformes.
@@ -62,15 +62,15 @@ export default function Hero() {
     >
       <div
         data-flanc
-        className="pointer-events-none absolute left-[2vw] top-1/2 hidden w-[11vw] max-w-40 -translate-y-1/2 md:block"
+        className="absolute left-[2vw] top-1/2 hidden w-[13vw] max-w-52 -translate-y-1/2 md:block"
       >
-        <LigneClaire variant="vesta" ton="bronze" />
+        <FragmentVesta variant="vesta" />
       </div>
       <div
         data-flanc
-        className="pointer-events-none absolute right-[2vw] top-1/2 hidden w-[11vw] max-w-40 -translate-y-1/2 scale-x-[-1] md:block"
+        className="absolute right-[2vw] top-1/2 hidden w-[13vw] max-w-52 -translate-y-1/2 md:block"
       >
-        <LigneClaire variant="flamme" ton="bronze" />
+        <FragmentVesta variant="flamme" miroir />
       </div>
 
       <p className="voix-mono mb-6" style={{ color: "var(--color-bronze)" }}>

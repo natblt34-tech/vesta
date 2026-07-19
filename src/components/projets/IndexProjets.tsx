@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { PROJETS } from "@/lib/projets";
-import { gsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { setStatus } from "@/lib/status";
 import { TransitionLink } from "@/components/chrome/Transition";
@@ -17,7 +17,14 @@ export default function IndexProjets() {
   const plate = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setStatus(`${PROJETS.length} FILMS LIVRÉS`);
+    setStatus(`${PROJETS.length} FILMS LIVRÉS · INDEX 0%`);
+    const st = ScrollTrigger.create({
+      start: 0,
+      end: () => document.documentElement.scrollHeight - window.innerHeight,
+      onUpdate: (self) =>
+        setStatus(`${PROJETS.length} FILMS LIVRÉS · INDEX ${Math.round(self.progress * 100)}%`),
+    });
+    return () => st.kill();
   }, []);
 
   useEffect(() => {

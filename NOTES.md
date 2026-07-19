@@ -37,5 +37,11 @@ La statue (direction B) n'a pas pu être générée → **la ligne claire (direc
 - Manifeste : suppression de la micro-rotation des glyphes (décorative, ne disait rien). La dérive verticale suffit.
 - Son : déjà écarté. WebGL grain : déjà écarté au profit du grain SVG fixe.
 
+### Retours client (2e passe)
+- Copy du site nettoyée : aucun nom d'outil de génération n'apparaît (« générée par IA » suffit — le montage humain est l'argument).
+- Overlay statut recentré : la zone droite appartient au bouton MENU (il y avait chevauchement).
+- **Dispositif dock.cool implémenté** (`FragmentVesta`) : fragments symétriques de part et d'autre du hero (home) et de l'en-tête projets ; au repos le trait bronze se dessine au scroll ; **au survol, un halo suivant le curseur révèle la version embrasée** (trait braise + lueur), qui s'éteint au départ — équivalent Vesta du rocher fleuri de la réf. Le composant est prévu pour recevoir les visuels statue photoréalistes (mêmes couches, même masque) quand le quota de génération sera libéré.
+- Statut /projets rendu dynamique au scroll (INDEX n%).
+
 ### TypeScript
 - npm avait installé TypeScript 7 (préversion native) → build Next 16 cassé (« The "id" argument must be of type string ») → épinglé typescript@5.9.
