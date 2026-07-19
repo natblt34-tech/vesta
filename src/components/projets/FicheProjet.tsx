@@ -5,6 +5,7 @@ import type { Projet } from "@/lib/projets";
 import { setStatus } from "@/lib/status";
 import { TransitionLink } from "@/components/chrome/Transition";
 import RendezVous from "@/components/chrome/RendezVous";
+import { media } from "@/lib/media";
 
 /* La fiche : l'entrée (photos moyennes) contre la sortie (le film).
    Le contraste EST l'argument. */
@@ -17,7 +18,7 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
     <main>
       <section className="relative flex h-[86svh] items-end overflow-hidden">
         <img
-          src={`/media/${projet.image}.webp`}
+          src={media(`${projet.image}.webp`)}
           alt={`Image du film — ${projet.titre}`}
           className="absolute inset-0 h-full w-full object-cover"
           style={{ objectPosition: projet.posPlate }}
@@ -51,7 +52,7 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
                 key={i}
                 className="aspect-4/3"
                 style={{
-                  backgroundImage: `url(/media/${projet.image}.webp)`,
+                  backgroundImage: `url(${media(`${projet.image}.webp`)})`,
                   backgroundSize: "340%",
                   backgroundPosition: `${(i * 41) % 100}% ${(i * 67) % 100}%`,
                   filter: "brightness(0.6) saturate(0.5) contrast(0.85)",

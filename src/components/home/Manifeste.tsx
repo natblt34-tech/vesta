@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { setPlan } from "./homeStatus";
+import { media } from "@/lib/media";
 
 /* « LE SCROLL EST LE FILM » — chaque glyphe est une fenêtre sur la même frame.
    Les lettres dérivent puis se recomposent. */
@@ -63,8 +64,7 @@ export default function Manifeste() {
                   data-glyphe
                   className="inline-block will-change-transform"
                   style={{
-                    backgroundImage:
-                      "linear-gradient(rgba(18,21,26,0.1), rgba(18,21,26,0.1)), url(/media/salon-apres.webp)",
+                    backgroundImage: `linear-gradient(rgba(18,21,26,0.1), rgba(18,21,26,0.1)), url(${media("salon-apres.webp")})`,
                     backgroundSize: "900% auto",
                     backgroundPosition: `${(pos * 13) % 100}% ${(pos * 29) % 100}%`,
                     WebkitBackgroundClip: "text",

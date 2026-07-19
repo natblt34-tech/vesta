@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { setPlan } from "./homeStatus";
+import { media } from "@/lib/media";
 
 /* LA TRAVERSÉE — le différenciateur produit, nommé et montré.
    La caméra pousse dans le salon, un portail circulaire (le temple rond)
@@ -61,13 +62,13 @@ export default function Traversee() {
       <section className="relative h-svh overflow-hidden">
         <img
           data-salon
-          src="/media/salon-apres.webp"
+          src={media("salon-apres.webp")}
           alt="Salon du bien témoin, lumière du soir sur le mur de brique"
           className="absolute inset-0 h-full w-full object-cover will-change-transform"
         />
         <img
           data-cuisine
-          src="/media/cuisine-porte.webp"
+          src={media("cuisine-porte.webp")}
           alt="La cuisine, vue depuis la porte du salon"
           className="absolute inset-0 h-full w-full object-cover will-change-transform"
           style={{ clipPath: "circle(0% at 50% 56%)" }}

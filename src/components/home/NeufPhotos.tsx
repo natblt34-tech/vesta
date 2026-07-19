@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { setPlan } from "./homeStatus";
+import { media } from "@/lib/media";
 
 /* 9 photos → un film. La planche contact converge vers l'ordre du montage. */
 
@@ -70,7 +71,7 @@ export default function NeufPhotos() {
             data-r={t.r}
             className="aspect-4/3 will-change-transform"
             style={{
-              backgroundImage: `url(/media/${t.img}.webp)`,
+              backgroundImage: `url(${media(`${t.img}.webp`)})`,
               backgroundSize: "300%",
               backgroundPosition: t.pos,
               filter: "saturate(0.8) brightness(0.9)",

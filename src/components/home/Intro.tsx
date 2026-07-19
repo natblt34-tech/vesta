@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap, gsapEasePierre } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
+import { media } from "@/lib/media";
 
 /* L'intro (réf. 333southwabash) : ~2,2 s, une fois par session, skippable.
    La braise naît, la phrase entre par volets, la lettre se remplit d'image,
@@ -99,7 +100,7 @@ export default function Intro() {
     >
       <style>{`
         .intro-allume [data-char] {
-          background-image: linear-gradient(rgba(18,21,26,0.25), rgba(18,21,26,0.25)), url(/media/salon-apres.webp);
+          background-image: linear-gradient(rgba(18,21,26,0.25), rgba(18,21,26,0.25)), url(${media("salon-apres.webp")});
           background-size: cover;
           background-position: center;
           -webkit-background-clip: text;

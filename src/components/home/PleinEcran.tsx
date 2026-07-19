@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { setPlan } from "./homeStatus";
+import { media } from "@/lib/media";
 
 /* Le SEUL plan plein cadre du site. Travelling latéral lent, scrubé.
    L'impact vient du contraste : tout le reste est masqué. */
@@ -44,7 +45,7 @@ export default function PleinEcran() {
       <section className="relative h-svh overflow-hidden">
         <img
           data-plan
-          src="/media/salon-meuble.webp"
+          src={media("salon-meuble.webp")}
           alt="Séjour habité au soir, lampe laiton allumée — plan plein cadre du film"
           className="absolute inset-0 h-full w-full object-cover will-change-transform"
         />

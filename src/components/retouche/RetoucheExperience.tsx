@@ -5,6 +5,7 @@ import { gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { setStatus } from "@/lib/status";
 import LigneClaire from "@/components/vesta/LigneClaire";
+import { media } from "@/lib/media";
 
 /* /retouche — le scroll est le curseur avant/après.
    Le « avant » est dérivé du « après » par filtres CSS : alignement parfait.
@@ -39,7 +40,7 @@ export function HeroBrut() {
     <section ref={wrap} className="relative flex h-svh items-end overflow-hidden">
       <img
         data-brut
-        src="/media/salon-apres.webp"
+        src={media("salon-apres.webp")}
         alt="Photo brute du salon : sous-exposée, terne, verticales tombantes"
         className="absolute inset-0 h-full w-full object-cover will-change-transform"
         style={{ filter: DEGRADE, rotate: "1.6deg", scale: "1.06" }}
@@ -110,7 +111,7 @@ export function Wipe() {
       <section className="relative h-svh overflow-hidden">
         <img
           data-avant
-          src="/media/salon-apres.webp"
+          src={media("salon-apres.webp")}
           alt=""
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover"
@@ -118,7 +119,7 @@ export function Wipe() {
         />
         <img
           data-apres
-          src="/media/salon-apres.webp"
+          src={media("salon-apres.webp")}
           alt="La même photo, retouchée : lumière du soir, verticales droites"
           className="absolute inset-0 h-full w-full object-cover"
           style={{ clipPath: "polygon(0 0, 0% 0, 0% 100%, 0 100%)" }}
@@ -289,7 +290,7 @@ export function Fenetre() {
       <section className="relative h-svh overflow-hidden">
         <img
           data-froid
-          src="/media/salon-vide.webp"
+          src={media("salon-vide.webp")}
           alt="Pièce vide, ciel gris derrière les fenêtres"
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -362,7 +363,7 @@ export function Serie() {
               data-piece
               className="aspect-4/3 will-change-[filter]"
               style={{
-                backgroundImage: `url(/media/${s.img}.webp)`,
+                backgroundImage: `url(${media(`${s.img}.webp`)})`,
                 backgroundSize: "180%",
                 backgroundPosition: s.pos,
               }}

@@ -7,6 +7,7 @@ import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { setStatus } from "@/lib/status";
 import { TransitionLink } from "@/components/chrome/Transition";
 import LigneClaire from "@/components/vesta/LigneClaire";
+import { media } from "@/lib/media";
 
 /* L'index (réf. edit.church) : une liste typographique dense.
    La ligne s'ouvre au survol, l'extrait apparaît dans la marge —
@@ -71,7 +72,7 @@ export default function IndexProjets() {
                   <span className="overflow-hidden">
                     <span
                       className="mt-4 block aspect-video bg-cover"
-                      style={{ backgroundImage: `url(/media/${p.image}.webp)`, backgroundPosition: p.posPlate }}
+                      style={{ backgroundImage: `url(${media(`${p.image}.webp`)})`, backgroundPosition: p.posPlate }}
                     />
                   </span>
                 </span>
@@ -88,7 +89,7 @@ export default function IndexProjets() {
               <div
                 className="aspect-video bg-cover"
                 style={{
-                  backgroundImage: `url(/media/${projet.image}.webp)`,
+                  backgroundImage: `url(${media(`${projet.image}.webp`)})`,
                   backgroundPosition: projet.posPlate,
                 }}
                 role="img"

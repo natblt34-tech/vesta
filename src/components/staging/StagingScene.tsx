@@ -5,6 +5,7 @@ import { gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { setStatus } from "@/lib/status";
 import { MENTION_STAGING } from "@/lib/site";
+import { media } from "@/lib/media";
 
 /* /home-staging — le scroll meuble la pièce.
    Le plan de staging se dessine meuble par meuble (ligne claire),
@@ -161,7 +162,7 @@ export default function StagingScene() {
       <section className="relative h-svh overflow-hidden">
         <div data-scene className="absolute inset-0 will-change-transform">
           <img
-            src="/media/salon-vide.webp"
+            src={media("salon-vide.webp")}
             alt="Salon vide avant home staging virtuel : parquet, brique, ciel gris"
             className="absolute inset-0 h-full w-full object-cover"
             style={{ filter: "saturate(0.82) brightness(0.94)" }}
@@ -188,7 +189,7 @@ export default function StagingScene() {
           </svg>
           <img
             data-chaud
-            src="/media/salon-meuble.webp"
+            src={media("salon-meuble.webp")}
             alt="Le même salon, meublé et habité, lumière chaude du soir"
             className="absolute inset-0 h-full w-full object-cover"
             style={{ clipPath: "circle(0% at 34% 24%)" }}

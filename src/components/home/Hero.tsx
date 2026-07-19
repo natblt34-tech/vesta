@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { CAL_URL } from "@/lib/site";
+import { media } from "@/lib/media";
 import LigneClaire from "@/components/vesta/LigneClaire";
 import { setPlan } from "./homeStatus";
 
@@ -79,8 +80,7 @@ export default function Hero() {
         className="voix-display select-none text-center"
         style={{
           fontSize: "var(--text-colossal)",
-          backgroundImage:
-            "linear-gradient(rgba(18,21,26,0.18), rgba(18,21,26,0.18)), url(/media/salon-apres.webp)",
+          backgroundImage: `linear-gradient(rgba(18,21,26,0.18), rgba(18,21,26,0.18)), url(${media("salon-apres.webp")})`,
           backgroundSize: "cover",
           backgroundPosition: "center 30%",
           WebkitBackgroundClip: "text",
