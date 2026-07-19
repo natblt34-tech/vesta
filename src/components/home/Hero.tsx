@@ -5,6 +5,7 @@ import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { CAL_URL } from "@/lib/site";
 import { media } from "@/lib/media";
+import { useFitText } from "@/lib/useFitText";
 import LigneClaire from "@/components/vesta/LigneClaire";
 import { setPlan } from "./homeStatus";
 
@@ -13,6 +14,7 @@ import { setPlan } from "./homeStatus";
 export default function Hero() {
   const section = useRef<HTMLElement>(null);
   const titre = useRef<HTMLHeadingElement>(null);
+  useFitText(section);
 
   useEffect(() => {
     const sec = section.current;
@@ -77,7 +79,8 @@ export default function Hero() {
 
       <h1
         ref={titre}
-        className="voix-display select-none text-center"
+        data-fit
+        className="voix-display select-none whitespace-nowrap text-center"
         style={{
           fontSize: "var(--text-colossal)",
           backgroundImage: `linear-gradient(rgba(18,21,26,0.18), rgba(18,21,26,0.18)), url(${media("salon-apres.webp")})`,

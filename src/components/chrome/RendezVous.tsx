@@ -1,4 +1,5 @@
 import { CAL_URL } from "@/lib/site";
+import Ajuste from "@/components/Ajuste";
 
 /* L'unique CTA du site, en fin de chaque page. */
 export default function RendezVous({ mention }: { mention?: string }) {
@@ -16,9 +17,9 @@ export default function RendezVous({ mention }: { mention?: string }) {
           style={{ fontSize: "var(--text-titre)", color: "var(--page-fg)" }}
         >
           <span className="braise-point self-center" aria-hidden="true" />
-          <span className="underline decoration-1 underline-offset-8 transition-colors duration-200 group-hover:text-(--color-braise-vive)">
+          <Ajuste className="underline decoration-1 underline-offset-8 transition-colors duration-200 group-hover:text-(--color-braise-vive)">
             Prendre rendez-vous
-          </span>
+          </Ajuste>
           <span className="voix-mono" style={{ color: "var(--page-fg-2)" }}>
             15 min · sans engagement
           </span>

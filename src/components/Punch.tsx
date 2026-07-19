@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
+import { useFitText } from "@/lib/useFitText";
 
 /* Le moment de conversion : silence, respiration, puis frappe.
    Tout le décor s'efface, la phrase entre par lignes masquées. */
@@ -18,6 +19,7 @@ export default function Punch({
   onEnter?: () => void;
 }) {
   const section = useRef<HTMLElement>(null);
+  useFitText(section);
 
   useEffect(() => {
     const sec = section.current;
@@ -73,12 +75,12 @@ export default function Punch({
         </p>
       ) : null}
       <h2
-        className="voix-display"
+        className="voix-display w-full max-w-full"
         style={{ fontSize: "var(--text-colossal)", color: "var(--page-fg)" }}
       >
         {lignes.map((l, i) => (
-          <span key={i} className="block overflow-hidden">
-            <span data-ligne className="block will-change-transform">
+          <span key={i} className="block overflow-hidden pt-[0.12em]">
+            <span data-ligne data-fit className="block w-fit whitespace-nowrap will-change-transform">
               {l}
             </span>
           </span>

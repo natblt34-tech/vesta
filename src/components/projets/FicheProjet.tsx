@@ -6,16 +6,21 @@ import { setStatus } from "@/lib/status";
 import { TransitionLink } from "@/components/chrome/Transition";
 import RendezVous from "@/components/chrome/RendezVous";
 import { media } from "@/lib/media";
+import { useRef } from "react";
+import { useFitText } from "@/lib/useFitText";
 
 /* La fiche : l'entrée (photos moyennes) contre la sortie (le film).
    Le contraste EST l'argument. */
 export default function FicheProjet({ projet }: { projet: Projet }) {
+  const racine = useRef<HTMLElement>(null);
+  useFitText(racine);
+
   useEffect(() => {
     setStatus(`${projet.titre.toUpperCase()} · ${projet.duree} S`);
   }, [projet]);
 
   return (
-    <main>
+    <main ref={racine}>
       <section className="relative flex h-[86svh] items-end overflow-hidden">
         <img
           src={media(`${projet.image}.webp`)}
@@ -32,7 +37,11 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
           <p className="voix-mono mb-3" style={{ color: "var(--color-braise-vive)" }}>
             FILM LIVRÉ · {projet.duree} S
           </p>
-          <h1 className="voix-display" style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)" }}>
+          <h1
+            data-fit
+            className="voix-display w-fit whitespace-nowrap"
+            style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)" }}
+          >
             {projet.titre}
           </h1>
           <p className="voix-mono mt-4" style={{ color: "var(--color-pierre)" }}>

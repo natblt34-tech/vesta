@@ -3,6 +3,7 @@ import StagingScene from "@/components/staging/StagingScene";
 import Punch from "@/components/Punch";
 import RendezVous from "@/components/chrome/RendezVous";
 import { MENTION_STAGING } from "@/lib/site";
+import Ajuste from "@/components/Ajuste";
 
 export const metadata: Metadata = {
   title: "Le home staging virtuel",
@@ -15,7 +16,7 @@ export default function HomeStaging() {
     <main>
       <header className="marge flex min-h-[60svh] flex-col justify-end pb-16 pt-32">
         <h1 className="voix-display" style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)" }}>
-          Le home staging
+          <Ajuste>Le home staging</Ajuste>
         </h1>
         <p className="mt-6 max-w-md" style={{ color: "var(--color-gris-pierre)" }}>
           Un bien vide se vend mal : personne n&apos;achète des murs. En scrollant,

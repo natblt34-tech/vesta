@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap, gsapEasePierre } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { media } from "@/lib/media";
+import { fitLines } from "@/lib/useFitText";
 
 /* L'intro (réf. 333southwabash) : ~2,2 s, une fois par session, skippable.
    La braise naît, la phrase entre par volets, la lettre se remplit d'image,
@@ -34,6 +35,8 @@ export default function Intro() {
     if (!el) return;
 
     document.documentElement.style.overflow = "hidden";
+    fitLines(el);
+    document.fonts?.ready.then(() => fitLines(el));
     const chars = el.querySelectorAll<HTMLElement>("[data-char]");
     const braise = el.querySelector("[data-braise]");
     const phrase = el.querySelector("[data-phrase]");
@@ -125,7 +128,7 @@ export default function Intro() {
         }}
       >
         {[L1, L2].map((ligne, li) => (
-          <span key={li} className="block overflow-hidden py-1">
+          <span key={li} data-fit className="mx-auto block w-fit overflow-hidden whitespace-nowrap py-1">
             {ligne.split("").map((c, i) => (
               <span
                 key={i}

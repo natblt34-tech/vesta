@@ -5,6 +5,7 @@ import { gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { setPlan } from "./homeStatus";
 import { media } from "@/lib/media";
+import { useFitText } from "@/lib/useFitText";
 
 /* « LE SCROLL EST LE FILM » — chaque glyphe est une fenêtre sur la même frame.
    Les lettres dérivent puis se recomposent. */
@@ -13,6 +14,7 @@ const LIGNES = ["LE SCROLL", "EST LE FILM"];
 
 export default function Manifeste() {
   const section = useRef<HTMLElement>(null);
+  useFitText(section);
 
   useEffect(() => {
     const sec = section.current;
@@ -54,7 +56,7 @@ export default function Manifeste() {
       <h2 className="sr-only">Le scroll est le film</h2>
       <p className="voix-display" aria-hidden="true" style={{ fontSize: "var(--text-display)" }}>
         {LIGNES.map((ligne, li) => (
-          <span key={li} className="block">
+          <span key={li} data-fit className="block w-fit whitespace-nowrap">
             {ligne.split("").map((c, i) => {
               const pos = index++;
               if (c === " ") return <span key={i}> </span>;

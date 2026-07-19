@@ -47,7 +47,7 @@ export default function Offres() {
                 aria-expanded={est}
                 aria-controls={`offre-${i}`}
                 onClick={() => setOuverte(est ? null : i)}
-                className="group flex w-full items-baseline justify-between gap-6 py-6 text-left"
+                className="group flex w-full flex-wrap items-baseline justify-between gap-x-6 gap-y-2 py-6 text-left"
               >
                 <span
                   className="voix-display transition-colors duration-200 group-hover:text-(--color-braise-vive)"
@@ -55,7 +55,7 @@ export default function Offres() {
                 >
                   {o.nom}
                 </span>
-                <span className="voix-mono shrink-0" style={{ color: "var(--color-gris-pierre)" }}>
+                <span className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
                   {o.resume}
                 </span>
               </button>

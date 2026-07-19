@@ -123,7 +123,7 @@ export default function Nav() {
                 }}
                 className="voix-display group flex items-baseline gap-6"
                 style={{
-                  fontSize: "var(--text-display)",
+                  fontSize: "clamp(2rem, 6.5vw, 4.75rem)",
                   color: pathname === e.href ? "var(--color-gris-pierre)" : "var(--color-pierre)",
                 }}
               >

@@ -6,6 +6,7 @@ import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { setStatus } from "@/lib/status";
 import LigneClaire from "@/components/vesta/LigneClaire";
 import { media } from "@/lib/media";
+import { useFitText } from "@/lib/useFitText";
 
 /* /retouche — le scroll est le curseur avant/après.
    Le « avant » est dérivé du « après » par filtres CSS : alignement parfait.
@@ -17,6 +18,7 @@ const DEGRADE =
 
 export function HeroBrut() {
   const wrap = useRef<HTMLElement>(null);
+  useFitText(wrap);
 
   useEffect(() => {
     setStatus("CALAGE BLANCS · 0/7");
@@ -47,7 +49,8 @@ export function HeroBrut() {
       />
       <div className="relative z-1 w-full p-[var(--spacing-marge)] pb-14">
         <h1
-          className="voix-display"
+          data-fit
+          className="voix-display w-fit whitespace-nowrap"
           style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)", textShadow: "0 2px 16px rgba(18,21,26,0.7)" }}
         >
           La retouche

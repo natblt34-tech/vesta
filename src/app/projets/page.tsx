@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import IndexProjets from "@/components/projets/IndexProjets";
 import RendezVous from "@/components/chrome/RendezVous";
+import Ajuste from "@/components/Ajuste";
 
 export const metadata: Metadata = {
   title: "Les projets",
@@ -13,7 +14,7 @@ export default function Projets() {
     <main>
       <header className="marge flex flex-col justify-end pb-8 pt-32">
         <h1 className="voix-display" style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)" }}>
-          Les projets
+          <Ajuste>Les projets</Ajuste>
         </h1>
         <p className="voix-mono mt-6" style={{ color: "var(--color-bronze)" }}>
           CE QUE L&apos;AGENCE A FOURNI · CE QUE L&apos;ACHETEUR A VU

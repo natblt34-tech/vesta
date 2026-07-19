@@ -1,4 +1,5 @@
 import { TransitionLink } from "@/components/chrome/Transition";
+import Ajuste from "@/components/Ajuste";
 
 export default function NotFound() {
   return (
@@ -7,9 +8,8 @@ export default function NotFound() {
         PLAN INTROUVABLE
       </p>
       <h1 className="voix-display" style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)" }}>
-        Cette pièce
-        <br />
-        n&apos;existe pas.
+        <Ajuste>Cette pièce</Ajuste>
+        <Ajuste>n&apos;existe pas.</Ajuste>
       </h1>
       <TransitionLink
         href="/"
