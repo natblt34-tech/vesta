@@ -19,6 +19,18 @@ npm run build      # build de production (9 pages statiques)
 - `NOTES.md` — le journal de bord (décisions, pivots, inventaire médias)
 - `CLAUDE.md` + `.claude/skills/vesta-brand/` — conventions et charte pour les sessions futures
 
+## Déploiement
+
+**GitHub Pages (actif)** : https://natblt34-tech.github.io/vesta/
+Le site est un export statique poussé sur la branche `gh-pages`. Après toute modification :
+```bash
+npm run deploy
+```
+(builde avec `NEXT_PUBLIC_BASE_PATH=/vesta` et republie `out/` sur `gh-pages` ; le push de `main` seul ne redéploie pas).
+Pour automatiser via GitHub Actions, il faudrait le scope `workflow` : `gh auth refresh -s workflow`, puis recréer le workflow build + deploy-pages.
+
+**Vercel (recommandé à terme)** : importer le repo, ne pas définir `NEXT_PUBLIC_BASE_PATH` — le site se sert à la racine.
+
 ## À brancher avant mise en ligne
 - Remplacer `CAL_URL` dans `src/lib/site.ts` par la vraie URL de réservation
 - Remplacer les médias IA de `public/media/` par les vrais films Vesta (mêmes noms de fichiers)
