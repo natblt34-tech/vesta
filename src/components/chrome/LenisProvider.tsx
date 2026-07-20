@@ -24,7 +24,16 @@ export default function LenisProvider() {
     gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
 
+    /* Le hero scroll-expansion verrouille la page tant que le film
+       n'est pas déployé : il pilote lui-même la molette. */
+    const lock = () => lenis.stop();
+    const unlock = () => lenis.start();
+    window.addEventListener("vesta:scroll-lock", lock);
+    window.addEventListener("vesta:scroll-unlock", unlock);
+
     return () => {
+      window.removeEventListener("vesta:scroll-lock", lock);
+      window.removeEventListener("vesta:scroll-unlock", unlock);
       gsap.ticker.remove(raf);
       lenis.destroy();
     };

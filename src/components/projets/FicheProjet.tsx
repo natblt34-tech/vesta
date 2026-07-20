@@ -8,19 +8,38 @@ import RendezVous from "@/components/chrome/RendezVous";
 import { media } from "@/lib/media";
 import { useRef } from "react";
 import { useFitText } from "@/lib/useFitText";
+import { useReducedMotion } from "@/lib/useReducedMotion";
+import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 
 /* La fiche : l'entrée (photos moyennes) contre la sortie (le film).
    Le contraste EST l'argument. */
 export default function FicheProjet({ projet }: { projet: Projet }) {
   const racine = useRef<HTMLElement>(null);
+  const reduced = useReducedMotion();
   useFitText(racine);
 
   useEffect(() => {
     setStatus(`${projet.titre.toUpperCase()} · ${projet.duree} S`);
   }, [projet]);
 
+  /* Film réel livré : le hero devient le film lui-même, qui se déploie
+     sous le scroll. Repli statique sous prefers-reduced-motion. */
+  const heroFilm = projet.video && !reduced;
+
   return (
     <main ref={racine}>
+      {heroFilm ? (
+        <ScrollExpandMedia
+          mediaType="video"
+          mediaSrc={media(projet.video!)}
+          posterSrc={projet.poster ? media(projet.poster) : undefined}
+          bgImageSrc={projet.poster ? media(projet.poster) : media(`${projet.image}.webp`)}
+          title={projet.titre}
+          date={`${projet.type} · ${projet.surface} M² · ${projet.quartier}`}
+          scrollToExpand="SCROLLEZ — LE FILM S'OUVRE"
+        />
+      ) : null}
+      {heroFilm ? null : (
       <section className="relative flex h-[86svh] items-end overflow-hidden">
         <img
           src={media(`${projet.image}.webp`)}
@@ -49,6 +68,7 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
           </p>
         </div>
       </section>
+      )}
 
       <section className="marge grid gap-12 py-(--spacing-section) md:grid-cols-2">
         <div>

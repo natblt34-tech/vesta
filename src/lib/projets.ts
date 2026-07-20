@@ -13,6 +13,9 @@ export type Projet = {
   posPlate: string;
   brief: string;
   resultat: string;
+  /* Film réel livré (public/media). La fiche passe alors en hero scroll-expansion. */
+  video?: string;
+  poster?: string;
 };
 
 export const PROJETS: Projet[] = [
@@ -30,6 +33,8 @@ export const PROJETS: Projet[] = [
     duree: 47,
     image: "salon-apres",
     posPlate: "center 40%",
+    video: "visite.mp4",
+    poster: "visite-poster.jpg",
     brief:
       "Neuf photos d'agent, prises au téléphone en fin de journée. Un séjour magnifique mais sous-exposé, une brique invisible dans l'annonce d'origine.",
     resultat:
