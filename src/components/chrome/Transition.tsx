@@ -38,6 +38,16 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
         return;
       }
       pending.current = href;
+      /* Filet de sécurité : si le tween du rideau est interrompu
+         (onglet caché, charge), la navigation part quand même. */
+      let parti = false;
+      const partir = () => {
+        if (parti) return;
+        parti = true;
+        window.scrollTo(0, 0);
+        router.push(href);
+      };
+      const secours = window.setTimeout(partir, 900);
       gsap.fromTo(
         el,
         { clipPath: "inset(100% 0% 0% 0%)", display: "block" },
@@ -46,8 +56,8 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
           duration: 0.55,
           ease: gsapEasePierre,
           onComplete: () => {
-            window.scrollTo(0, 0);
-            router.push(href);
+            window.clearTimeout(secours);
+            partir();
           },
         },
       );

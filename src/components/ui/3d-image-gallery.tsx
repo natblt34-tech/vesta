@@ -3,14 +3,14 @@
 import React, { Suspense, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Html, Plane, Sphere } from "@react-three/drei";
+import { OrbitControls, Html, Sphere } from "@react-three/drei";
 import { useTransitionNavigate } from "@/components/chrome/Transition";
 
-/* La galerie 3D des projets — c'est la page /projets.
+/* L'environnement 3D des projets — c'est la page /projets entière.
    Une carte par film livré, en orbite dans un champ de braises sur
-   basalte. Le clic emmène directement sur la fiche du projet, via la
-   transition rideau du site. Zoom molette désactivé : la molette
-   appartient au scroll de la page. */
+   basalte. Les cartes sont de vrais éléments DOM (drei Html) : le clic
+   est un clic DOM natif, fiable, qui ouvre la fiche via la transition
+   rideau. Zoom molette désactivé, rotation auto lente, drag pour orbiter. */
 
 export type CarteProjet = {
   slug: string;
@@ -20,7 +20,6 @@ export type CarteProjet = {
   meta: string;
 };
 
-/* Champ de braises : des points chauds en dérive lente. */
 function ChampDeBraises() {
   const points = useRef<THREE.Points>(null);
 
@@ -70,39 +69,16 @@ function CarteFlottante({
 
   return (
     <group ref={groupRef} position={position}>
-      <Plane
-        args={[7.5, 6]}
-        onClick={(e) => {
-          e.stopPropagation();
-          document.body.style.cursor = "auto";
-          navigate(`/projets/${carte.slug}`);
-        }}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          setHovered(true);
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={(e) => {
-          e.stopPropagation();
-          setHovered(false);
-          document.body.style.cursor = "auto";
-        }}
-      >
-        <meshBasicMaterial transparent opacity={0} />
-      </Plane>
-
-      <Html
-        transform
-        distanceFactor={10}
-        position={[0, 0, 0.01]}
-        style={{
-          transition: "transform 0.3s var(--ease-braise)",
-          transform: hovered ? "scale(1.08)" : "scale(1)",
-          pointerEvents: "none",
-        }}
-      >
-        <div
-          className="w-72 select-none overflow-hidden p-2"
+      <Html transform distanceFactor={10} position={[0, 0, 0]}>
+        {/* Clic DOM natif : fiable, accessible, pas de raycast. */}
+        <button
+          type="button"
+          data-cursor
+          onClick={() => navigate(`/projets/${carte.slug}`)}
+          onPointerEnter={() => setHovered(true)}
+          onPointerLeave={() => setHovered(false)}
+          aria-label={`Ouvrir la fiche du projet ${carte.titre}`}
+          className="block w-72 select-none overflow-hidden p-2 text-left"
           style={{
             background: "var(--color-basalte-2)",
             border: hovered
@@ -111,31 +87,36 @@ function CarteFlottante({
             boxShadow: hovered
               ? "0 0 40px color-mix(in srgb, var(--color-braise) 45%, transparent)"
               : "0 20px 40px rgba(0, 0, 0, 0.55)",
-            transition: "box-shadow 0.3s var(--ease-braise), border-color 0.3s",
+            transform: hovered ? "scale(1.06)" : "scale(1)",
+            transition:
+              "transform 0.3s var(--ease-braise), box-shadow 0.3s var(--ease-braise), border-color 0.3s",
           }}
         >
           <img
             src={carte.imageUrl}
             alt={carte.alt}
-            className="aspect-video w-full object-cover"
+            className="pointer-events-none aspect-video w-full object-cover"
             loading="lazy"
             draggable={false}
           />
-          <div className="px-1 pb-1 pt-3">
-            <p
-              className="voix-display truncate"
+          <span className="block px-1 pb-1 pt-3">
+            <span
+              className="voix-display block truncate"
               style={{ color: "var(--color-pierre)", fontSize: "1rem" }}
             >
               {carte.titre}
-            </p>
-            <p
-              className="voix-mono mt-1.5"
-              style={{ color: hovered ? "var(--color-braise-vive)" : "var(--color-bronze)", fontSize: "0.5625rem" }}
+            </span>
+            <span
+              className="voix-mono mt-1.5 block"
+              style={{
+                color: hovered ? "var(--color-braise-vive)" : "var(--color-bronze)",
+                fontSize: "0.5625rem",
+              }}
             >
               {carte.meta}
-            </p>
-            <p
-              className="voix-mono mt-2"
+            </span>
+            <span
+              className="voix-mono mt-2 block"
               style={{
                 color: "var(--color-gris-pierre)",
                 fontSize: "0.5625rem",
@@ -144,9 +125,9 @@ function CarteFlottante({
               }}
             >
               VOIR LA FICHE →
-            </p>
-          </div>
-        </div>
+            </span>
+          </span>
+        </button>
       </Html>
     </group>
   );
@@ -176,15 +157,8 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
   const positions = useMemo(() => positionsPour(cartes.length), [cartes.length]);
 
   return (
-    <div
-      className="relative h-svh w-full overflow-hidden"
-      style={{ background: "var(--color-basalte)" }}
-    >
-      <Canvas
-        camera={{ position: [0, 0, 16], fov: 60 }}
-        className="absolute inset-0"
-        gl={{ antialias: true, alpha: true }}
-      >
+    <div className="absolute inset-0" style={{ background: "var(--color-basalte)" }}>
+      <Canvas camera={{ position: [0, 0, 16], fov: 60 }} gl={{ antialias: true, alpha: true }}>
         <Suspense fallback={null}>
           <ambientLight intensity={0.5} />
           <ChampDeBraises />
@@ -215,12 +189,6 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
           />
         </Suspense>
       </Canvas>
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center">
-        <p className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
-          GLISSEZ POUR ORBITER · CLIQUEZ UN PROJET POUR OUVRIR SA FICHE
-        </p>
-      </div>
     </div>
   );
 }
