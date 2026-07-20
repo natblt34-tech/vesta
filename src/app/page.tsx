@@ -12,7 +12,7 @@ import RendezVous from "@/components/chrome/RendezVous";
 
 export const metadata: Metadata = {
   description:
-    "Vesta transforme les photos d'un bien en film cinématique. La preuve : cette page est le film — scrollez. Génération IA, montage humain, livré en 72 h.",
+    "Vesta transforme les photos d'un bien en film cinématique. La preuve : cette page est le film, scrollez. Génération IA, montage humain, livré en 72 h.",
 };
 
 export default function Home() {

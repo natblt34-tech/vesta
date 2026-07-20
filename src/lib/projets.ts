@@ -66,7 +66,7 @@ export const PROJETS: Projet[] = [
     brief:
       "Onze photos, un appartement traversant dont les enfilades ne se lisaient pas du tout en photo fixe. C'est le cas d'usage exact des traversées.",
     resultat:
-      "Trois traversées bout à bout : le film fait ce que la visite fait — il enchaîne les pièces. 52 secondes, livré en 72 h.",
+      "Trois traversées bout à bout : le film fait ce que la visite fait, il enchaîne les pièces. 52 secondes, livré en 72 h.",
   },
   {
     slug: "appartement-carmes",

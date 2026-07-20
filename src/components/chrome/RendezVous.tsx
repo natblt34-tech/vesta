@@ -7,7 +7,7 @@ export default function RendezVous({ mention }: { mention?: string }) {
     <footer className="marge filet flex flex-col gap-10 py-16">
       <div className="flex flex-col gap-6">
         <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
-          Chaque offre inclut le premier film — Étincelle · Flamme · Brasier
+          Chaque offre inclut le premier film : Étincelle · Flamme · Brasier
         </p>
         <a
           href={CAL_URL}

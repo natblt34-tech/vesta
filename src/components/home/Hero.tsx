@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { CAL_URL } from "@/lib/site";
 import { media } from "@/lib/media";
 import { useFitText } from "@/lib/useFitText";
 import FragmentVesta from "@/components/vesta/FragmentVesta";
+import { Etoile } from "@/components/chrome/Logo";
 import { setPlan } from "./homeStatus";
 
-/* Le hero : VESTA en colossal, le film vit dans les contreformes.
-   Les flancs symétriques (dispositif dock.cool) portent la ligne claire. */
+/* Le hero : VESTA en pleine largeur, le film vit dans les contreformes.
+   Une punchline, un rendez-vous. Le client comprend en un clin d'œil. */
 export default function Hero() {
   const section = useRef<HTMLElement>(null);
   const titre = useRef<HTMLHeadingElement>(null);
@@ -24,7 +25,7 @@ export default function Hero() {
 
     const ctx = gsap.context(() => {
       /* Le film avance dans les lettres : la position du fond suit le scroll,
-         la fonte se resserre — l'anamorphique se referme en quittant le plan. */
+         la fonte se resserre en quittant le plan. */
       gsap.fromTo(
         h1,
         { backgroundPositionY: "30%", fontStretch: "125%" },
@@ -62,28 +63,24 @@ export default function Hero() {
     >
       <div
         data-flanc
-        className="absolute left-[2vw] top-1/2 hidden w-[13vw] max-w-52 -translate-y-1/2 md:block"
+        className="absolute left-[2vw] top-1/2 hidden w-[12vw] max-w-48 -translate-y-1/2 md:block"
       >
         <FragmentVesta variant="vesta" />
       </div>
       <div
         data-flanc
-        className="absolute right-[2vw] top-1/2 hidden w-[13vw] max-w-52 -translate-y-1/2 md:block"
+        className="absolute right-[2vw] top-1/2 hidden w-[12vw] max-w-48 -translate-y-1/2 md:block"
       >
         <FragmentVesta variant="flamme" miroir />
       </div>
-
-      <p className="voix-mono mb-6" style={{ color: "var(--color-bronze)" }}>
-        Studio vidéo immobilier · Toulouse
-      </p>
 
       <h1
         ref={titre}
         data-fit
         className="voix-display select-none whitespace-nowrap text-center"
         style={{
-          fontSize: "var(--text-colossal)",
-          backgroundImage: `linear-gradient(rgba(18,21,26,0.18), rgba(18,21,26,0.18)), url(${media("salon-apres.webp")})`,
+          fontSize: "24vw",
+          backgroundImage: `linear-gradient(rgba(18,21,26,0.14), rgba(18,21,26,0.14)), url(${media("visite-poster.jpg")})`,
           backgroundSize: "cover",
           backgroundPosition: "center 30%",
           WebkitBackgroundClip: "text",
@@ -95,18 +92,11 @@ export default function Hero() {
       </h1>
 
       <p
-        className="voix-display mt-4 text-center"
-        style={{ fontSize: "clamp(1.25rem, 2.6vw, 2.25rem)", color: "var(--color-pierre)" }}
+        className="voix-display mt-6 text-center"
+        style={{ fontSize: "clamp(1.375rem, 3vw, 2.5rem)", color: "var(--color-pierre)" }}
       >
-        Le feu avant la visite
-      </p>
-
-      <p
-        className="mt-6 max-w-md text-balance px-6 text-center"
-        style={{ color: "var(--color-gris-pierre)" }}
-      >
-        Vos photos deviennent un film. Génération par IA, montage humain, image par
-        image. Ce que vous allez voir en scrollant, c&apos;est le produit.
+        On rallume vos annonces
+        <Etoile taille="1em" />
       </p>
 
       <a
@@ -121,11 +111,18 @@ export default function Hero() {
       </a>
 
       <p
-        className="voix-mono absolute bottom-6 left-1/2 -translate-x-1/2"
+        className="voix-mono absolute bottom-6 left-[var(--spacing-marge)]"
+        style={{ color: "var(--color-gris-pierre)" }}
+      >
+        <Etoile taille="1.2em" /> Le premier film est offert
+      </p>
+
+      <p
+        className="voix-mono absolute bottom-6 right-[var(--spacing-marge)]"
         style={{ color: "var(--color-gris-pierre)" }}
         aria-hidden="true"
       >
-        Scrollez — la barre de scroll est la timeline
+        Scrollez, la barre de scroll est la timeline
       </p>
     </section>
   );

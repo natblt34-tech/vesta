@@ -7,8 +7,8 @@ import SiteChrome from "@/components/chrome/SiteChrome";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Vesta — Le feu avant la visite",
-    template: "%s — Vesta",
+    default: "Vesta · Le feu avant la visite",
+    template: "%s · Vesta",
   },
   description:
     "Studio vidéo immobilier à Toulouse. Vos photos deviennent un film cinématique : génération IA, montage humain, livré en 72 h. Le premier film est offert.",

@@ -16,7 +16,7 @@ export async function generateMetadata({
   const projet = getProjet(slug);
   if (!projet) return {};
   return {
-    title: `${projet.titre} — projet`,
+    title: `${projet.titre} · projet`,
     description: `${projet.titre} (${projet.type}, ${projet.surface} m², ${projet.quartier}) : ${projet.photos} photos fournies, ${projet.traversees.length} traversée(s), un film de ${projet.duree} s.`,
   };
 }

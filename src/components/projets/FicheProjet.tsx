@@ -36,14 +36,14 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
           bgImageSrc={projet.poster ? media(projet.poster) : media(`${projet.image}.webp`)}
           title={projet.titre}
           date={`${projet.type} · ${projet.surface} M² · ${projet.quartier} · ${projet.photos} PHOTOS`}
-          scrollToExpand="SCROLLEZ — LE FILM S'OUVRE"
+          scrollToExpand="SCROLLEZ · LE FILM S'OUVRE"
         />
       ) : null}
       {heroFilm ? null : (
       <section className="relative flex h-[86svh] items-end overflow-hidden">
         <img
           src={media(`${projet.image}.webp`)}
-          alt={`Image du film — ${projet.titre}`}
+          alt={`Image du film ${projet.titre}`}
           className="absolute inset-0 h-full w-full object-cover"
           style={{ objectPosition: projet.posPlate }}
         />
@@ -73,7 +73,7 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
       <section className="marge grid gap-12 py-(--spacing-section) md:grid-cols-2">
         <div>
           <h2 className="voix-mono mb-6" style={{ color: "var(--color-bronze)" }}>
-            LE BRIEF — CE QUE L&apos;AGENCE A FOURNI
+            LE BRIEF · CE QUE L&apos;AGENCE A FOURNI
           </h2>
           {projet.briefPhotos ? (
             <div className="grid grid-cols-2 gap-2">

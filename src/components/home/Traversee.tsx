@@ -30,8 +30,8 @@ export default function Traversee() {
           end: "+=280%",
           pin: true,
           scrub: 0.5,
-          onEnter: () => setPlan("TRAVERSÉE 01 · SALON → CUISINE"),
-          onEnterBack: () => setPlan("TRAVERSÉE 01 · SALON → CUISINE"),
+          onEnter: () => setPlan("TRAVERSÉE 01 · ENTRÉE → SALON"),
+          onEnterBack: () => setPlan("TRAVERSÉE 01 · ENTRÉE → SALON"),
           onUpdate: (self) => setTc(Math.min(6, self.progress * 6)),
         },
       });
@@ -41,8 +41,8 @@ export default function Traversee() {
       /* .3 → .75 : le portail s'ouvre — cercle du temple. */
       tl.fromTo(
         cuisine,
-        { clipPath: "circle(0% at 50% 56%)" },
-        { clipPath: "circle(75% at 50% 56%)", duration: 0.45, ease: "none" },
+        { clipPath: "circle(0% at 42% 50%)" },
+        { clipPath: "circle(75% at 42% 50%)", duration: 0.45, ease: "none" },
         0.3,
       );
       tl.fromTo(lueur, { opacity: 0 }, { opacity: 1, duration: 0.12 }, 0.3).to(
@@ -62,16 +62,16 @@ export default function Traversee() {
       <section className="relative h-svh overflow-hidden">
         <img
           data-salon
-          src={media("salon-apres.webp")}
-          alt="Salon du bien témoin, lumière du soir sur le mur de brique"
+          src={media("brief-entree.webp")}
+          alt="L'entrée de la maison Côte Pavée, enfilade ouverte vers le séjour"
           className="absolute inset-0 h-full w-full object-cover will-change-transform"
         />
         <img
           data-cuisine
-          src={media("cuisine-porte.webp")}
-          alt="La cuisine, vue depuis la porte du salon"
+          src={media("brief-salon.webp")}
+          alt="Le salon, cheminée en marbre et parquet chevron, au bout de la traversée"
           className="absolute inset-0 h-full w-full object-cover will-change-transform"
-          style={{ clipPath: "circle(0% at 50% 56%)" }}
+          style={{ clipPath: "circle(0% at 42% 50%)" }}
         />
         <div
           data-lueur
@@ -79,7 +79,7 @@ export default function Traversee() {
           className="pointer-events-none absolute inset-0 opacity-0"
           style={{
             background:
-              "radial-gradient(circle at 50% 56%, color-mix(in srgb, var(--color-braise-vive) 35%, transparent) 0%, transparent 40%)",
+              "radial-gradient(circle at 42% 50%, color-mix(in srgb, var(--color-braise-vive) 35%, transparent) 0%, transparent 40%)",
           }}
         />
 
@@ -88,7 +88,7 @@ export default function Traversee() {
             className="voix-mono"
             style={{ color: "var(--color-pierre)", textShadow: "0 1px 8px rgba(18,21,26,0.8)" }}
           >
-            TRAVERSÉE 01 · SALON → CUISINE · {tc.toFixed(1).padStart(4, "0")} S
+            TRAVERSÉE 01 · ENTRÉE → SALON · {tc.toFixed(1).padStart(4, "0")} S
           </p>
           <p
             className="voix-mono hidden sm:block"

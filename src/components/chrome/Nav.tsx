@@ -150,7 +150,7 @@ export default function Nav() {
             style={{ borderColor: "var(--color-braise)", color: "var(--color-pierre)" }}
           >
             <span className="braise-point" aria-hidden="true" />
-            Prendre rendez-vous — le premier film est offert
+            Prendre rendez-vous · le premier film est offert
           </a>
         </div>
       </div>

@@ -11,7 +11,7 @@ export default function PunchHome() {
       onEnter={() => setPlan("DERNIÈRE IMAGE")}
       sous={
         <p>
-          Générée à partir de 9 photos. Montée à la main. Livrée en 72 h.
+          Générée à partir de 4 photos. Montée à la main. Livrée en 72 h.
         </p>
       }
     />

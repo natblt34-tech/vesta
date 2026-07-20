@@ -20,7 +20,7 @@ export default function HomeStaging() {
         </h1>
         <p className="mt-6 max-w-md" style={{ color: "var(--color-gris-pierre)" }}>
           Un bien vide se vend mal : personne n&apos;achète des murs. En scrollant,
-          vous allez meubler ce salon vous-même — c&apos;est exactement ce que voit
+          vous allez meubler ce salon vous-même : c&apos;est exactement ce que voit
           un acheteur dans nos films.
         </p>
         <p className="voix-mono mt-8" style={{ color: "var(--color-bronze)" }}>

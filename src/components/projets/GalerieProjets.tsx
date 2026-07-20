@@ -30,7 +30,7 @@ const GaleriePlans = dynamic(() => import("@/components/ui/3d-image-gallery"), {
 const CARTES: CarteProjet[] = PROJETS.map((p) => ({
   slug: p.slug,
   imageUrl: media(p.poster ?? `${p.image}.webp`),
-  alt: `Extrait du film — ${p.titre}`,
+  alt: `Extrait du film ${p.titre}`,
   titre: p.titre,
   meta: `${p.type} · ${p.surface} M² · ${p.quartier} · ${p.photos} PHOTOS · ${p.traversees.length} TRAVERSÉE${p.traversees.length > 1 ? "S" : ""} · ${p.duree} S`,
 }));
@@ -108,7 +108,7 @@ export default function GalerieProjets() {
 
   return (
     <section
-      aria-label="Les projets — environnement 3D"
+      aria-label="Les projets, environnement 3D"
       className="relative h-svh w-full overflow-hidden"
     >
       <GaleriePlans cartes={CARTES} />

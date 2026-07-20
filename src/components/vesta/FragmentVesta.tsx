@@ -24,7 +24,10 @@ export default function FragmentVesta({ variant, miroir = false, className = "" 
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    const x = e.clientX - r.left;
+    /* Le conteneur miroité inverse le rendu : on compense pour que
+       le halo suive réellement le curseur des deux côtés. */
+    el.style.setProperty("--mx", `${miroir ? r.width - x : x}px`);
     el.style.setProperty("--my", `${e.clientY - r.top}px`);
     setChaud(true);
   };
@@ -50,15 +53,10 @@ export default function FragmentVesta({ variant, miroir = false, className = "" 
       {/* Pierre froide : le trait se dessine au scroll. */}
       <LigneClaire variant={variant} ton="bronze" />
 
-      {/* La braise, révélée par le halo du curseur. */}
+      {/* La braise, révélée par le halo du curseur. Pas d'aura de fond :
+         elle se ferait couper aux bords du fragment. Seul le trait
+         s'embrase, avec sa lueur portée. */}
       <div className="absolute inset-0" style={masque}>
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(circle 9rem at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--color-braise) 22%, transparent) 0%, transparent 70%)",
-          }}
-        />
         <LigneClaire
           variant={variant}
           ton="braise"

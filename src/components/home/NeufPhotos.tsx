@@ -3,20 +3,18 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
-import { setPlan } from "./homeStatus";
 import { media } from "@/lib/media";
+import { setPlan } from "./homeStatus";
 
-/* 9 photos → un film. La planche contact converge vers l'ordre du montage. */
+/* Quatre photos, un film : le vrai brief de la maison Côte Pavée.
+   La planche contact converge vers l'ordre du montage. */
 
-const SOURCES = ["salon-apres", "cuisine-porte", "salon-meuble"] as const;
-
-const TUILES = Array.from({ length: 9 }, (_, i) => ({
-  img: SOURCES[i % 3],
-  pos: `${(i * 37) % 100}% ${(i * 53) % 100}%`,
-  x: ((i * 17) % 24) - 12,
-  y: ((i * 29) % 36) - 18,
-  r: ((i * 11) % 9) - 4,
-}));
+const PHOTOS = [
+  { img: "brief-salon.webp", alt: "Photo du brief : le salon", x: -14, y: -16, r: -3 },
+  { img: "brief-chambre.webp", alt: "Photo du brief : la chambre", x: 12, y: -10, r: 2 },
+  { img: "brief-cuisine.webp", alt: "Photo du brief : la cuisine", x: -10, y: 14, r: 3 },
+  { img: "brief-entree.webp", alt: "Photo du brief : l'entrée", x: 15, y: 12, r: -2 },
+];
 
 export default function NeufPhotos() {
   const section = useRef<HTMLElement>(null);
@@ -61,42 +59,39 @@ export default function NeufPhotos() {
       ref={section}
       className="marge grid items-center gap-14 py-(--spacing-section) md:grid-cols-2"
     >
-      <div className="grid grid-cols-3 gap-2">
-        {TUILES.map((t, i) => (
-          <div
-            key={i}
+      <div className="grid grid-cols-2 gap-2">
+        {PHOTOS.map((p) => (
+          <img
+            key={p.img}
             data-tuile
-            data-x={t.x}
-            data-y={t.y}
-            data-r={t.r}
-            className="aspect-4/3 will-change-transform"
-            style={{
-              backgroundImage: `url(${media(`${t.img}.webp`)})`,
-              backgroundSize: "300%",
-              backgroundPosition: t.pos,
-              filter: "saturate(0.8) brightness(0.9)",
-            }}
-            aria-hidden="true"
+            data-x={p.x}
+            data-y={p.y}
+            data-r={p.r}
+            src={media(p.img)}
+            alt={p.alt}
+            loading="lazy"
+            className="aspect-4/3 w-full object-cover will-change-transform"
           />
         ))}
       </div>
 
       <div>
         <h2 className="voix-display" style={{ fontSize: "var(--text-titre)", color: "var(--color-pierre)" }}>
-          9 photos.
+          Quatre photos.
           <br />
           Un film.
         </h2>
         <p className="mt-6 max-w-md" style={{ color: "var(--color-gris-pierre)" }}>
-          Vous envoyez les photos de l&apos;annonce. La génération est faite par IA.
-          Le montage est fait par un humain, image par image :
-          choix des plans, raccords, rythme, étalonnage. C&apos;est la différence
-          entre un effet et un film.
+          Ce sont les quatre vraies photos du brief de la maison Côte Pavée, et
+          le film que vous traversez depuis le début de cette page. La
+          génération est faite par IA. Le montage est fait par un humain, image
+          par image : choix des plans, raccords, rythme, étalonnage. C&apos;est la
+          différence entre un effet et un film.
         </p>
         <dl className="voix-mono mt-8 grid grid-cols-3 gap-4" style={{ color: "var(--color-bronze)" }}>
           <div>
             <dt className="sr-only">Photos nécessaires</dt>
-            <dd>9 PHOTOS</dd>
+            <dd>4 PHOTOS</dd>
           </div>
           <div>
             <dt className="sr-only">Montage</dt>

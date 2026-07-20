@@ -24,7 +24,7 @@ const OFFRES = [
     nom: "Brasier",
     resume: "FILM + RETOUCHE + STAGING",
     detail:
-      "Tout Flamme, plus le home staging virtuel des pièces vides — jusqu'au home staging progressif, meublé sous les yeux de l'acheteur.",
+      "Tout Flamme, plus le home staging virtuel des pièces vides, jusqu'au home staging progressif, meublé sous les yeux de l'acheteur.",
   },
 ] as const;
 
@@ -34,7 +34,7 @@ export default function Offres() {
   return (
     <section className="marge py-(--spacing-section)" onMouseEnter={() => setPlan("PLAN 06 · LES OFFRES")}>
       <h2 className="voix-mono mb-8" style={{ color: "var(--color-bronze)" }}>
-        TROIS OFFRES · AUCUN PRIX ICI — ILS SE DONNENT DE VIVE VOIX
+        TROIS OFFRES · AUCUN PRIX ICI · ILS SE DONNENT DE VIVE VOIX
       </h2>
 
       <ul>

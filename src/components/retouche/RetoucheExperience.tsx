@@ -371,7 +371,7 @@ export function Serie() {
                 backgroundPosition: s.pos,
               }}
               role="img"
-              aria-label={`Photo retouchée — ${s.label.toLowerCase()}`}
+              aria-label={`Photo retouchée, ${s.label.toLowerCase()}`}
             />
             <figcaption className="voix-mono mt-3" style={{ color: "var(--page-fg-2)" }}>
               {s.label}

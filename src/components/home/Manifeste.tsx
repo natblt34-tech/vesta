@@ -66,7 +66,7 @@ export default function Manifeste() {
                   data-glyphe
                   className="inline-block will-change-transform"
                   style={{
-                    backgroundImage: `linear-gradient(rgba(18,21,26,0.1), rgba(18,21,26,0.1)), url(${media("salon-apres.webp")})`,
+                    backgroundImage: `linear-gradient(rgba(18,21,26,0.1), rgba(18,21,26,0.1)), url(${media("brief-salon.webp")})`,
                     backgroundSize: "900% auto",
                     backgroundPosition: `${(pos * 13) % 100}% ${(pos * 29) % 100}%`,
                     WebkitBackgroundClip: "text",
@@ -83,7 +83,7 @@ export default function Manifeste() {
       </p>
       <p className="mt-10 max-w-lg" style={{ color: "var(--color-gris-pierre)" }}>
         Pas de lecteur vidéo ici. La visite avance quand vous scrollez, image par
-        image — comme au banc de montage. Chaque lettre est une fenêtre sur la
+        image, comme au banc de montage. Chaque lettre est une fenêtre sur la
         même frame.
       </p>
     </section>
