@@ -3,8 +3,9 @@
 import React, { Suspense, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Html, Sphere } from "@react-three/drei";
+import { OrbitControls, Html, Sphere, useTexture } from "@react-three/drei";
 import { useTransitionNavigate } from "@/components/chrome/Transition";
+import { media } from "@/lib/media";
 
 /* L'environnement 3D des projets — c'est la page /projets entière.
    Une carte par film livré, en orbite dans un champ de braises sur
@@ -47,6 +48,52 @@ function ChampDeBraises() {
     <points ref={points} geometry={geometrie}>
       <pointsMaterial color="#c2551e" size={0.5} sizeAttenuation transparent opacity={0.8} />
     </points>
+  );
+}
+
+/* Le noyau : le logo vesta*, en billboard face caméra avec un léger
+   retard (il rattrape l'orbite) et un écho braise décalé derrière —
+   effet 2.5D. Ses lettres opaques occultent les cartes qui passent
+   derrière (occlusion par la profondeur). */
+function LogoNoyau() {
+  const groupe = useRef<THREE.Group>(null);
+  const texture = useTexture(media("vesta-logo.png"));
+  const cible = useMemo(() => new THREE.Object3D(), []);
+
+  const L = 7; // largeur du plan
+  const H = L * (496 / 1912); // ratio réel du logo
+
+  useFrame(({ camera }, delta) => {
+    const g = groupe.current;
+    if (!g) return;
+    /* Vise la caméra, mais rattrape en douceur : le retard donne la
+       sensation d'une carte qui pivote dans l'espace, pas d'un sticker. */
+    cible.position.copy(g.position);
+    cible.lookAt(camera.position);
+    const f = 1 - Math.pow(0.0009, delta);
+    g.quaternion.slerp(cible.quaternion, f);
+  });
+
+  return (
+    <group ref={groupe}>
+      {/* Écho braise, décalé et en retrait : la profondeur du 2.5D. */}
+      <mesh position={[0.22, -0.14, -0.55]} scale={1.08}>
+        <planeGeometry args={[L, H]} />
+        <meshBasicMaterial
+          map={texture}
+          transparent
+          opacity={0.4}
+          color="#c2551e"
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+      {/* Le logo net : ses lettres écrivent la profondeur (occlusion). */}
+      <mesh>
+        <planeGeometry args={[L, H]} />
+        <meshBasicMaterial map={texture} transparent alphaTest={0.5} toneMapped={false} />
+      </mesh>
+    </group>
   );
 }
 
@@ -179,14 +226,10 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
           <ambientLight intensity={0.5} />
           <ChampDeBraises />
 
-          {/* Le noyau : un corps solide basalte — il occulte les cartes
-             qui passent derrière lui. Le filaire bronze l'habille. */}
-          <Sphere args={[2, 48, 48]} position={[0, 0, 0]}>
-            <meshBasicMaterial color="#1b1f26" />
-          </Sphere>
-          <Sphere args={[2.02, 32, 32]} position={[0, 0, 0]}>
-            <meshBasicMaterial color="#96794c" transparent opacity={0.2} wireframe />
-          </Sphere>
+          {/* Le noyau : le logo vesta* en billboard 2.5D. */}
+          <LogoNoyau />
+
+          {/* Les cercles du temple, en fond lointain. */}
           <Sphere args={[12, 32, 32]} position={[0, 0, 0]}>
             <meshBasicMaterial color="#96794c" transparent opacity={0.05} wireframe />
           </Sphere>

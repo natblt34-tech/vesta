@@ -91,18 +91,9 @@ export default function GalerieProjets() {
     return (
       <>
         <header className="marge flex flex-col justify-end pb-4 pt-28">
-          <h1
-            className="voix-display"
-            style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)" }}
-          >
-            On rallume
-            <br />
-            vos annonces
-            <Etoile taille="0.9em" />
-          </h1>
-          <p className="mt-6 max-w-sm" style={{ color: "var(--color-gris-pierre)" }}>
-            Studio vidéo immobilier à Toulouse. Ouvrez un projet : vous verrez sur
-            un cas réel la retouche, le home staging et l&apos;animation vidéo.
+          <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
+            VESTA
+            <Etoile taille="1.1em" /> · STUDIO VIDÉO IMMOBILIER · TOULOUSE
           </p>
         </header>
         <ListeStatique />
@@ -118,25 +109,12 @@ export default function GalerieProjets() {
     >
       <GaleriePlans cartes={CARTES} />
 
-      {/* Surimpressions : la punchline, la consigne, l'unique CTA. */}
-      <div className="pointer-events-none absolute inset-x-0 top-[22vh] z-10 flex flex-col items-center px-[var(--spacing-marge)] text-center">
-        <h1
-          className="voix-display"
-          style={{ fontSize: "clamp(2rem, 5vw, 4rem)", color: "var(--color-pierre)" }}
-        >
-          On rallume vos annonces
-          <Etoile taille="0.85em" />
-        </h1>
-        <p className="voix-mono mt-4" style={{ color: "var(--color-bronze)" }}>
-          CLIQUEZ UN PROJET · VOYEZ CE QU&apos;ON FAIT, SUR UN CAS RÉEL
-        </p>
-      </div>
-
+      {/* Une seule aide, discrète, en bas. Pas de titre flottant. */}
       <p
         className="voix-mono pointer-events-none absolute inset-x-0 bottom-6 z-10 text-center"
         style={{ color: "var(--color-gris-pierre)" }}
       >
-        GLISSEZ POUR ORBITER · MOLETTE POUR ZOOMER · CLIQUEZ UN PROJET
+        GLISSEZ POUR ORBITER · MOLETTE POUR ZOOMER
       </p>
 
       <a

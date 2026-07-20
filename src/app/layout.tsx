@@ -7,7 +7,7 @@ import SiteChrome from "@/components/chrome/SiteChrome";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Vesta · On rallume vos annonces",
+    default: "Vesta · Studio vidéo immobilier · Toulouse",
     template: "%s · Vesta",
   },
   description:
