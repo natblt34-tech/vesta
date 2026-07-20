@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import IndexProjets from "@/components/projets/IndexProjets";
 import GalerieProjets from "@/components/projets/GalerieProjets";
 import RendezVous from "@/components/chrome/RendezVous";
 import Ajuste from "@/components/Ajuste";
@@ -8,7 +7,7 @@ import FragmentVesta from "@/components/vesta/FragmentVesta";
 export const metadata: Metadata = {
   title: "Les projets",
   description:
-    "Films immobiliers livrés par Vesta à Toulouse : à partir de 8 à 11 photos, des films de 38 à 52 secondes avec traversées. L'index des projets.",
+    "Films immobiliers livrés par Vesta à Toulouse : chaque projet est une carte en orbite — cliquez pour ouvrir la fiche du film, ses traversées et son brief.",
 };
 
 export default function Projets() {
@@ -25,7 +24,6 @@ export default function Projets() {
           CE QUE L&apos;AGENCE A FOURNI · CE QUE L&apos;ACHETEUR A VU
         </p>
       </header>
-      <IndexProjets />
       <GalerieProjets />
       <RendezVous />
     </main>
