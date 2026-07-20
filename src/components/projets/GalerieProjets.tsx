@@ -130,7 +130,7 @@ export default function GalerieProjets() {
         className="voix-mono pointer-events-none absolute inset-x-0 bottom-6 z-10 text-center"
         style={{ color: "var(--color-gris-pierre)" }}
       >
-        GLISSEZ POUR ORBITER · CLIQUEZ UN PROJET POUR OUVRIR SA FICHE
+        GLISSEZ POUR ORBITER · MOLETTE POUR ZOOMER · CLIQUEZ UN PROJET
       </p>
 
       <a

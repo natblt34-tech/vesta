@@ -53,9 +53,11 @@ function ChampDeBraises() {
 function CarteFlottante({
   carte,
   position,
+  occulteurs,
 }: {
   carte: CarteProjet;
   position: [number, number, number];
+  occulteurs: React.RefObject<THREE.Object3D>[];
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
@@ -69,7 +71,13 @@ function CarteFlottante({
 
   return (
     <group ref={groupRef} position={position}>
-      <Html transform distanceFactor={10} position={[0, 0, 0]}>
+      <Html
+        transform
+        distanceFactor={10}
+        position={[0, 0, 0]}
+        occlude={occulteurs}
+        style={{ transition: "opacity 0.25s" }}
+      >
         {/* Clic DOM natif : fiable, accessible, pas de raycast. */}
         <button
           type="button"
@@ -155,6 +163,7 @@ function positionsPour(n: number): [number, number, number][] {
 
 export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
   const positions = useMemo(() => positionsPour(cartes.length), [cartes.length]);
+  const noyau = useRef<THREE.Mesh>(null);
 
   return (
     <div className="absolute inset-0" style={{ background: "var(--color-basalte)" }}>
@@ -163,9 +172,13 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
           <ambientLight intensity={0.5} />
           <ChampDeBraises />
 
-          {/* Les cercles du temple : sphères filaires concentriques. */}
-          <Sphere args={[2, 32, 32]} position={[0, 0, 0]}>
-            <meshBasicMaterial color="#96794c" transparent opacity={0.14} wireframe />
+          {/* Le noyau : un corps solide basalte — il occulte les cartes
+             qui passent derrière lui. Le filaire bronze l'habille. */}
+          <Sphere ref={noyau} args={[2, 48, 48]} position={[0, 0, 0]}>
+            <meshBasicMaterial color="#1b1f26" />
+          </Sphere>
+          <Sphere args={[2.02, 32, 32]} position={[0, 0, 0]}>
+            <meshBasicMaterial color="#96794c" transparent opacity={0.2} wireframe />
           </Sphere>
           <Sphere args={[12, 32, 32]} position={[0, 0, 0]}>
             <meshBasicMaterial color="#96794c" transparent opacity={0.05} wireframe />
@@ -175,12 +188,20 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
           </Sphere>
 
           {cartes.map((c, i) => (
-            <CarteFlottante key={c.slug + i} carte={c} position={positions[i]} />
+            <CarteFlottante
+              key={c.slug + i}
+              carte={c}
+              position={positions[i]}
+              occulteurs={[noyau as unknown as React.RefObject<THREE.Object3D>]}
+            />
           ))}
 
           <OrbitControls
             enablePan={false}
-            enableZoom={false}
+            enableZoom
+            minDistance={7}
+            maxDistance={32}
+            zoomSpeed={0.9}
             enableRotate
             autoRotate
             autoRotateSpeed={0.4}
