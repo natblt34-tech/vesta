@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import IndexProjets from "@/components/projets/IndexProjets";
+import GalerieProjets from "@/components/projets/GalerieProjets";
 import RendezVous from "@/components/chrome/RendezVous";
 import Ajuste from "@/components/Ajuste";
 import FragmentVesta from "@/components/vesta/FragmentVesta";
@@ -25,6 +26,7 @@ export default function Projets() {
         </p>
       </header>
       <IndexProjets />
+      <GalerieProjets />
       <RendezVous />
     </main>
   );
