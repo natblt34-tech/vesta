@@ -7,7 +7,7 @@ import { setStatus } from "@/lib/status";
 import { MENTION_STAGING } from "@/lib/site";
 import { media } from "@/lib/media";
 
-/* /home-staging — le scroll meuble la pièce.
+/* Le home staging — le scroll meuble la pièce.
    Le plan de staging se dessine meuble par meuble (ligne claire),
    la caméra suit chaque pose (plans montés, pas un zoom),
    puis la flamme s'allume : la pièce réelle, habitée, chaude.
@@ -52,7 +52,17 @@ const MEUBLES = [
   },
 ];
 
-export default function StagingScene() {
+export default function StagingScene({
+  vide = "salon-vide.webp",
+  meuble = "salon-meuble.webp",
+  piece = "SÉJOUR",
+  label = true,
+}: {
+  vide?: string;
+  meuble?: string;
+  piece?: string;
+  label?: boolean;
+} = {}) {
   const wrap = useRef<HTMLDivElement>(null);
   const [poses, setPoses] = useState(0);
   const [flamme, setFlamme] = useState(false);
@@ -67,13 +77,13 @@ export default function StagingScene() {
       reduced.current = true;
       setPoses(MEUBLES.length);
       setFlamme(true);
-      setStatus("SALON · FOYER ALLUMÉ");
+      setStatus(`${piece} · FOYER ALLUMÉ`);
       const chaud = el.querySelector<HTMLElement>("[data-chaud]");
       if (chaud) chaud.style.clipPath = "none";
       return;
     }
 
-    setStatus("SALON · 0 ÉLÉMENT POSÉ");
+    setStatus(`${piece} · 0 ÉLÉMENT POSÉ`);
 
     const ctx = gsap.context(() => {
       const scene = el.querySelector<HTMLElement>("[data-scene]");
@@ -98,12 +108,12 @@ export default function StagingScene() {
             const p = self.progress;
             if (p > 0.86) {
               setFlamme(true);
-              setStatus("SALON · FOYER ALLUMÉ");
+              setStatus(`${piece} · FOYER ALLUMÉ`);
             } else {
               setFlamme(false);
               const n = Math.min(MEUBLES.length, Math.floor((p / 0.8) * MEUBLES.length));
               setPoses(n);
-              setStatus(`SALON · ${n} ÉLÉMENT${n > 1 ? "S" : ""} POSÉ${n > 1 ? "S" : ""}`);
+              setStatus(`${piece} · ${n} ÉLÉMENT${n > 1 ? "S" : ""} POSÉ${n > 1 ? "S" : ""}`);
             }
           },
         },
@@ -160,10 +170,18 @@ export default function StagingScene() {
   return (
     <div ref={wrap}>
       <section className="relative h-svh overflow-hidden">
+        {label ? (
+          <p
+            className="voix-mono absolute left-[var(--spacing-marge)] top-10 z-10"
+            style={{ color: "var(--color-braise-vive)" }}
+          >
+            02 · LE HOME STAGING
+          </p>
+        ) : null}
         <div data-scene className="absolute inset-0 will-change-transform">
           <img
-            src={media("salon-vide.webp")}
-            alt="Salon vide avant home staging virtuel : parquet, brique, ciel gris"
+            src={media(vide)}
+            alt="Pièce vide avant home staging virtuel : parquet, murs nus, ciel gris"
             className="absolute inset-0 h-full w-full object-cover"
             style={{ filter: "saturate(0.82) brightness(0.94)" }}
           />
@@ -189,8 +207,8 @@ export default function StagingScene() {
           </svg>
           <img
             data-chaud
-            src={media("salon-meuble.webp")}
-            alt="Le même salon, meublé et habité, lumière chaude du soir"
+            src={media(meuble)}
+            alt="La même pièce, meublée et habitée, lumière chaude du soir"
             className="absolute inset-0 h-full w-full object-cover"
             style={{ clipPath: "circle(0% at 34% 24%)" }}
           />

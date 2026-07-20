@@ -18,6 +18,26 @@ export type Projet = {
   poster?: string;
   /* Photos réelles du brief (public/media). À défaut, tuiles recadrées de l'image. */
   briefPhotos?: { src: string; alt: string }[];
+  /* Services démontrés sur la fiche, dans l'ordre. Chaque projet ne montre
+     que ce qu'il a réellement reçu. */
+  retouche?: {
+    src: string;
+    piece: string;
+    reglages: string;
+  };
+  staging?: {
+    vide: string;
+    meuble: string;
+    piece: string;
+  };
+  traversee?: {
+    depart: string;
+    arrivee: string;
+    depuis: string;
+    vers: string;
+    duree: number;
+    origine: string;
+  };
 };
 
 export const PROJETS: Projet[] = [
@@ -47,6 +67,24 @@ export const PROJETS: Projet[] = [
       "Quatre photos fournies : le salon, la chambre, la cuisine, l'entrée. Un bel haussmannien dont les enfilades et la lumière de fin de journée ne tenaient pas dans des images fixes.",
     resultat:
       "Un film de 47 secondes, deux traversées, la lumière du soir traversant tout l'appartement. L'annonce est passée en tête de sa recherche dès la première semaine.",
+    retouche: {
+      src: "brief-cuisine.webp",
+      piece: "CUISINE",
+      reglages: "+1.3 EV · BALANCE 3800K → 5200K · VERTICALES · GRAIN 12%",
+    },
+    staging: {
+      vide: "salon-vide.webp",
+      meuble: "salon-meuble.webp",
+      piece: "SÉJOUR",
+    },
+    traversee: {
+      depart: "brief-entree.webp",
+      arrivee: "brief-salon.webp",
+      depuis: "ENTRÉE",
+      vers: "SALON",
+      duree: 5,
+      origine: "42% 50%",
+    },
   },
   {
     slug: "t3-saint-aubin",
@@ -67,6 +105,14 @@ export const PROJETS: Projet[] = [
       "Onze photos, un appartement traversant dont les enfilades ne se lisaient pas du tout en photo fixe. C'est le cas d'usage exact des traversées.",
     resultat:
       "Trois traversées bout à bout : le film fait ce que la visite fait, il enchaîne les pièces. 52 secondes, livré en 72 h.",
+    traversee: {
+      depart: "salon-apres.webp",
+      arrivee: "cuisine-porte.webp",
+      depuis: "SÉJOUR",
+      vers: "CUISINE",
+      duree: 6,
+      origine: "50% 55%",
+    },
   },
   {
     slug: "appartement-carmes",
@@ -83,6 +129,11 @@ export const PROJETS: Projet[] = [
       "Huit photos d'un bien vendu meublé. L'agence voulait l'heure dorée sans attendre le bon créneau météo.",
     resultat:
       "Étalonnage chaud sur tout le film, lampes allumées, 38 secondes. Le bien s'est vendu sur la deuxième visite.",
+    retouche: {
+      src: "salon-meuble.webp",
+      piece: "SÉJOUR",
+      reglages: "+0.9 EV · CIEL 18H40 · LAMPES ALLUMÉES · GRAIN 10%",
+    },
   },
 ];
 

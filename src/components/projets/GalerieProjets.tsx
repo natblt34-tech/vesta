@@ -9,6 +9,7 @@ import { CAL_URL } from "@/lib/site";
 import { PROJETS } from "@/lib/projets";
 import { TransitionLink } from "@/components/chrome/Transition";
 import RendezVous from "@/components/chrome/RendezVous";
+import { Etoile } from "@/components/chrome/Logo";
 import type { CarteProjet } from "@/components/ui/3d-image-gallery";
 
 /* La page projets EST l'environnement 3D : plein écran d'entrée,
@@ -94,10 +95,14 @@ export default function GalerieProjets() {
             className="voix-display"
             style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)" }}
           >
-            Les projets
+            On rallume
+            <br />
+            vos annonces
+            <Etoile taille="0.9em" />
           </h1>
-          <p className="voix-mono mt-4" style={{ color: "var(--color-bronze)" }}>
-            CE QUE L&apos;AGENCE A FOURNI · CE QUE L&apos;ACHETEUR A VU
+          <p className="mt-6 max-w-sm" style={{ color: "var(--color-gris-pierre)" }}>
+            Studio vidéo immobilier à Toulouse. Ouvrez un projet : vous verrez sur
+            un cas réel la retouche, le home staging et l&apos;animation vidéo.
           </p>
         </header>
         <ListeStatique />
@@ -113,16 +118,17 @@ export default function GalerieProjets() {
     >
       <GaleriePlans cartes={CARTES} />
 
-      {/* Surimpressions : le titre, la consigne, l'unique CTA. */}
-      <div className="pointer-events-none absolute left-[var(--spacing-marge)] top-16 z-10">
+      {/* Surimpressions : la punchline, la consigne, l'unique CTA. */}
+      <div className="pointer-events-none absolute inset-x-0 top-[22vh] z-10 flex flex-col items-center px-[var(--spacing-marge)] text-center">
         <h1
           className="voix-display"
-          style={{ fontSize: "var(--text-titre)", color: "var(--color-pierre)" }}
+          style={{ fontSize: "clamp(2rem, 5vw, 4rem)", color: "var(--color-pierre)" }}
         >
-          Les projets
+          On rallume vos annonces
+          <Etoile taille="0.85em" />
         </h1>
-        <p className="voix-mono mt-3" style={{ color: "var(--color-bronze)" }}>
-          CE QUE L&apos;AGENCE A FOURNI · CE QUE L&apos;ACHETEUR A VU
+        <p className="voix-mono mt-4" style={{ color: "var(--color-bronze)" }}>
+          CLIQUEZ UN PROJET · VOYEZ CE QU&apos;ON FAIT, SUR UN CAS RÉEL
         </p>
       </div>
 

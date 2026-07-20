@@ -6,12 +6,15 @@ import { gsap, gsapEasePierre } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { useTransitionNavigate } from "./Transition";
 import { CAL_URL } from "@/lib/site";
+import { PROJETS } from "@/lib/projets";
 
 const ENTREES = [
-  { href: "/", label: "Le film", voix: "LE SCROLL EST LE FILM" },
-  { href: "/retouche", label: "La retouche", voix: "AVANT / APRÈS" },
-  { href: "/home-staging", label: "Le home staging", voix: "LA PIÈCE SE MEUBLE" },
-  { href: "/projets", label: "Les projets", voix: "FILMS LIVRÉS" },
+  { href: "/", label: "Les projets", voix: "L'ENVIRONNEMENT 3D" },
+  ...PROJETS.map((p) => ({
+    href: `/projets/${p.slug}`,
+    label: p.titre,
+    voix: `${p.type} · ${p.quartier} · ${p.duree} S`,
+  })),
 ];
 
 export default function Nav() {

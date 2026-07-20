@@ -43,5 +43,12 @@ La statue (direction B) n'a pas pu être générée → **la ligne claire (direc
 - **Dispositif dock.cool implémenté** (`FragmentVesta`) : fragments symétriques de part et d'autre du hero (home) et de l'en-tête projets ; au repos le trait bronze se dessine au scroll ; **au survol, un halo suivant le curseur révèle la version embrasée** (trait braise + lueur), qui s'éteint au départ — équivalent Vesta du rocher fleuri de la réf. Le composant est prévu pour recevoir les visuels statue photoréalistes (mêmes couches, même masque) quand le quota de génération sera libéré.
 - Statut /projets rendu dynamique au scroll (INDEX n%).
 
+### Restructuration (site à page unique + fiches)
+- La landing devient l'environnement 3D (galerie des projets). Pages `/`, `/retouche`, `/home-staging`, `/projets` (index) supprimées ; composants home démontables retirés (Hero, Manifeste, Traversee, PleinEcran, NeufPhotos, Punch, RetoucheExperience, homeStatus…).
+- Chaque fiche `/projets/[slug]` EST la démonstration par l'exemple : hero film scroll-expansion, puis services réellement rendus sur CE bien, déclarés dans `projets.ts` (`retouche`, `staging`, `traversee`) → sections numérotées 01/02/03 (vraies séquences, numérotation légitime), puis brief/résultat, offres, RDV.
+- Démos scopées réutilisables : `DemoRetouche` (wipe avant/après sur une vraie photo, avant = CSS), `DemoTraversee` (portail), `StagingScene` paramétré (vide/meuble/pièce). Côte Pavée montre les 3 ; Saint-Aubin seulement l'animation ; Carmes retouche + film.
+- Offres découplées de la home → `components/chrome/Offres.tsx`. Nav refaite : accueil + liste des projets.
+- Après suppression de pages : `Remove-Item .next` obligatoire (types générés périmés référençaient les routes disparues).
+
 ### TypeScript
 - npm avait installé TypeScript 7 (préversion native) → build Next 16 cassé (« The "id" argument must be of type string ») → épinglé typescript@5.9.

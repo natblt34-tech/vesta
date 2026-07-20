@@ -1,18 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { Projet } from "@/lib/projets";
 import { setStatus } from "@/lib/status";
-import { TransitionLink } from "@/components/chrome/Transition";
-import RendezVous from "@/components/chrome/RendezVous";
 import { media } from "@/lib/media";
-import { useRef } from "react";
+import { MENTION_STAGING } from "@/lib/site";
 import { useFitText } from "@/lib/useFitText";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
+import DemoRetouche from "./DemoRetouche";
+import DemoTraversee from "./DemoTraversee";
+import StagingScene from "@/components/staging/StagingScene";
+import Offres from "@/components/chrome/Offres";
+import RendezVous from "@/components/chrome/RendezVous";
+import { TransitionLink } from "@/components/chrome/Transition";
 
-/* La fiche : l'entrée (photos moyennes) contre la sortie (le film).
-   Le contraste EST l'argument. */
+/* La fiche projet est la démonstration complète par l'exemple :
+   ce qu'on a fait sur CE bien, service par service (retouche, home
+   staging s'il y en a, animation vidéo), puis le brief, le résultat,
+   les offres et le rendez-vous. Le hero est le film livré. */
 export default function FicheProjet({ projet }: { projet: Projet }) {
   const racine = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
@@ -22,12 +28,11 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
     setStatus(`${projet.titre.toUpperCase()} · ${projet.duree} S`);
   }, [projet]);
 
-  /* Film réel livré : le hero devient le film lui-même, qui se déploie
-     sous le scroll. Repli statique sous prefers-reduced-motion. */
   const heroFilm = projet.video && !reduced;
 
   return (
     <main ref={racine}>
+      {/* HERO — le film livré, qui se déploie sous le scroll. */}
       {heroFilm ? (
         <ScrollExpandMedia
           mediaType="video"
@@ -38,38 +43,67 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
           date={`${projet.type} · ${projet.surface} M² · ${projet.quartier} · ${projet.photos} PHOTOS`}
           scrollToExpand="SCROLLEZ · LE FILM S'OUVRE"
         />
-      ) : null}
-      {heroFilm ? null : (
-      <section className="relative flex h-[86svh] items-end overflow-hidden">
-        <img
-          src={media(`${projet.image}.webp`)}
-          alt={`Image du film ${projet.titre}`}
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{ objectPosition: projet.posPlate }}
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{ background: "linear-gradient(rgba(18,21,26,0.1) 40%, rgba(18,21,26,0.72))" }}
-        />
-        <div className="relative z-1 w-full p-[var(--spacing-marge)] pb-12">
-          <p className="voix-mono mb-3" style={{ color: "var(--color-braise-vive)" }}>
-            FILM LIVRÉ · {projet.duree} S
-          </p>
-          <h1
-            data-fit
-            className="voix-display w-fit whitespace-nowrap"
-            style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)" }}
-          >
-            {projet.titre}
-          </h1>
-          <p className="voix-mono mt-4" style={{ color: "var(--color-pierre)" }}>
-            {projet.type} · {projet.surface} M² · {projet.quartier} · {projet.photos} PHOTOS FOURNIES
-          </p>
-        </div>
-      </section>
+      ) : (
+        <section className="relative flex h-[86svh] items-end overflow-hidden">
+          <img
+            src={media(`${projet.image}.webp`)}
+            alt={`Image du film ${projet.titre}`}
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ objectPosition: projet.posPlate }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(rgba(18,21,26,0.1) 40%, rgba(18,21,26,0.72))" }}
+          />
+          <div className="relative z-1 w-full p-[var(--spacing-marge)] pb-12">
+            <p className="voix-mono mb-3" style={{ color: "var(--color-braise-vive)" }}>
+              FILM LIVRÉ · {projet.duree} S
+            </p>
+            <h1
+              data-fit
+              className="voix-display w-fit whitespace-nowrap"
+              style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)" }}
+            >
+              {projet.titre}
+            </h1>
+            <p className="voix-mono mt-4" style={{ color: "var(--color-pierre)" }}>
+              {projet.type} · {projet.surface} M² · {projet.quartier} · {projet.photos} PHOTOS FOURNIES
+            </p>
+          </div>
+        </section>
       )}
 
+      {/* CE QU'ON A FAIT SUR CE BIEN — les services démontrés. */}
+      <section className="marge py-(--spacing-section)">
+        <p className="voix-mono mb-4" style={{ color: "var(--color-bronze)" }}>
+          CE QU&apos;ON A FAIT SUR CE BIEN
+        </p>
+        <h2
+          className="voix-display max-w-3xl"
+          style={{ fontSize: "var(--text-titre)", color: "var(--color-pierre)" }}
+        >
+          Vous venez de scroller le film. Voici comment il a été fabriqué, geste
+          par geste.
+        </h2>
+      </section>
+
+      {/* 01 · LA RETOUCHE */}
+      {projet.retouche ? <DemoRetouche projet={projet} /> : null}
+
+      {/* 02 · LE HOME STAGING (si le projet en a) */}
+      {projet.staging ? (
+        <StagingScene
+          vide={projet.staging.vide}
+          meuble={projet.staging.meuble}
+          piece={projet.staging.piece}
+        />
+      ) : null}
+
+      {/* 03 · L'ANIMATION VIDÉO — la traversée */}
+      {projet.traversee ? <DemoTraversee projet={projet} /> : null}
+
+      {/* LE BRIEF vs LE RÉSULTAT */}
       <section className="marge grid gap-12 py-(--spacing-section) md:grid-cols-2">
         <div>
           <h2 className="voix-mono mb-6" style={{ color: "var(--color-bronze)" }}>
@@ -134,8 +168,13 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
           <p className="max-w-md" style={{ color: "var(--color-gris-pierre)" }}>
             {projet.resultat}
           </p>
+          {projet.staging ? (
+            <p className="voix-mono mt-8" style={{ color: "var(--color-gris-pierre)" }}>
+              {MENTION_STAGING}
+            </p>
+          ) : null}
           <TransitionLink
-            href="/projets"
+            href="/"
             className="voix-mono mt-10 inline-block underline underline-offset-4"
             style={{ color: "var(--color-pierre)" }}
           >
@@ -144,7 +183,9 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
         </div>
       </section>
 
-      <RendezVous />
+      {/* LES OFFRES — la conversion, après la démonstration. */}
+      <Offres />
+      <RendezVous mention={projet.staging ? MENTION_STAGING : undefined} />
     </main>
   );
 }

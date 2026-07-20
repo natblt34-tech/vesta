@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { CAL_URL } from "@/lib/site";
-import { setPlan } from "./homeStatus";
 
 /* Trois lignes typographiques. Pas de cartes, pas de prix.
    La ligne s'ouvre, le prix reste au rendez-vous. */
@@ -12,7 +11,7 @@ const OFFRES = [
     nom: "Étincelle",
     resume: "UN BIEN · UN FILM",
     detail:
-      "Le film cinématique du bien, 45 à 60 secondes, à partir de 9 photos. Une traversée incluse. Livré en 72 h.",
+      "Le film cinématique du bien, 45 à 60 secondes, à partir de quelques photos. Une traversée incluse. Livré en 72 h.",
   },
   {
     nom: "Flamme",
@@ -32,7 +31,7 @@ export default function Offres() {
   const [ouverte, setOuverte] = useState<number | null>(null);
 
   return (
-    <section className="marge py-(--spacing-section)" onMouseEnter={() => setPlan("PLAN 06 · LES OFFRES")}>
+    <section className="marge py-(--spacing-section)">
       <h2 className="voix-mono mb-8" style={{ color: "var(--color-bronze)" }}>
         TROIS OFFRES · AUCUN PRIX ICI · ILS SE DONNENT DE VIVE VOIX
       </h2>
