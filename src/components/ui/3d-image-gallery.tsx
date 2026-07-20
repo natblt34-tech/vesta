@@ -53,11 +53,9 @@ function ChampDeBraises() {
 function CarteFlottante({
   carte,
   position,
-  occulteurs,
 }: {
   carte: CarteProjet;
   position: [number, number, number];
-  occulteurs: React.RefObject<THREE.Object3D>[];
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
@@ -71,13 +69,10 @@ function CarteFlottante({
 
   return (
     <group ref={groupRef} position={position}>
-      <Html
-        transform
-        distanceFactor={10}
-        position={[0, 0, 0]}
-        occlude={occulteurs}
-        style={{ transition: "opacity 0.25s" }}
-      >
+      {/* occlude="blending" : la carte vit sous le canvas, un plan de
+         profondeur découpe sa fenêtre dans le rendu — le noyau la
+         recouvre progressivement, comme un vrai objet devant elle. */}
+      <Html transform distanceFactor={10} position={[0, 0, 0]} occlude="blending">
         {/* Clic DOM natif : fiable, accessible, pas de raycast. */}
         <button
           type="button"
@@ -163,18 +158,30 @@ function positionsPour(n: number): [number, number, number][] {
 
 export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
   const positions = useMemo(() => positionsPour(cartes.length), [cartes.length]);
-  const noyau = useRef<THREE.Mesh>(null);
+  const enveloppe = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="absolute inset-0" style={{ background: "var(--color-basalte)" }}>
-      <Canvas camera={{ position: [0, 0, 16], fov: 60 }} gl={{ antialias: true, alpha: true }}>
+    <div
+      ref={enveloppe}
+      className="absolute inset-0"
+      style={{ background: "var(--color-basalte)", touchAction: "none" }}
+    >
+      {/* Le canvas laisse passer les clics (les cartes DOM sont dessous) ;
+         l'orbite écoute sur l'enveloppe. */}
+      <Canvas
+        camera={{ position: [0, 0, 16], fov: 60 }}
+        gl={{ antialias: true, alpha: true }}
+        eventSource={enveloppe as unknown as React.RefObject<HTMLElement>}
+        eventPrefix="client"
+        style={{ pointerEvents: "none" }}
+      >
         <Suspense fallback={null}>
           <ambientLight intensity={0.5} />
           <ChampDeBraises />
 
           {/* Le noyau : un corps solide basalte — il occulte les cartes
              qui passent derrière lui. Le filaire bronze l'habille. */}
-          <Sphere ref={noyau} args={[2, 48, 48]} position={[0, 0, 0]}>
+          <Sphere args={[2, 48, 48]} position={[0, 0, 0]}>
             <meshBasicMaterial color="#1b1f26" />
           </Sphere>
           <Sphere args={[2.02, 32, 32]} position={[0, 0, 0]}>
@@ -188,12 +195,7 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
           </Sphere>
 
           {cartes.map((c, i) => (
-            <CarteFlottante
-              key={c.slug + i}
-              carte={c}
-              position={positions[i]}
-              occulteurs={[noyau as unknown as React.RefObject<THREE.Object3D>]}
-            />
+            <CarteFlottante key={c.slug + i} carte={c} position={positions[i]} />
           ))}
 
           <OrbitControls
