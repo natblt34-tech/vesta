@@ -16,6 +16,8 @@ export type Projet = {
   /* Film réel livré (public/media). La fiche passe alors en hero scroll-expansion. */
   video?: string;
   poster?: string;
+  /* Photos réelles du brief (public/media). À défaut, tuiles recadrées de l'image. */
+  briefPhotos?: { src: string; alt: string }[];
 };
 
 export const PROJETS: Projet[] = [
@@ -25,7 +27,7 @@ export const PROJETS: Projet[] = [
     type: "T4",
     surface: 112,
     quartier: "CÔTE PAVÉE",
-    photos: 9,
+    photos: 4,
     traversees: [
       { nom: "SALON → CUISINE", duree: 6 },
       { nom: "ENTRÉE → SÉJOUR", duree: 5 },
@@ -35,10 +37,16 @@ export const PROJETS: Projet[] = [
     posPlate: "center 40%",
     video: "visite.mp4",
     poster: "visite-poster.jpg",
+    briefPhotos: [
+      { src: "brief-salon.webp", alt: "Salon : cheminée en marbre, miroir ancien, parquet chevron" },
+      { src: "brief-chambre.webp", alt: "Chambre : tête de lit beige, lumière dorée de fin de journée" },
+      { src: "brief-cuisine.webp", alt: "Cuisine sauge et laiton, vue sur les toits de Toulouse" },
+      { src: "brief-entree.webp", alt: "Entrée : console en noyer, enfilade vers le séjour" },
+    ],
     brief:
-      "Neuf photos d'agent, prises au téléphone en fin de journée. Un séjour magnifique mais sous-exposé, une brique invisible dans l'annonce d'origine.",
+      "Quatre photos fournies : le salon, la chambre, la cuisine, l'entrée. Un bel haussmannien dont les enfilades et la lumière de fin de journée ne tenaient pas dans des images fixes.",
     resultat:
-      "Un film de 47 secondes, deux traversées, la brique rendue à sa lumière du soir. L'annonce est passée en tête de sa recherche Se Loger dès la première semaine.",
+      "Un film de 47 secondes, deux traversées, la lumière du soir traversant tout l'appartement. L'annonce est passée en tête de sa recherche dès la première semaine.",
   },
   {
     slug: "t3-saint-aubin",

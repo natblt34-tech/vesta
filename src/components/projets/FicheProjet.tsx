@@ -35,7 +35,7 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
           posterSrc={projet.poster ? media(projet.poster) : undefined}
           bgImageSrc={projet.poster ? media(projet.poster) : media(`${projet.image}.webp`)}
           title={projet.titre}
-          date={`${projet.type} · ${projet.surface} M² · ${projet.quartier}`}
+          date={`${projet.type} · ${projet.surface} M² · ${projet.quartier} · ${projet.photos} PHOTOS`}
           scrollToExpand="SCROLLEZ — LE FILM S'OUVRE"
         />
       ) : null}
@@ -75,22 +75,36 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
           <h2 className="voix-mono mb-6" style={{ color: "var(--color-bronze)" }}>
             LE BRIEF — CE QUE L&apos;AGENCE A FOURNI
           </h2>
-          <div className="grid grid-cols-3 gap-2">
-            {Array.from({ length: Math.min(projet.photos, 9) }, (_, i) => (
-              <div
-                key={i}
-                className="aspect-4/3"
-                style={{
-                  backgroundImage: `url(${media(`${projet.image}.webp`)})`,
-                  backgroundSize: "340%",
-                  backgroundPosition: `${(i * 41) % 100}% ${(i * 67) % 100}%`,
-                  filter: "brightness(0.6) saturate(0.5) contrast(0.85)",
-                }}
-                role="img"
-                aria-label={`Photo brute ${i + 1} fournie par l'agence`}
-              />
-            ))}
-          </div>
+          {projet.briefPhotos ? (
+            <div className="grid grid-cols-2 gap-2">
+              {projet.briefPhotos.map((p) => (
+                <img
+                  key={p.src}
+                  src={media(p.src)}
+                  alt={p.alt}
+                  loading="lazy"
+                  className="aspect-4/3 w-full object-cover"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: Math.min(projet.photos, 9) }, (_, i) => (
+                <div
+                  key={i}
+                  className="aspect-4/3"
+                  style={{
+                    backgroundImage: `url(${media(`${projet.image}.webp`)})`,
+                    backgroundSize: "340%",
+                    backgroundPosition: `${(i * 41) % 100}% ${(i * 67) % 100}%`,
+                    filter: "brightness(0.6) saturate(0.5) contrast(0.85)",
+                  }}
+                  role="img"
+                  aria-label={`Photo brute ${i + 1} fournie par l'agence`}
+                />
+              ))}
+            </div>
+          )}
           <p className="mt-6 max-w-md" style={{ color: "var(--color-gris-pierre)" }}>
             {projet.brief}
           </p>
