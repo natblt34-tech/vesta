@@ -12,6 +12,7 @@ import DemoRetouche from "./DemoRetouche";
 import DemoFormats from "./DemoFormats";
 import StagingScene from "@/components/staging/StagingScene";
 import { FooterVesta } from "@/components/ui/motion-footer";
+import Ajuste from "@/components/Ajuste";
 
 /* La fiche projet est la démonstration complète par l'exemple :
    ce qu'on a fait sur CE bien, service par service (retouche, home
@@ -105,9 +106,8 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
             className="voix-display"
             style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)", lineHeight: 0.95 }}
           >
-            {projet.photos} photos.
-            <br />
-            {projet.duree} secondes.
+            <Ajuste>{projet.photos} photos.</Ajuste>
+            <Ajuste>{projet.duree} secondes.</Ajuste>
           </h2>
           <p className="mt-8 max-w-md" style={{ color: "var(--color-gris-pierre)" }}>
             {projet.resultat}

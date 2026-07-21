@@ -38,7 +38,7 @@
   --ease-poids: cubic-bezier(0.34, 1.28, 0.44, 1);
 
   /* Rythme */
-  --spacing-section: clamp(6rem, 14vh, 15rem);
+  --spacing-section: clamp(3.5rem, 8vh, 7rem);
   --spacing-marge: max(4vw, 1.25rem);
 }
 

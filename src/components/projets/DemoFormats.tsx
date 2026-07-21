@@ -5,6 +5,7 @@ import { gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { media } from "@/lib/media";
 import type { Projet } from "@/lib/projets";
+import Ajuste from "@/components/Ajuste";
 
 /* L'animation vidéo, livrée en deux formats : 16:9 pour le web et les
    portails (sur un ordinateur portable), 9:16 pour les réseaux (sur un
@@ -87,13 +88,12 @@ export default function DemoFormats({ projet }: { projet: Projet }) {
         className="voix-display max-w-4xl"
         style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)", lineHeight: 0.95 }}
       >
-        Un tournage,
-        <br />
-        deux formats.
+        <Ajuste>Un tournage,</Ajuste>
+        <Ajuste>deux formats.</Ajuste>
       </h2>
 
       <div
-        className="mt-8 grid items-end gap-16 md:mt-10 md:grid-cols-[1.7fr_1fr] md:gap-10"
+        className="mt-8 grid items-end gap-10 md:mt-10 md:grid-cols-[1.7fr_1fr]"
         style={{ perspective: "1400px" }}
       >
         {/* L'ORDINATEUR PORTABLE — 16:9, le web et les portails. */}
