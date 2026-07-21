@@ -12,7 +12,6 @@ import DemoRetouche from "./DemoRetouche";
 import DemoFormats from "./DemoFormats";
 import StagingScene from "@/components/staging/StagingScene";
 import { FooterVesta } from "@/components/ui/motion-footer";
-import { TransitionLink } from "@/components/chrome/Transition";
 
 /* La fiche projet est la démonstration complète par l'exemple :
    ce qu'on a fait sur CE bien, service par service (retouche, home
@@ -39,8 +38,7 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
           posterSrc={projet.poster ? media(projet.poster) : undefined}
           bgImageSrc={projet.poster ? media(projet.poster) : media(`${projet.image}.webp`)}
           title={projet.titre}
-          date={`${projet.type} · ${projet.surface} M² · ${projet.quartier} · ${projet.photos} PHOTOS`}
-          scrollToExpand="SCROLLEZ · LE FILM S'OUVRE"
+          date={`${projet.type} · ${projet.surface} M² · ${projet.quartier}`}
         />
       ) : (
         <section className="relative flex h-[86svh] items-end overflow-hidden">
@@ -73,24 +71,10 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
         </section>
       )}
 
-      {/* CE QU'ON A FAIT SUR CE BIEN — les services démontrés. */}
-      <section className="marge py-(--spacing-section)">
-        <p className="voix-mono mb-4" style={{ color: "var(--color-bronze)" }}>
-          CE QU&apos;ON A FAIT SUR CE BIEN
-        </p>
-        <h2
-          className="voix-display max-w-3xl"
-          style={{ fontSize: "var(--text-titre)", color: "var(--color-pierre)" }}
-        >
-          Vous venez de scroller le film. Voici comment il a été fabriqué, geste
-          par geste.
-        </h2>
-      </section>
-
-      {/* 01 · LA RETOUCHE */}
+      {/* La retouche */}
       {projet.retouche ? <DemoRetouche projet={projet} /> : null}
 
-      {/* 02 · LE HOME STAGING (si le projet en a) */}
+      {/* Le home staging (si le projet en a) */}
       {projet.staging ? (
         <StagingScene
           vide={projet.staging.vide}
@@ -99,72 +83,33 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
         />
       ) : null}
 
-      {/* 03 · L'ANIMATION VIDÉO — livrée en 16:9 et 9:16 */}
+      {/* L'animation vidéo, livrée en 16:9 et 9:16 */}
       <DemoFormats projet={projet} />
 
-      {/* LE BRIEF vs LE RÉSULTAT */}
-      <section className="marge grid gap-12 py-(--spacing-section) md:grid-cols-2">
-        <div>
-          <h2 className="voix-mono mb-6" style={{ color: "var(--color-bronze)" }}>
-            LE BRIEF · CE QUE L&apos;AGENCE A FOURNI
-          </h2>
-          {projet.briefPhotos ? (
-            <div className="grid grid-cols-2 gap-2">
-              {projet.briefPhotos.map((p) => (
-                <img
-                  key={p.src}
-                  src={media(p.src)}
-                  alt={p.alt}
-                  loading="lazy"
-                  className="aspect-4/3 w-full object-cover"
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
-              {Array.from({ length: Math.min(projet.photos, 9) }, (_, i) => (
-                <div
-                  key={i}
-                  className="aspect-4/3"
-                  style={{
-                    backgroundImage: `url(${media(`${projet.image}.webp`)})`,
-                    backgroundSize: "340%",
-                    backgroundPosition: `${(i * 41) % 100}% ${(i * 67) % 100}%`,
-                    filter: "brightness(0.6) saturate(0.5) contrast(0.85)",
-                  }}
-                  role="img"
-                  aria-label={`Photo brute ${i + 1} fournie par l'agence`}
-                />
-              ))}
-            </div>
-          )}
-          <p className="mt-6 max-w-md" style={{ color: "var(--color-gris-pierre)" }}>
-            {projet.brief}
-          </p>
+      {/* Le brief, le résultat. */}
+      <section className="marge grid items-center gap-14 py-(--spacing-section) md:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2">
+          {(projet.briefPhotos ?? []).map((p) => (
+            <img
+              key={p.src}
+              src={media(p.src)}
+              alt={p.alt}
+              loading="lazy"
+              className="aspect-4/3 w-full object-cover"
+            />
+          ))}
         </div>
 
         <div>
-          <h2 className="voix-mono mb-6" style={{ color: "var(--color-bronze)" }}>
-            LES TRAVERSÉES DU FILM
+          <h2
+            className="voix-display"
+            style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)", lineHeight: 0.95 }}
+          >
+            {projet.photos} photos.
+            <br />
+            {projet.duree} secondes.
           </h2>
-          <ul>
-            {projet.traversees.map((t, i) => (
-              <li
-                key={t.nom}
-                className="filet voix-mono flex items-baseline justify-between py-4"
-                style={{ color: "var(--color-pierre)" }}
-              >
-                <span>
-                  TRAVERSÉE {String(i + 1).padStart(2, "0")} · {t.nom}
-                </span>
-                <span style={{ color: "var(--color-gris-pierre)" }}>{t.duree} S</span>
-              </li>
-            ))}
-          </ul>
-          <h2 className="voix-mono mb-4 mt-12" style={{ color: "var(--color-bronze)" }}>
-            LE RÉSULTAT
-          </h2>
-          <p className="max-w-md" style={{ color: "var(--color-gris-pierre)" }}>
+          <p className="mt-8 max-w-md" style={{ color: "var(--color-gris-pierre)" }}>
             {projet.resultat}
           </p>
           {projet.staging ? (
@@ -172,21 +117,9 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
               {MENTION_STAGING}
             </p>
           ) : null}
-          <TransitionLink
-            href="/"
-            className="voix-mono mt-10 inline-block underline underline-offset-4"
-            style={{ color: "var(--color-pierre)" }}
-          >
-            ← Tous les projets
-          </TransitionLink>
         </div>
       </section>
 
-      {projet.staging ? (
-        <p className="voix-mono marge pb-6" style={{ color: "var(--color-gris-pierre)" }}>
-          {MENTION_STAGING}
-        </p>
-      ) : null}
       <FooterVesta />
     </main>
   );

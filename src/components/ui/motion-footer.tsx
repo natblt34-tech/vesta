@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useEffect, useRef } from "react";
-import { gsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { CAL_URL } from "@/lib/site";
@@ -147,47 +147,40 @@ export function FooterVesta() {
     if (!el) return;
     if (prefersReducedMotion()) return;
 
-    gsap.set([geant.current, contenu.current], { autoAlpha: 0 });
-
-    let joue = false;
-    const jouer = () => {
-      if (joue) return;
-      joue = true;
-      const tl = gsap.timeline();
-      tl.fromTo(
+    const ctx = gsap.context(() => {
+      /* Le rideau : le texte géant monte en parallaxe au fil du scroll. */
+      gsap.fromTo(
         geant.current,
-        { y: 60, autoAlpha: 0, scale: 0.9 },
-        { y: 0, autoAlpha: 1, scale: 1, duration: 1.1, ease: "power2.out" },
-      ).fromTo(
-        contenu.current?.children ? Array.from(contenu.current.children) : [],
-        { y: 40, autoAlpha: 0 },
-        { y: 0, autoAlpha: 1, stagger: 0.12, duration: 0.8, ease: "power3.out" },
-        "-=0.7",
+        { yPercent: 22, scale: 0.86, autoAlpha: 0 },
+        {
+          yPercent: 0,
+          scale: 1,
+          autoAlpha: 1,
+          ease: "none",
+          scrollTrigger: { trigger: el, start: "top 90%", end: "bottom bottom", scrub: 1 },
+        },
       );
-      gsap.set(contenu.current, { autoAlpha: 1 });
-    };
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          io.disconnect();
-          jouer();
-        }
-      },
-      { threshold: 0.15 },
-    );
-    io.observe(el);
+      /* Le contenu se révèle, étagé, tiré par le scroll. */
+      gsap.fromTo(
+        contenu.current?.children ? Array.from(contenu.current.children) : [],
+        { y: 60, autoAlpha: 0 },
+        {
+          y: 0,
+          autoAlpha: 1,
+          stagger: 0.1,
+          ease: "power3.out",
+          scrollTrigger: { trigger: el, start: "top 55%", end: "bottom bottom", scrub: 1 },
+        },
+      );
+    }, el);
 
-    /* Filet de sécurité : le CTA ne doit jamais rester masqué. */
-    const secours = window.setTimeout(() => {
-      io.disconnect();
-      gsap.set([geant.current, contenu.current], { autoAlpha: 1, y: 0, scale: 1 });
-      joue = true;
-    }, 4000);
+    /* Le hero verrouille le scroll : on recalcule après montage. */
+    const t = window.setTimeout(() => ScrollTrigger.refresh(), 200);
 
     return () => {
-      io.disconnect();
-      window.clearTimeout(secours);
+      window.clearTimeout(t);
+      ctx.revert();
     };
   }, []);
 

@@ -83,18 +83,17 @@ export default function DemoFormats({ projet }: { projet: Projet }) {
 
   return (
     <section ref={wrap} className="marge py-(--spacing-section)">
-      <p className="voix-mono mb-4" style={{ color: "var(--color-braise-vive)" }}>
-        03 · L&apos;ANIMATION VIDÉO
-      </p>
       <h2
-        className="voix-display max-w-3xl"
-        style={{ fontSize: "var(--text-titre)", color: "var(--color-pierre)" }}
+        className="voix-display max-w-4xl"
+        style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)", lineHeight: 0.95 }}
       >
-        Un tournage, deux formats. Livrés prêts à poster.
+        Un tournage,
+        <br />
+        deux formats.
       </h2>
 
       <div
-        className="mt-20 grid items-end gap-16 md:grid-cols-[1.7fr_1fr] md:gap-10"
+        className="mt-8 grid items-end gap-16 md:mt-10 md:grid-cols-[1.7fr_1fr] md:gap-10"
         style={{ perspective: "1400px" }}
       >
         {/* L'ORDINATEUR PORTABLE — 16:9, le web et les portails. */}

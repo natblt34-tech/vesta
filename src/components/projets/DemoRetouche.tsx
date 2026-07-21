@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { media } from "@/lib/media";
@@ -15,15 +15,11 @@ const DEGRADE = "brightness(0.55) saturate(0.55) contrast(0.88) hue-rotate(-8deg
 export default function DemoRetouche({ projet }: { projet: Projet }) {
   const r = projet.retouche;
   const wrap = useRef<HTMLDivElement>(null);
-  const [avance, setAvance] = useState(0);
 
   useEffect(() => {
     const el = wrap.current;
     if (!el || !r) return;
-    if (prefersReducedMotion()) {
-      setAvance(1);
-      return;
-    }
+    if (prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
       const apres = el.querySelector<HTMLElement>("[data-apres]");
@@ -46,7 +42,6 @@ export default function DemoRetouche({ projet }: { projet: Projet }) {
               bord.style.opacity = p > 0.02 && p < 0.98 ? "1" : "0";
             }
             if (avant) avant.style.rotate = `${1.4 * (1 - p)}deg`;
-            setAvance(p);
           },
         },
       });
@@ -86,20 +81,9 @@ export default function DemoRetouche({ projet }: { projet: Projet }) {
           }}
         />
 
-        <div className="absolute inset-x-0 top-10 flex items-baseline justify-between p-[var(--spacing-marge)]">
-          <p className="voix-mono" style={{ color: "var(--color-braise-vive)" }}>
-            01 · LA RETOUCHE
-          </p>
-          <p
-            className="voix-mono"
-            style={{ color: "var(--color-pierre)", textShadow: "0 1px 8px rgba(18,21,26,0.8)" }}
-          >
-            {avance < 0.15 ? "PHOTO BRUTE DE L'AGENCE" : "VOUS TENEZ LE CURSEUR"}
-          </p>
-        </div>
         <p
           className="voix-mono absolute bottom-10 left-[var(--spacing-marge)]"
-          style={{ color: "var(--color-pierre)", textShadow: "0 1px 8px rgba(18,21,26,0.8)" }}
+          style={{ color: "var(--color-pierre)", textShadow: "0 1px 8px rgba(18,21,26,0.8)", fontSize: "0.75rem" }}
         >
           {r.piece} · {r.reglages}
         </p>
