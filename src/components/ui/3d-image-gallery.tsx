@@ -1,8 +1,8 @@
 "use client";
 
-import React, { Suspense, useMemo, useRef, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html, Sphere, useTexture } from "@react-three/drei";
 import { useTransitionNavigate } from "@/components/chrome/Transition";
 import { media } from "@/lib/media";
@@ -166,6 +166,22 @@ function CarteFlottante({
   );
 }
 
+/* Caméra responsive : en portrait/petit écran, on élargit le champ pour
+   que les trois cartes tiennent dans le cadre. */
+function CameraRig() {
+  const { camera, size } = useThree();
+  useEffect(() => {
+    const portrait = size.height >= size.width;
+    const fov = portrait ? 80 : size.width < 1000 ? 66 : 55;
+    const cam = camera as THREE.PerspectiveCamera;
+    if (cam.fov !== fov) {
+      cam.fov = fov;
+      cam.updateProjectionMatrix();
+    }
+  }, [camera, size]);
+  return null;
+}
+
 /* Trois projets : triangle en orbite. Au-delà : spirale dorée. */
 function positionsPour(n: number): [number, number, number][] {
   if (n <= 3) {
@@ -206,6 +222,7 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
         style={{ pointerEvents: "none" }}
       >
         <Suspense fallback={null}>
+          <CameraRig />
           <ambientLight intensity={0.5} />
           <ChampDeBraises />
 

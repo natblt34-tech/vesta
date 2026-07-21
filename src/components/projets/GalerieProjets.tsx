@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect } from "react";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { media } from "@/lib/media";
 import { setStatus } from "@/lib/status";
@@ -66,28 +66,16 @@ function ListeStatique() {
   );
 }
 
-function useEstLarge() {
-  return useSyncExternalStore(
-    (cb) => {
-      const mq = window.matchMedia("(min-width: 768px)");
-      mq.addEventListener("change", cb);
-      return () => mq.removeEventListener("change", cb);
-    },
-    () => window.matchMedia("(min-width: 768px)").matches,
-    () => false,
-  );
-}
-
 export default function GalerieProjets() {
   const reduced = useReducedMotion();
-  const large = useEstLarge();
-  const environnement = large && !reduced;
 
   useEffect(() => {
     setStatus(`${PROJETS.length} FILMS LIVRÉS · EN ORBITE`);
   }, []);
 
-  if (!environnement) {
+  /* L'environnement 3D partout (mobile compris). La liste sobre n'est
+     servie qu'en reduced-motion, pour l'accessibilité. */
+  if (reduced) {
     return (
       <>
         <header className="marge flex flex-col justify-end pb-4 pt-28">
