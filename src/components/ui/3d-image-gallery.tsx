@@ -150,24 +150,7 @@ function LogoNoyau() {
   );
 }
 
-/* —————————————————— Marqueur : étincelle -> carte au survol —————————————————— */
-
-function Etincelle() {
-  return (
-    <span
-      className="block"
-      style={{
-        width: "0.7rem",
-        height: "0.7rem",
-        background:
-          "radial-gradient(circle, var(--color-braise-vive) 0%, var(--color-braise) 45%, transparent 72%)",
-        borderRadius: "50%",
-        boxShadow: "0 0 14px 3px color-mix(in srgb, var(--color-braise-vive) 65%, transparent)",
-        animation: "etincelle 2.6s ease-in-out infinite",
-      }}
-    />
-  );
-}
+/* —————————————————— Marqueur : la carte du projet —————————————————— */
 
 function Marqueur({
   carte,
@@ -175,72 +158,52 @@ function Marqueur({
   actif,
   onHover,
   onWarp,
-  delai,
 }: {
   carte: CarteProjet;
   position: [number, number, number];
   actif: boolean;
   onHover: (slug: string | null) => void;
   onWarp: (p: [number, number, number], slug: string) => void;
-  delai: number;
 }) {
   return (
-    <Html position={position} center zIndexRange={[actif ? 60 : 20, 0]} style={{ pointerEvents: "none" }}>
-      <div
+    <Html transform distanceFactor={13} position={position} occlude="blending">
+      <button
+        type="button"
+        data-cursor
         onMouseEnter={() => onHover(carte.slug)}
         onMouseLeave={() => onHover(null)}
         onClick={() => onWarp(position, carte.slug)}
-        data-cursor
-        className="relative flex cursor-pointer items-center justify-center"
+        aria-label={`Ouvrir la fiche du projet ${carte.titre}`}
+        className="block w-52 select-none overflow-hidden p-2 text-left"
         style={{
-          pointerEvents: "auto",
-          width: actif ? "12.5rem" : "2.75rem",
-          height: actif ? "9.4rem" : "2.75rem",
-          transition: "width 0.4s var(--ease-braise), height 0.4s var(--ease-braise)",
+          background: "var(--color-basalte-2)",
+          border: actif ? "1px solid var(--color-braise-vive)" : "1px solid var(--color-filet)",
+          boxShadow: actif
+            ? "0 0 40px color-mix(in srgb, var(--color-braise) 45%, transparent)"
+            : "0 20px 40px rgba(0, 0, 0, 0.55)",
+          transform: actif ? "scale(1.06)" : "scale(1)",
+          transition: "transform 0.3s var(--ease-braise), box-shadow 0.3s var(--ease-braise), border-color 0.3s",
         }}
       >
-        {/* L'étincelle (état de repos) */}
+        <img
+          src={carte.imageUrl}
+          alt={carte.alt}
+          className="pointer-events-none aspect-video w-full object-cover"
+          loading="lazy"
+          draggable={false}
+        />
         <span
-          className="absolute"
+          className="voix-mono block truncate px-0.5 pb-0.5 pt-2.5 text-center"
           style={{
-            opacity: actif ? 0 : 1,
-            transition: "opacity 0.25s",
-            animationDelay: `${delai}s`,
+            color: actif ? "var(--color-braise-vive)" : "var(--color-gris-pierre)",
+            fontSize: "0.5rem",
+            letterSpacing: "0.08em",
+            transition: "color 0.25s",
           }}
         >
-          <Etincelle />
+          {carte.titre}
         </span>
-
-        {/* La carte (au survol) */}
-        <div
-          className="absolute inset-0 overflow-hidden p-2"
-          style={{
-            opacity: actif ? 1 : 0,
-            transform: actif ? "scale(1)" : "scale(0.82)",
-            transition: "opacity 0.3s, transform 0.4s var(--ease-braise), box-shadow 0.4s",
-            pointerEvents: actif ? "auto" : "none",
-            background: "var(--color-basalte-2)",
-            border: "1px solid var(--color-braise-vive)",
-            boxShadow: actif
-              ? "0 0 44px color-mix(in srgb, var(--color-braise) 50%, transparent)"
-              : "0 0 0 transparent",
-          }}
-        >
-          <img src={carte.imageUrl} alt={carte.alt} className="pointer-events-none aspect-video w-full object-cover" draggable={false} />
-          <p
-            className="voix-mono mt-2 truncate text-center"
-            style={{ color: "var(--color-pierre)", fontSize: "0.625rem", letterSpacing: "0.06em" }}
-          >
-            {carte.titre}
-          </p>
-          <p
-            className="voix-mono mt-1 text-center"
-            style={{ color: "var(--color-braise-vive)", fontSize: "0.5rem", letterSpacing: "0.1em" }}
-          >
-            ENTRER →
-          </p>
-        </div>
-      </div>
+      </button>
     </Html>
   );
 }
@@ -350,7 +313,6 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
               actif={survol === c.slug}
               onHover={setSurvol}
               onWarp={lancerWarp}
-              delai={(i % 5) * 0.4}
             />
           ))}
 
