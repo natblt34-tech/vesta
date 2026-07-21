@@ -83,6 +83,41 @@ export const PROJETS: Projet[] = [
     },
   },
   {
+    slug: "maison-architecte",
+    titre: "Maison d'architecte",
+    type: "T6",
+    surface: 190,
+    quartier: "TOULOUSE",
+    photos: 7,
+    traversees: [
+      { nom: "SÉJOUR → CUISINE", duree: 6 },
+      { nom: "COULOIR → CHAMBRES", duree: 5 },
+      { nom: "SÉJOUR → TERRASSE", duree: 5 },
+    ],
+    duree: 32,
+    image: "archi-salon",
+    posPlate: "center 50%",
+    video: "maison-architecte.mp4",
+    poster: "maison-architecte-poster.jpg",
+    briefPhotos: [
+      { src: "archi-salon.webp", alt: "Séjour : canapé rouge, baies vitrées, mur noir graphique" },
+      { src: "archi-cuisine.webp", alt: "Cuisine ouverte, îlot blanc, éclairage linéaire au plafond" },
+      { src: "archi-couloir.webp", alt: "Circulation : portes bois, parquet clair, spots encastrés" },
+      { src: "archi-escalier.webp", alt: "Claustra bois et cube suspendu sur le mur noir" },
+      { src: "archi-espaceenfants.webp", alt: "Espace enfants : coussins colorés, bibliothèque" },
+      { src: "archi-bureau.webp", alt: "Bureau et salle de jeux, volumes blancs" },
+    ],
+    brief:
+      "Sept photos d'une maison d'architecte : le séjour noir et blanc, la cuisine ouverte, les circulations, les espaces des enfants. Des volumes forts, une lumière difficile à tenir en photo fixe.",
+    resultat:
+      "Un film de 32 secondes qui traverse la maison, du séjour à la terrasse, en gardant la ligne graphique. Livré en 16:9 pour les portails et en 9:16 pour les réseaux.",
+    retouche: {
+      src: "archi-cuisine.webp",
+      piece: "CUISINE",
+      reglages: "+0.8 EV · VERTICALES · CONTRASTE +14 · GRAIN 10%",
+    },
+  },
+  {
     slug: "t3-saint-aubin",
     titre: "T3 Saint-Aubin",
     type: "T3",
