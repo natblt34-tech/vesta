@@ -109,14 +109,6 @@ export default function GalerieProjets() {
     >
       <GaleriePlans cartes={CARTES} />
 
-      {/* Une seule aide, discrète, en bas. Pas de titre flottant. */}
-      <p
-        className="voix-mono pointer-events-none absolute inset-x-0 bottom-6 z-10 text-center"
-        style={{ color: "var(--color-gris-pierre)" }}
-      >
-        GLISSEZ POUR ORBITER · MOLETTE POUR ZOOMER
-      </p>
-
       <a
         href={CAL_URL}
         target="_blank"

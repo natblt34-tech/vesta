@@ -149,10 +149,10 @@ function CarteFlottante({
             loading="lazy"
             draggable={false}
           />
-          <span className="block px-1 pb-1 pt-3">
+          <span className="block px-1 pb-1 pt-2.5">
             <span
-              className="voix-display block truncate"
-              style={{ color: "var(--color-pierre)", fontSize: "1rem" }}
+              className="voix-display block"
+              style={{ color: "var(--color-pierre)", fontSize: "0.8125rem", lineHeight: 1.1 }}
             >
               {carte.titre}
             </span>
@@ -160,7 +160,9 @@ function CarteFlottante({
               className="voix-mono mt-1.5 block"
               style={{
                 color: hovered ? "var(--color-braise-vive)" : "var(--color-bronze)",
-                fontSize: "0.5625rem",
+                fontSize: "0.5rem",
+                lineHeight: 1.4,
+                letterSpacing: "0.04em",
               }}
             >
               {carte.meta}
@@ -169,7 +171,8 @@ function CarteFlottante({
               className="voix-mono mt-2 block"
               style={{
                 color: "var(--color-gris-pierre)",
-                fontSize: "0.5625rem",
+                fontSize: "0.5rem",
+                letterSpacing: "0.04em",
                 opacity: hovered ? 1 : 0,
                 transition: "opacity 0.25s",
               }}
