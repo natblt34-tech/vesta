@@ -43,8 +43,8 @@ export type Projet = {
 export const PROJETS: Projet[] = [
   {
     slug: "maison-cote-pavee",
-    titre: "Maison Côte Pavée",
-    type: "T4",
+    titre: "T3 haussmannien",
+    type: "T3",
     surface: 112,
     quartier: "CÔTE PAVÉE",
     photos: 4,
