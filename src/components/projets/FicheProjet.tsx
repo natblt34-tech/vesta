@@ -11,7 +11,6 @@ import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import DemoRetouche from "./DemoRetouche";
 import DemoTraversee from "./DemoTraversee";
 import StagingScene from "@/components/staging/StagingScene";
-import Offres from "@/components/chrome/Offres";
 import RendezVous from "@/components/chrome/RendezVous";
 import { TransitionLink } from "@/components/chrome/Transition";
 
@@ -183,8 +182,6 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
         </div>
       </section>
 
-      {/* LES OFFRES — la conversion, après la démonstration. */}
-      <Offres />
       <RendezVous mention={projet.staging ? MENTION_STAGING : undefined} />
     </main>
   );

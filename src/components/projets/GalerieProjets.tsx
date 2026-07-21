@@ -33,7 +33,7 @@ const CARTES: CarteProjet[] = PROJETS.map((p) => ({
   imageUrl: media(p.poster ?? `${p.image}.webp`),
   alt: `Extrait du film ${p.titre}`,
   titre: p.titre,
-  meta: `${p.type} · ${p.surface} M² · ${p.quartier} · ${p.photos} PHOTOS · ${p.traversees.length} TRAVERSÉE${p.traversees.length > 1 ? "S" : ""} · ${p.duree} S`,
+  meta: `${p.type} · ${p.surface} M² · ${p.quartier} · ${p.duree} S`,
 }));
 
 function ListeStatique() {

@@ -119,7 +119,7 @@ function CarteFlottante({
       {/* occlude="blending" : la carte vit sous le canvas, un plan de
          profondeur découpe sa fenêtre dans le rendu — le noyau la
          recouvre progressivement, comme un vrai objet devant elle. */}
-      <Html transform distanceFactor={10} position={[0, 0, 0]} occlude="blending">
+      <Html transform distanceFactor={13} position={[0, 0, 0]} occlude="blending">
         {/* Clic DOM natif : fiable, accessible, pas de raycast. */}
         <button
           type="button"
@@ -128,7 +128,7 @@ function CarteFlottante({
           onPointerEnter={() => setHovered(true)}
           onPointerLeave={() => setHovered(false)}
           aria-label={`Ouvrir la fiche du projet ${carte.titre}`}
-          className="block w-72 select-none overflow-hidden p-2 text-left"
+          className="block w-52 select-none overflow-hidden p-2 text-left"
           style={{
             background: "var(--color-basalte-2)",
             border: hovered

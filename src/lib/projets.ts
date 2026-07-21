@@ -72,11 +72,7 @@ export const PROJETS: Projet[] = [
       piece: "CUISINE",
       reglages: "+1.3 EV · BALANCE 3800K → 5200K · VERTICALES · GRAIN 12%",
     },
-    staging: {
-      vide: "salon-vide.webp",
-      meuble: "salon-meuble.webp",
-      piece: "SÉJOUR",
-    },
+    /* Pas de home staging : l'appartement était déjà meublé. */
     traversee: {
       depart: "brief-entree.webp",
       arrivee: "brief-salon.webp",
