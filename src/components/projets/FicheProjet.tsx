@@ -39,7 +39,7 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
           posterSrc={projet.poster ? media(projet.poster) : undefined}
           bgImageSrc={projet.poster ? media(projet.poster) : media(`${projet.image}.webp`)}
           title={projet.titre}
-          date={`${projet.type} · ${projet.surface} M² · ${projet.quartier}`}
+          date={`${projet.photos} PHOTOS · ${projet.duree} S`}
         />
       ) : (
         <section className="relative flex h-[86svh] items-end overflow-hidden">
@@ -66,7 +66,7 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
               {projet.titre}
             </h1>
             <p className="voix-mono mt-4" style={{ color: "var(--color-pierre)" }}>
-              {projet.type} · {projet.surface} M² · {projet.quartier} · {projet.photos} PHOTOS FOURNIES
+              {projet.photos} PHOTOS FOURNIES
             </p>
           </div>
         </section>

@@ -17,7 +17,7 @@ export async function generateMetadata({
   if (!projet) return {};
   return {
     title: `${projet.titre} · projet`,
-    description: `${projet.titre} (${projet.type}, ${projet.surface} m², ${projet.quartier}) : ${projet.photos} photos fournies, ${projet.traversees.length} traversée(s), un film de ${projet.duree} s.`,
+    description: `${projet.titre} : ${projet.photos} photos fournies, un film cinématique de ${projet.duree} s livré en 16:9 et 9:16 par Vesta, studio vidéo immobilier à Toulouse.`,
   };
 }
 
