@@ -11,7 +11,7 @@ import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import DemoRetouche from "./DemoRetouche";
 import DemoFormats from "./DemoFormats";
 import StagingScene from "@/components/staging/StagingScene";
-import RendezVous from "@/components/chrome/RendezVous";
+import { FooterVesta } from "@/components/ui/motion-footer";
 import { TransitionLink } from "@/components/chrome/Transition";
 
 /* La fiche projet est la démonstration complète par l'exemple :
@@ -182,7 +182,12 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
         </div>
       </section>
 
-      <RendezVous mention={projet.staging ? MENTION_STAGING : undefined} />
+      {projet.staging ? (
+        <p className="voix-mono marge pb-6" style={{ color: "var(--color-gris-pierre)" }}>
+          {MENTION_STAGING}
+        </p>
+      ) : null}
+      <FooterVesta />
     </main>
   );
 }

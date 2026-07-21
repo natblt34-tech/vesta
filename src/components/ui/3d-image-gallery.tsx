@@ -60,7 +60,7 @@ function LogoNoyau() {
   const texture = useTexture(media("vesta-logo.png"));
   const cible = useMemo(() => new THREE.Object3D(), []);
 
-  const L = 7; // largeur du plan
+  const L = 10.5; // largeur du plan
   const H = L * (496 / 1912); // ratio réel du logo
 
   useFrame(({ camera }, delta) => {

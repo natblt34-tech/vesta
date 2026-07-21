@@ -169,3 +169,40 @@ a {
     cursor: none;
   }
 }
+
+/* Le curseur braise (réf. vesta2) : point unique en blend difference,
+   qui grossit et passe pierre au survol. */
+.cursor-braise {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-braise-vive);
+  pointer-events: none;
+  mix-blend-mode: difference;
+  opacity: 0;
+  transition:
+    width 0.28s var(--ease-braise),
+    height 0.28s var(--ease-braise),
+    background 0.28s,
+    opacity 0.3s;
+}
+
+.cursor-braise.is-visible {
+  opacity: 1;
+}
+
+.cursor-braise.is-hover {
+  width: 46px;
+  height: 46px;
+  background: var(--color-pierre);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-braise {
+    display: none;
+  }
+}
