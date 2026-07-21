@@ -6,7 +6,6 @@ import { ScrollTrigger } from "@/lib/gsap";
 import { setStatus } from "@/lib/status";
 import LenisProvider from "./LenisProvider";
 import Cursor from "./Cursor";
-import Nav from "./Nav";
 import ScrollProgress from "./ScrollProgress";
 import StatusOverlay from "./StatusOverlay";
 import { TransitionProvider } from "./Transition";
@@ -31,7 +30,6 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
       <LenisProvider />
       <ScrollProgress />
       <StatusOverlay />
-      <Nav />
       <a
         href="#contenu"
         className="voix-mono fixed left-4 top-3 z-99 -translate-y-16 bg-(--color-basalte-2) px-3 py-2 focus-visible:translate-y-0"

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Intro from "@/components/home/Intro";
 import GalerieProjets from "@/components/projets/GalerieProjets";
 
 export const metadata: Metadata = {
@@ -10,7 +9,6 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main>
-      <Intro />
       <GalerieProjets />
     </main>
   );
