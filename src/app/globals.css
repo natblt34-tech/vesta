@@ -120,6 +120,12 @@ body {
   100% { transform: translate(0, 0); }
 }
 
+/* L'étincelle qui scintille (marqueurs de projet dans l'espace 3D) */
+@keyframes etincelle {
+  0%, 100% { transform: scale(0.82) rotate(0deg); opacity: 0.55; }
+  50% { transform: scale(1.15) rotate(45deg); opacity: 1; }
+}
+
 /* La braise qui respire (loader, curseur, index) */
 @keyframes braise-respire {
   0%, 100% { opacity: 0.85; transform: scale(1); }

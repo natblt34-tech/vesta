@@ -3,92 +3,145 @@
 import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Html, Sphere, useTexture } from "@react-three/drei";
-import { useTransitionNavigate } from "@/components/chrome/Transition";
+import { OrbitControls, Html, useTexture } from "@react-three/drei";
+import { useRouter } from "next/navigation";
 import { media } from "@/lib/media";
 
-/* L'environnement 3D des projets — c'est la page /projets entière.
-   Une carte par film livré, en orbite dans un champ de braises sur
-   basalte. Les cartes sont de vrais éléments DOM (drei Html) : le clic
-   est un clic DOM natif, fiable, qui ouvre la fiche via la transition
-   rideau. Zoom molette désactivé, rotation auto lente, drag pour orbiter. */
+/* L'environnement 3D des projets. Champ de braises rondes (shader), un
+   marqueur-étincelle par projet qui révèle sa carte au survol, et un
+   « voyage dans les braises » au clic vers la fiche. */
 
 export type CarteProjet = {
   slug: string;
   imageUrl: string;
   alt: string;
   titre: string;
-  meta: string;
+  /* Affiché uniquement dans la liste de repli (reduced-motion / mobile). */
+  meta?: string;
 };
 
-function ChampDeBraises() {
-  const points = useRef<THREE.Points>(null);
+/* —————————————————— Champ de braises (shader) —————————————————— */
+
+const VERT = `
+  attribute float aSize;
+  attribute vec3 aColor;
+  attribute float aPhase;
+  uniform float uTime;
+  uniform float uBoost;
+  varying vec3 vColor;
+  varying float vTw;
+  void main() {
+    vColor = aColor;
+    float tw = 0.55 + 0.45 * sin(uTime * 1.4 + aPhase);
+    vTw = tw;
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    gl_PointSize = min(aSize * uBoost * (0.7 + 0.5 * tw) * (300.0 / -mv.z), 90.0);
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+const FRAG = `
+  varying vec3 vColor;
+  varying float vTw;
+  void main() {
+    float d = length(gl_PointCoord - 0.5);
+    float a = smoothstep(0.5, 0.0, d);
+    a = pow(a, 1.7);
+    vec3 c = vColor * (0.5 + 0.9 * vTw);
+    gl_FragColor = vec4(c, a);
+  }
+`;
+
+const PALETTE = [
+  new THREE.Color("#c2551e"),
+  new THREE.Color("#e8863c"),
+  new THREE.Color("#96794c"),
+  new THREE.Color("#f0c48a"),
+];
+
+function ChampDeBraises({ boost }: { boost: React.RefObject<number> }) {
+  const mat = useRef<THREE.ShaderMaterial>(null);
+  const groupe = useRef<THREE.Points>(null);
 
   const geometrie = useMemo(() => {
-    const g = new THREE.BufferGeometry();
-    const n = 2500;
+    const n = 2600;
     const positions = new Float32Array(n * 3);
+    const colors = new Float32Array(n * 3);
+    const sizes = new Float32Array(n);
+    const phases = new Float32Array(n);
     for (let i = 0; i < n; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 300;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 300;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 300;
+      positions[i * 3] = (Math.random() - 0.5) * 340;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 340;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 340;
+      const c = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+      colors[i * 3] = c.r;
+      colors[i * 3 + 1] = c.g;
+      colors[i * 3 + 2] = c.b;
+      sizes[i] = 3 + Math.random() * 9;
+      phases[i] = Math.random() * Math.PI * 2;
     }
+    const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    g.setAttribute("aColor", new THREE.BufferAttribute(colors, 3));
+    g.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
+    g.setAttribute("aPhase", new THREE.BufferAttribute(phases, 1));
     return g;
   }, []);
 
-  useFrame(() => {
-    if (points.current) {
-      points.current.rotation.y += 0.0001;
-      points.current.rotation.x += 0.00004;
+  const uniforms = useMemo(
+    () => ({ uTime: { value: 0 }, uBoost: { value: 1 } }),
+    [],
+  );
+
+  useFrame((_, dt) => {
+    uniforms.uTime.value += dt;
+    /* Rampe le boost pendant le warp (effet hyperspace). */
+    const cible = boost.current ?? 1;
+    uniforms.uBoost.value += (cible - uniforms.uBoost.value) * Math.min(1, dt * 6);
+    if (groupe.current) {
+      groupe.current.rotation.y += dt * 0.012;
+      groupe.current.rotation.x += dt * 0.005;
     }
   });
 
   return (
-    <points ref={points} geometry={geometrie}>
-      <pointsMaterial color="#c2551e" size={0.5} sizeAttenuation transparent opacity={0.8} />
+    <points ref={groupe} geometry={geometrie}>
+      <shaderMaterial
+        ref={mat}
+        uniforms={uniforms}
+        vertexShader={VERT}
+        fragmentShader={FRAG}
+        transparent
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
     </points>
   );
 }
 
-/* Le noyau : le logo vesta*, en billboard face caméra avec un léger
-   retard (il rattrape l'orbite) et un écho braise décalé derrière —
-   effet 2.5D. Ses lettres opaques occultent les cartes qui passent
-   derrière (occlusion par la profondeur). */
+/* —————————————————— Le noyau : logo vesta* billboard 2.5D —————————————————— */
+
 function LogoNoyau() {
   const groupe = useRef<THREE.Group>(null);
   const texture = useTexture(media("vesta-logo.png"));
   const cible = useMemo(() => new THREE.Object3D(), []);
-
-  const L = 10.5; // largeur du plan
-  const H = L * (496 / 1912); // ratio réel du logo
+  const L = 10.5;
+  const H = L * (496 / 1912);
 
   useFrame(({ camera }, delta) => {
     const g = groupe.current;
     if (!g) return;
-    /* Vise la caméra, mais rattrape en douceur : le retard donne la
-       sensation d'une carte qui pivote dans l'espace, pas d'un sticker. */
     cible.position.copy(g.position);
     cible.lookAt(camera.position);
-    const f = 1 - Math.pow(0.0009, delta);
-    g.quaternion.slerp(cible.quaternion, f);
+    g.quaternion.slerp(cible.quaternion, 1 - Math.pow(0.0009, delta));
   });
 
   return (
     <group ref={groupe}>
-      {/* Écho braise, décalé et en retrait : la profondeur du 2.5D. */}
       <mesh position={[0.22, -0.14, -0.55]} scale={1.08}>
         <planeGeometry args={[L, H]} />
-        <meshBasicMaterial
-          map={texture}
-          transparent
-          opacity={0.4}
-          color="#c2551e"
-          depthWrite={false}
-          toneMapped={false}
-        />
+        <meshBasicMaterial map={texture} transparent opacity={0.4} color="#c2551e" depthWrite={false} toneMapped={false} />
       </mesh>
-      {/* Le logo net : ses lettres écrivent la profondeur (occlusion). */}
       <mesh>
         <planeGeometry args={[L, H]} />
         <meshBasicMaterial map={texture} transparent alphaTest={0.5} toneMapped={false} />
@@ -97,77 +150,131 @@ function LogoNoyau() {
   );
 }
 
-function CarteFlottante({
-  carte,
-  position,
-}: {
-  carte: CarteProjet;
-  position: [number, number, number];
-}) {
-  const groupRef = useRef<THREE.Group>(null);
-  const [hovered, setHovered] = useState(false);
-  const navigate = useTransitionNavigate();
+/* —————————————————— Marqueur : étincelle -> carte au survol —————————————————— */
 
-  useFrame(({ camera }) => {
-    if (groupRef.current) {
-      groupRef.current.lookAt(camera.position);
-    }
-  });
-
+function Etincelle() {
   return (
-    <group ref={groupRef} position={position}>
-      {/* occlude="blending" : la carte vit sous le canvas, un plan de
-         profondeur découpe sa fenêtre dans le rendu — le noyau la
-         recouvre progressivement, comme un vrai objet devant elle. */}
-      <Html transform distanceFactor={13} position={[0, 0, 0]} occlude="blending">
-        {/* Clic DOM natif : fiable, accessible, pas de raycast. */}
-        <button
-          type="button"
-          data-cursor
-          onClick={() => navigate(`/projets/${carte.slug}`)}
-          onPointerEnter={() => setHovered(true)}
-          onPointerLeave={() => setHovered(false)}
-          aria-label={`Ouvrir la fiche du projet ${carte.titre}`}
-          className="block w-52 select-none overflow-hidden p-2 text-left"
-          style={{
-            background: "var(--color-basalte-2)",
-            border: hovered
-              ? "1px solid var(--color-braise-vive)"
-              : "1px solid var(--color-filet)",
-            boxShadow: hovered
-              ? "0 0 40px color-mix(in srgb, var(--color-braise) 45%, transparent)"
-              : "0 20px 40px rgba(0, 0, 0, 0.55)",
-            transform: hovered ? "scale(1.06)" : "scale(1)",
-            transition:
-              "transform 0.3s var(--ease-braise), box-shadow 0.3s var(--ease-braise), border-color 0.3s",
-          }}
-        >
-          <img
-            src={carte.imageUrl}
-            alt={carte.alt}
-            className="pointer-events-none aspect-video w-full object-cover"
-            loading="lazy"
-            draggable={false}
-          />
-          <span
-            className="voix-mono block truncate px-0.5 pb-0.5 pt-2.5 text-center"
-            style={{
-              color: hovered ? "var(--color-braise-vive)" : "var(--color-gris-pierre)",
-              fontSize: "0.5rem",
-              letterSpacing: "0.08em",
-              transition: "color 0.25s",
-            }}
-          >
-            {carte.titre}
-          </span>
-        </button>
-      </Html>
-    </group>
+    <span
+      className="block"
+      style={{
+        width: "0.7rem",
+        height: "0.7rem",
+        background:
+          "radial-gradient(circle, var(--color-braise-vive) 0%, var(--color-braise) 45%, transparent 72%)",
+        borderRadius: "50%",
+        boxShadow: "0 0 14px 3px color-mix(in srgb, var(--color-braise-vive) 65%, transparent)",
+        animation: "etincelle 2.6s ease-in-out infinite",
+      }}
+    />
   );
 }
 
-/* Caméra responsive : en portrait/petit écran, on élargit le champ pour
-   que les trois cartes tiennent dans le cadre. */
+function Marqueur({
+  carte,
+  position,
+  actif,
+  onHover,
+  onWarp,
+  delai,
+}: {
+  carte: CarteProjet;
+  position: [number, number, number];
+  actif: boolean;
+  onHover: (slug: string | null) => void;
+  onWarp: (p: [number, number, number], slug: string) => void;
+  delai: number;
+}) {
+  return (
+    <Html position={position} center zIndexRange={[actif ? 60 : 20, 0]} style={{ pointerEvents: "none" }}>
+      <div
+        onMouseEnter={() => onHover(carte.slug)}
+        onMouseLeave={() => onHover(null)}
+        onClick={() => onWarp(position, carte.slug)}
+        data-cursor
+        className="relative flex cursor-pointer items-center justify-center"
+        style={{
+          pointerEvents: "auto",
+          width: actif ? "12.5rem" : "2.75rem",
+          height: actif ? "9.4rem" : "2.75rem",
+          transition: "width 0.4s var(--ease-braise), height 0.4s var(--ease-braise)",
+        }}
+      >
+        {/* L'étincelle (état de repos) */}
+        <span
+          className="absolute"
+          style={{
+            opacity: actif ? 0 : 1,
+            transition: "opacity 0.25s",
+            animationDelay: `${delai}s`,
+          }}
+        >
+          <Etincelle />
+        </span>
+
+        {/* La carte (au survol) */}
+        <div
+          className="absolute inset-0 overflow-hidden p-2"
+          style={{
+            opacity: actif ? 1 : 0,
+            transform: actif ? "scale(1)" : "scale(0.82)",
+            transition: "opacity 0.3s, transform 0.4s var(--ease-braise), box-shadow 0.4s",
+            pointerEvents: actif ? "auto" : "none",
+            background: "var(--color-basalte-2)",
+            border: "1px solid var(--color-braise-vive)",
+            boxShadow: actif
+              ? "0 0 44px color-mix(in srgb, var(--color-braise) 50%, transparent)"
+              : "0 0 0 transparent",
+          }}
+        >
+          <img src={carte.imageUrl} alt={carte.alt} className="pointer-events-none aspect-video w-full object-cover" draggable={false} />
+          <p
+            className="voix-mono mt-2 truncate text-center"
+            style={{ color: "var(--color-pierre)", fontSize: "0.625rem", letterSpacing: "0.06em" }}
+          >
+            {carte.titre}
+          </p>
+          <p
+            className="voix-mono mt-1 text-center"
+            style={{ color: "var(--color-braise-vive)", fontSize: "0.5rem", letterSpacing: "0.1em" }}
+          >
+            ENTRER →
+          </p>
+        </div>
+      </div>
+    </Html>
+  );
+}
+
+/* —————————————————— Le voyage (warp caméra) —————————————————— */
+
+function Warp({ cible, onDone }: { cible: THREE.Vector3; onDone: () => void }) {
+  const { camera } = useThree();
+  const depart = useRef<THREE.Vector3 | null>(null);
+  const prog = useRef(0);
+  const fini = useRef(false);
+  const DUREE = 1.15;
+
+  useFrame((_, dt) => {
+    if (fini.current) return;
+    if (!depart.current) depart.current = camera.position.clone();
+    prog.current = Math.min(1, prog.current + dt / DUREE);
+    const p = prog.current;
+    const e = p * p * p; // accélération
+    const dir = new THREE.Vector3().subVectors(cible, depart.current).normalize();
+    const arrivee = new THREE.Vector3().copy(cible).add(dir.multiplyScalar(7));
+    camera.position.lerpVectors(depart.current, arrivee, e);
+    camera.lookAt(cible);
+    if (p >= 1) {
+      fini.current = true;
+      onDone();
+    }
+  });
+
+  return null;
+}
+
+/* —————————————————— Caméra responsive —————————————————— */
+
 function CameraRig() {
   const { camera, size } = useThree();
   useEffect(() => {
@@ -182,7 +289,6 @@ function CameraRig() {
   return null;
 }
 
-/* Trois projets : triangle en orbite. Au-delà : spirale dorée. */
 function positionsPour(n: number): [number, number, number][] {
   if (n <= 3) {
     const base: [number, number, number][] = [
@@ -202,59 +308,81 @@ function positionsPour(n: number): [number, number, number][] {
   });
 }
 
+/* —————————————————— Scène —————————————————— */
+
 export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
   const positions = useMemo(() => positionsPour(cartes.length), [cartes.length]);
-  const enveloppe = useRef<HTMLDivElement>(null);
+  const [survol, setSurvol] = useState<string | null>(null);
+  const [warp, setWarp] = useState<{ cible: THREE.Vector3; slug: string } | null>(null);
+  const boost = useRef(1);
+  const controls = useRef<React.ComponentRef<typeof OrbitControls>>(null);
+  const router = useRouter();
+
+  const lancerWarp = (p: [number, number, number], slug: string) => {
+    if (warp) return;
+    boost.current = 8;
+    setSurvol(null);
+    setWarp({ cible: new THREE.Vector3(p[0], p[1], p[2]), slug });
+  };
+
+  useEffect(() => {
+    if (controls.current) controls.current.enabled = !warp;
+  }, [warp]);
 
   return (
-    <div
-      ref={enveloppe}
-      className="absolute inset-0"
-      style={{ background: "var(--color-basalte)", touchAction: "none" }}
-    >
-      {/* Le canvas laisse passer les clics (les cartes DOM sont dessous) ;
-         l'orbite écoute sur l'enveloppe. */}
+    <div className="absolute inset-0" style={{ background: "var(--color-basalte)" }}>
       <Canvas
         camera={{ position: [0, 0, 24], fov: 55 }}
         gl={{ antialias: true, alpha: true }}
-        eventSource={enveloppe as unknown as React.RefObject<HTMLElement>}
-        eventPrefix="client"
-        style={{ pointerEvents: "none" }}
+        style={{ pointerEvents: warp ? "none" : "auto" }}
       >
         <Suspense fallback={null}>
           <CameraRig />
           <ambientLight intensity={0.5} />
-          <ChampDeBraises />
-
-          {/* Le noyau : le logo vesta* en billboard 2.5D. */}
+          <ChampDeBraises boost={boost} />
           <LogoNoyau />
 
-          {/* Les cercles du temple, en fond lointain. */}
-          <Sphere args={[12, 32, 32]} position={[0, 0, 0]}>
-            <meshBasicMaterial color="#96794c" transparent opacity={0.05} wireframe />
-          </Sphere>
-          <Sphere args={[17, 32, 32]} position={[0, 0, 0]}>
-            <meshBasicMaterial color="#c2551e" transparent opacity={0.035} wireframe />
-          </Sphere>
-
           {cartes.map((c, i) => (
-            <CarteFlottante key={c.slug + i} carte={c} position={positions[i]} />
+            <Marqueur
+              key={c.slug + i}
+              carte={c}
+              position={positions[i]}
+              actif={survol === c.slug}
+              onHover={setSurvol}
+              onWarp={lancerWarp}
+              delai={(i % 5) * 0.4}
+            />
           ))}
 
+          {warp ? <Warp cible={warp.cible} onDone={() => router.push(`/projets/${warp.slug}`)} /> : null}
+
           <OrbitControls
+            ref={controls}
             enablePan={false}
             enableZoom
             minDistance={12}
             maxDistance={38}
             zoomSpeed={0.9}
             enableRotate
-            autoRotate
+            autoRotate={survol === null && !warp}
             autoRotateSpeed={0.4}
             rotateSpeed={0.5}
             target={[0, 0, 0]}
           />
         </Suspense>
       </Canvas>
+
+      {/* Voile du voyage : la lumière de braise engloutit l'écran. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--color-braise) 55%, transparent) 0%, var(--color-basalte) 65%)",
+          opacity: warp ? 1 : 0,
+          transition: warp ? "opacity 1s ease-in" : "opacity 0s",
+        }}
+      />
     </div>
   );
 }
