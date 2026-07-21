@@ -67,12 +67,7 @@ export const PROJETS: Projet[] = [
       "Quatre photos fournies : le salon, la chambre, la cuisine, l'entrée. Un bel haussmannien dont les enfilades et la lumière de fin de journée ne tenaient pas dans des images fixes.",
     resultat:
       "Un film de 47 secondes, deux traversées, la lumière du soir traversant tout l'appartement. L'annonce est passée en tête de sa recherche dès la première semaine.",
-    retouche: {
-      src: "brief-cuisine.webp",
-      piece: "CUISINE",
-      reglages: "+1.3 EV · BALANCE 3800K → 5200K · VERTICALES · GRAIN 12%",
-    },
-    /* Pas de home staging : l'appartement était déjà meublé. */
+    /* Ni retouche photo ni home staging sur ce projet. */
     traversee: {
       depart: "brief-entree.webp",
       arrivee: "brief-salon.webp",
@@ -111,11 +106,6 @@ export const PROJETS: Projet[] = [
       "Sept photos d'une maison d'architecte : le séjour noir et blanc, la cuisine ouverte, les circulations, les espaces des enfants. Des volumes forts, une lumière difficile à tenir en photo fixe.",
     resultat:
       "Un film de 32 secondes qui traverse la maison, du séjour à la terrasse, en gardant la ligne graphique. Livré en 16:9 pour les portails et en 9:16 pour les réseaux.",
-    retouche: {
-      src: "archi-cuisine.webp",
-      piece: "CUISINE",
-      reglages: "+0.8 EV · VERTICALES · CONTRASTE +14 · GRAIN 10%",
-    },
   },
   {
     slug: "t3-saint-aubin",
