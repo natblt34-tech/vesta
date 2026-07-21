@@ -6,6 +6,7 @@ import { ScrollTrigger } from "@/lib/gsap";
 import { setStatus } from "@/lib/status";
 import LenisProvider from "./LenisProvider";
 import Cursor from "./Cursor";
+import EspaceClient from "./EspaceClient";
 import ScrollProgress from "./ScrollProgress";
 import StatusOverlay from "./StatusOverlay";
 import { TransitionProvider } from "./Transition";
@@ -38,6 +39,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
         Aller au contenu
       </a>
       <div id="contenu">{children}</div>
+      {pathname === "/" ? <EspaceClient /> : null}
       <Cursor />
       <div className="grain" aria-hidden="true" />
     </TransitionProvider>
