@@ -9,7 +9,7 @@ import { useFitText } from "@/lib/useFitText";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import DemoRetouche from "./DemoRetouche";
-import DemoTraversee from "./DemoTraversee";
+import DemoFormats from "./DemoFormats";
 import StagingScene from "@/components/staging/StagingScene";
 import RendezVous from "@/components/chrome/RendezVous";
 import { TransitionLink } from "@/components/chrome/Transition";
@@ -99,8 +99,8 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
         />
       ) : null}
 
-      {/* 03 · L'ANIMATION VIDÉO — la traversée */}
-      {projet.traversee ? <DemoTraversee projet={projet} /> : null}
+      {/* 03 · L'ANIMATION VIDÉO — livrée en 16:9 et 9:16 */}
+      <DemoFormats projet={projet} />
 
       {/* LE BRIEF vs LE RÉSULTAT */}
       <section className="marge grid gap-12 py-(--spacing-section) md:grid-cols-2">
