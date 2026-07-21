@@ -199,7 +199,7 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
       {/* Le canvas laisse passer les clics (les cartes DOM sont dessous) ;
          l'orbite écoute sur l'enveloppe. */}
       <Canvas
-        camera={{ position: [0, 0, 16], fov: 60 }}
+        camera={{ position: [0, 0, 24], fov: 55 }}
         gl={{ antialias: true, alpha: true }}
         eventSource={enveloppe as unknown as React.RefObject<HTMLElement>}
         eventPrefix="client"
@@ -227,8 +227,8 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
           <OrbitControls
             enablePan={false}
             enableZoom
-            minDistance={7}
-            maxDistance={32}
+            minDistance={12}
+            maxDistance={38}
             zoomSpeed={0.9}
             enableRotate
             autoRotate

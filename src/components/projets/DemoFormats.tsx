@@ -7,9 +7,9 @@ import { media } from "@/lib/media";
 import type { Projet } from "@/lib/projets";
 
 /* L'animation vidéo, livrée en deux formats : 16:9 pour le web et les
-   portails, 9:16 pour les réseaux. On la montre en situation, sur un
-   écran et sur un téléphone qui lisent le même film, chacun à son cadre.
-   Un seul tournage, deux livrables prêts à poster. */
+   portails (sur un ordinateur portable), 9:16 pour les réseaux (sur un
+   téléphone). Un seul tournage, deux livrables prêts à poster.
+   Arrivée chorégraphiée au scroll, flottement discret une fois posés. */
 
 export default function DemoFormats({ projet }: { projet: Projet }) {
   const wrap = useRef<HTMLDivElement>(null);
@@ -18,49 +18,53 @@ export default function DemoFormats({ projet }: { projet: Projet }) {
 
   useEffect(() => {
     const el = wrap.current;
-    if (!el || prefersReducedMotion()) return;
+    if (!el) return;
 
-    const ctx = gsap.context(() => {
-      const ecran = el.querySelector("[data-ecran]");
-      const tel = el.querySelector("[data-tel]");
+    const ecran = el.querySelector("[data-ecran]");
+    const tel = el.querySelector("[data-tel]");
 
-      gsap.fromTo(
+    if (prefersReducedMotion()) {
+      gsap.set([ecran, tel], { autoAlpha: 1, y: 0, rotateX: 0, rotate: 0 });
+      return;
+    }
+
+    /* État de départ, hors vue. */
+    gsap.set([ecran, tel], { autoAlpha: 0 });
+
+    let joue = false;
+    const jouer = () => {
+      if (joue) return;
+      joue = true;
+      const tl = gsap.timeline();
+      tl.fromTo(
         ecran,
-        { yPercent: 14, opacity: 0, rotateY: 10 },
-        {
-          yPercent: 0,
-          opacity: 1,
-          rotateY: 0,
-          ease: "power3.out",
-          scrollTrigger: { trigger: el, start: "top 78%", end: "top 40%", scrub: 0.6 },
-        },
-      );
-      gsap.fromTo(
+        { y: 90, autoAlpha: 0, rotateX: 18, transformOrigin: "50% 100%" },
+        { y: 0, autoAlpha: 1, rotateX: 0, duration: 1, ease: "power3.out" },
+      ).fromTo(
         tel,
-        { yPercent: 26, opacity: 0, rotate: 4 },
-        {
-          yPercent: 0,
-          opacity: 1,
-          rotate: 0,
-          ease: "back.out(1.4)",
-          scrollTrigger: { trigger: el, start: "top 74%", end: "top 36%", scrub: 0.6 },
-        },
+        { y: 120, autoAlpha: 0, rotate: 8 },
+        { y: 0, autoAlpha: 1, rotate: 0, duration: 0.9, ease: "back.out(1.5)" },
+        "-=0.55",
       );
-      /* Flottement lent et discret du téléphone, une fois posé. */
-      gsap.to(tel, {
-        yPercent: -2.5,
-        duration: 3.2,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-        delay: 0.8,
-      });
-    }, el);
+    };
 
-    return () => ctx.revert();
+    /* IntersectionObserver : robuste malgré le scroll verrouillé du hero.
+       Filet : si la section est déjà à l'écran au montage, on joue. */
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          io.disconnect();
+          jouer();
+        }
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -8% 0px" },
+    );
+    io.observe(el);
+
+    return () => io.disconnect();
   }, []);
 
-  const Video = ({ classe }: { classe: string }) =>
+  const Media = ({ classe }: { classe: string }) =>
     source ? (
       <video
         src={source}
@@ -89,65 +93,71 @@ export default function DemoFormats({ projet }: { projet: Projet }) {
         Un tournage, deux formats. Livrés prêts à poster.
       </h2>
 
-      <div className="mt-16 grid items-end gap-12 md:grid-cols-[1.6fr_1fr] md:gap-8">
-        {/* Écran 16:9 : le web, les portails, le mail. */}
-        <figure data-ecran className="will-change-transform" style={{ perspective: "1200px" }}>
+      <div
+        className="mt-20 grid items-end gap-16 md:grid-cols-[1.7fr_1fr] md:gap-10"
+        style={{ perspective: "1400px" }}
+      >
+        {/* L'ORDINATEUR PORTABLE — 16:9, le web et les portails. */}
+        <figure data-ecran className="will-change-transform">
+          {/* L'écran. */}
           <div
-            className="overflow-hidden"
-            style={{ border: "1px solid var(--color-filet)", background: "var(--color-basalte-2)" }}
+            className="relative mx-auto rounded-t-xl p-3 pb-4"
+            style={{ background: "#0c0e12", border: "1px solid var(--color-filet)", borderBottom: "none" }}
           >
+            {/* La caméra. */}
             <div
-              className="flex items-center gap-1.5 px-3 py-2"
-              style={{ borderBottom: "1px solid var(--color-filet)" }}
-            >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--color-filet)" }} />
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--color-filet)" }} />
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--color-filet)" }} />
-              <span
-                className="voix-mono ml-3"
-                style={{ color: "var(--color-gris-pierre)", fontSize: "0.5625rem" }}
-              >
-                seloger.com / annonce
-              </span>
-            </div>
-            <div className="aspect-video w-full overflow-hidden">
-              <Video classe="h-full w-full object-cover" />
+              className="absolute left-1/2 top-1.5 h-1 w-1 -translate-x-1/2 rounded-full"
+              style={{ background: "var(--color-filet)" }}
+            />
+            <div className="mt-1.5 aspect-video w-full overflow-hidden" style={{ background: "var(--color-basalte)" }}>
+              <Media classe="h-full w-full object-cover" />
             </div>
           </div>
-          {/* Le pied de l'écran. */}
-          <div className="mx-auto h-4 w-1/4" style={{ background: "var(--color-basalte-2)" }} />
+          {/* La charnière et le clavier : la base trapézoïdale. */}
           <div
-            className="mx-auto h-px w-2/5"
-            style={{ background: "var(--color-filet)" }}
-          />
-          <figcaption className="voix-mono mt-5" style={{ color: "var(--color-bronze)" }}>
+            className="relative mx-auto"
+            style={{
+              width: "112%",
+              marginLeft: "-6%",
+              height: "0.9rem",
+              background: "linear-gradient(180deg, #16191e, #0c0e12)",
+              borderInline: "1px solid var(--color-filet)",
+              clipPath: "polygon(4% 0, 96% 0, 100% 100%, 0 100%)",
+            }}
+          >
+            {/* L'encoche d'ouverture. */}
+            <div
+              className="absolute left-1/2 top-0 h-1.5 w-16 -translate-x-1/2 rounded-b-lg"
+              style={{ background: "var(--color-basalte)" }}
+            />
+          </div>
+          <figcaption className="voix-mono mt-6" style={{ color: "var(--color-bronze)" }}>
             FORMAT 16:9 · SITE, PORTAILS, MAIL
           </figcaption>
         </figure>
 
-        {/* Téléphone 9:16 : Instagram, TikTok, Reels. */}
-        <figure data-tel className="mx-auto w-full max-w-[220px] will-change-transform">
-          <div
-            className="relative overflow-hidden rounded-[2rem] p-2"
-            style={{
-              border: "1px solid var(--color-filet)",
-              background: "var(--color-basalte-2)",
-              boxShadow: "0 24px 48px rgba(0,0,0,0.5)",
-            }}
-          >
-            {/* L'îlot dynamique. */}
+        {/* LE TÉLÉPHONE — 9:16, les réseaux. */}
+        <figure data-tel className="mx-auto w-full max-w-[210px] will-change-transform">
+          <div data-tel-flot className="will-change-transform">
             <div
-              className="absolute left-1/2 top-3.5 z-10 h-4 w-16 -translate-x-1/2 rounded-full"
-              style={{ background: "var(--color-basalte)" }}
-            />
-            <div
-              className="overflow-hidden rounded-[1.5rem]"
-              style={{ aspectRatio: "9 / 16" }}
+              className="relative overflow-hidden rounded-[2rem] p-2"
+              style={{
+                border: "1px solid var(--color-filet)",
+                background: "#0c0e12",
+                boxShadow: "0 30px 60px rgba(0,0,0,0.55)",
+              }}
             >
-              <Video classe="h-full w-full object-cover" />
+              {/* L'îlot dynamique. */}
+              <div
+                className="absolute left-1/2 top-3.5 z-10 h-4 w-16 -translate-x-1/2 rounded-full"
+                style={{ background: "var(--color-basalte)" }}
+              />
+              <div className="overflow-hidden rounded-[1.5rem]" style={{ aspectRatio: "9 / 16", background: "var(--color-basalte)" }}>
+                <Media classe="h-full w-full object-cover" />
+              </div>
             </div>
           </div>
-          <figcaption className="voix-mono mt-5 text-center" style={{ color: "var(--color-bronze)" }}>
+          <figcaption className="voix-mono mt-6 text-center" style={{ color: "var(--color-bronze)" }}>
             FORMAT 9:16 · INSTAGRAM, TIKTOK, REELS
           </figcaption>
         </figure>
