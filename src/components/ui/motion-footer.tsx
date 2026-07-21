@@ -265,17 +265,7 @@ export function FooterVesta() {
           {/* Barre du bas */}
           <div className="relative z-20 flex w-full flex-col items-center justify-between gap-4 px-6 pb-8 md:flex-row md:px-12">
             <div className="voix-mono order-2 md:order-1" style={{ color: "var(--color-gris-pierre)" }}>
-              © 2026 VESTA · STUDIO VIDÉO IMMOBILIER · TOULOUSE
-            </div>
-            <div
-              className="footer-pill voix-mono order-1 flex items-center gap-2 rounded-full px-6 py-3 md:order-2"
-              style={{ color: "var(--color-gris-pierre)" }}
-            >
-              ÉTINCELLE
-              <span style={{ color: "var(--color-braise-vive)" }}>·</span>
-              FLAMME
-              <span style={{ color: "var(--color-braise-vive)" }}>·</span>
-              BRASIER
+              © 2026 VESTA · STUDIO VIDÉO IMMOBILIER
             </div>
             <MagneticButton
               as="button"
