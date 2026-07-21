@@ -1,19 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { TransitionLink } from "@/components/chrome/Transition";
 import { Etoile } from "@/components/chrome/Logo";
+import { useAuth } from "@/lib/client/auth";
+import Champ from "./Champ";
 
-/* Fenêtre de connexion à l'espace client.
-   NOTE : l'authentification réelle nécessite un backend (voir NOTES.md).
-   Cette page est l'entrée du parcours ; le formulaire est branché sur
-   un état local en attendant le socle serveur. */
+/* Fenêtre de connexion. Branchée sur le backend (mock aujourd'hui). */
 export default function Connexion() {
-  const [envoye, setEnvoye] = useState(false);
+  const router = useRouter();
+  const { user, pret, connexion } = useAuth();
+  const [erreur, setErreur] = useState("");
+  const [enCours, setEnCours] = useState(false);
+
+  useEffect(() => {
+    if (pret && user) router.replace(user.role === "vesta" ? "/vesta-studio" : "/espace");
+  }, [pret, user, router]);
 
   return (
     <main
-      className="flex min-h-svh flex-col items-center justify-center px-6"
+      className="flex min-h-svh flex-col items-center justify-center px-6 py-24"
       style={{ background: "var(--color-basalte)" }}
     >
       <TransitionLink
@@ -40,69 +47,61 @@ export default function Connexion() {
         <p className="voix-mono mb-2" style={{ color: "var(--color-bronze)" }}>
           ESPACE CLIENT
         </p>
-        <h1
-          className="voix-display mb-8"
-          style={{ fontSize: "1.75rem", color: "var(--color-pierre)", lineHeight: 1 }}
-        >
+        <h1 className="voix-display mb-8" style={{ fontSize: "1.75rem", color: "var(--color-pierre)", lineHeight: 1 }}>
           Connexion
         </h1>
 
         <form
           className="flex flex-col gap-5"
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            setEnvoye(true);
+            setErreur("");
+            setEnCours(true);
+            const data = new FormData(e.currentTarget);
+            try {
+              await connexion(String(data.get("email")), String(data.get("password")));
+              router.replace("/espace");
+            } catch (err) {
+              setErreur(err instanceof Error ? err.message : "Erreur.");
+              setEnCours(false);
+            }
           }}
         >
-          <label className="flex flex-col gap-2">
-            <span className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
-              EMAIL
-            </span>
-            <input
-              type="email"
-              name="email"
-              required
-              autoComplete="email"
-              className="w-full bg-transparent px-3 py-3 outline-none"
-              style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
-            />
-          </label>
+          <Champ label="EMAIL" name="email" type="email" autoComplete="email" required />
+          <Champ label="MOT DE PASSE" name="password" type="password" autoComplete="current-password" required />
 
-          <label className="flex flex-col gap-2">
-            <span className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
-              MOT DE PASSE
-            </span>
-            <input
-              type="password"
-              name="password"
-              required
-              autoComplete="current-password"
-              className="w-full bg-transparent px-3 py-3 outline-none"
-              style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
-            />
-          </label>
+          {erreur ? (
+            <p className="voix-mono" style={{ color: "var(--color-braise-vive)" }}>
+              {erreur}
+            </p>
+          ) : null}
 
           <button
             type="submit"
-            className="voix-mono mt-2 inline-flex items-center justify-center gap-3 px-6 py-4 transition-colors duration-200 hover:border-(--color-braise-vive)"
+            disabled={enCours}
+            className="voix-mono mt-2 inline-flex items-center justify-center gap-3 px-6 py-4 transition-colors duration-200 hover:border-(--color-braise-vive) disabled:opacity-60"
             style={{ border: "1px solid var(--color-braise)", color: "var(--color-pierre)" }}
           >
             <span className="braise-point" aria-hidden="true" />
-            Se connecter
+            {enCours ? "Connexion…" : "Se connecter"}
           </button>
         </form>
 
-        {envoye ? (
-          <p className="voix-mono mt-6" style={{ color: "var(--color-bronze)", lineHeight: 1.6 }}>
-            L&apos;espace client est en cours d&apos;activation. Vous serez averti par
-            email dès son ouverture.
-          </p>
-        ) : (
-          <p className="voix-mono mt-6" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
-            Vous venez de souscrire ? Utilisez le lien reçu par email pour créer
-            vos accès.
-          </p>
-        )}
+        <p className="voix-mono mt-6" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
+          Vous venez de souscrire ?{" "}
+          <TransitionLink
+            href="/creer-acces"
+            className="underline underline-offset-2"
+            style={{ color: "var(--color-pierre)" }}
+          >
+            Créez vos accès
+          </TransitionLink>
+          .
+        </p>
+
+        <p className="voix-mono mt-4" style={{ color: "var(--color-filet)", lineHeight: 1.6 }}>
+          Démo : agence@demo / demo — studio@vesta / vesta
+        </p>
       </div>
 
       <TransitionLink

@@ -10,6 +10,7 @@ import EspaceClient from "./EspaceClient";
 import ScrollProgress from "./ScrollProgress";
 import StatusOverlay from "./StatusOverlay";
 import { TransitionProvider } from "./Transition";
+import { AuthProvider } from "@/lib/client/auth";
 
 /* Assemble le chrome transverse. Remet les variables de page à zéro
    à chaque navigation (la retouche les fait dériver). */
@@ -27,6 +28,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   return (
+    <AuthProvider>
     <TransitionProvider>
       <LenisProvider />
       <ScrollProgress />
@@ -43,5 +45,6 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
       <Cursor />
       <div className="grain" aria-hidden="true" />
     </TransitionProvider>
+    </AuthProvider>
   );
 }

@@ -50,5 +50,18 @@ La statue (direction B) n'a pas pu être générée → **la ligne claire (direc
 - Offres découplées de la home → `components/chrome/Offres.tsx`. Nav refaite : accueil + liste des projets.
 - Après suppression de pages : `Remove-Item .next` obligatoire (types générés périmés référençaient les routes disparues).
 
+### Portail client (2026-07-21) — conçu, non encore branché
+Tout le portail est construit et fonctionne en démo locale (persistance navigateur), architecturé pour brancher un vrai backend sans réécrire les pages.
+
+Point de branchement unique : `src/lib/client/backend.ts`. Toutes les pages parlent à l'interface `VestaBackend` ; aujourd'hui `mockBackend` (localStorage). Le jour de la mise en ligne :
+1. Écrire `supabaseBackend` (ou Firebase) qui implémente `VestaBackend` : `connexion`/`creerAcces` → Supabase Auth (liens d'invitation) ; `mesMandats`/`creerMandat`/`tousLesMandats`/`deposerProduction` → table + storage ; `demanderAide` → notification.
+2. Changer la dernière ligne `export const backend = mockBackend` → `supabaseBackend`.
+3. Emails : `src/lib/client/notify.ts` — remplacer le journal localStorage par `fetch('/api/notify')` → route serveur qui appelle Resend. Deux déclencheurs déjà câblés : `nouveau-mandat` (→ studio) et `production-livree` (→ client).
+4. Photos/vidéos : `src/lib/client/media.ts` — `importerPhoto` (redim navigateur, data URL en démo) et `importerVideoSession` (objectURL de session) → remplacer par upload storage renvoyant une URL persistante.
+
+Routes : `/connexion`, `/creer-acces?invite=TOKEN`, `/espace` (client), `/vesta-studio` (admin). Comptes démo : agence@demo/demo (client), studio@vesta/vesta (studio). Garde d'auth côté client (redirection). Export statique OK (tout client-side).
+
+Hébergement : le site restera un temps sur GitHub Pages (statique) ; le portail dynamique nécessitera un vrai hébergeur (Vercel + Supabase/Resend) le moment venu — décision reportée par le client.
+
 ### TypeScript
 - npm avait installé TypeScript 7 (préversion native) → build Next 16 cassé (« The "id" argument must be of type string ») → épinglé typescript@5.9.
