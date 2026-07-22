@@ -3,7 +3,7 @@
 import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Html, useTexture } from "@react-three/drei";
+import { OrbitControls, Html, Sphere, useTexture } from "@react-three/drei";
 import { useRouter } from "next/navigation";
 import { media } from "@/lib/media";
 
@@ -304,6 +304,14 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
           <ambientLight intensity={0.5} />
           <ChampDeBraises boost={boost} />
           <LogoNoyau />
+
+          {/* Les cercles du temple : sphères filaires concentriques. */}
+          <Sphere args={[12, 32, 32]} position={[0, 0, 0]}>
+            <meshBasicMaterial color="#96794c" transparent opacity={0.05} wireframe />
+          </Sphere>
+          <Sphere args={[17, 32, 32]} position={[0, 0, 0]}>
+            <meshBasicMaterial color="#c2551e" transparent opacity={0.035} wireframe />
+          </Sphere>
 
           {cartes.map((c, i) => (
             <Marqueur
