@@ -60,7 +60,7 @@ export const PROJETS: Projet[] = [
       { nom: "SÉJOUR → CUISINE", duree: 4 },
       { nom: "SÉJOUR → BALCON", duree: 4 },
     ],
-    duree: 31,
+    duree: 24,
     image: "avignon-poster",
     posPlate: "center 50%",
     video: "avignon.mp4",
