@@ -140,7 +140,7 @@ function LogoNoyau({ cartes }: { cartes: CarteProjet[] }) {
     fontWeight: 800,
     fontStretch: "125%",
     letterSpacing: "-0.01em",
-    fontSize: "88px",
+    fontSize: "118px",
     lineHeight: 1,
   };
 
@@ -163,7 +163,7 @@ function LogoNoyau({ cartes }: { cartes: CarteProjet[] }) {
           <div
             aria-hidden="true"
             className="absolute inset-0 flex items-baseline"
-            style={{ ...police, color: "var(--color-braise)", opacity: 0.42, transform: "translate(3px, 4px)" }}
+            style={{ ...police, color: "var(--color-gris-pierre)", opacity: 0.32, transform: "translate(3px, 4px)" }}
           >
             {LETTRES.join("")}
             <span style={{ fontSize: "0.7em" }}>*</span>
