@@ -33,6 +33,10 @@ const CARTES: CarteProjet[] = PROJETS.map((p) => ({
   imageUrl: media(p.poster ?? `${p.image}.webp`),
   alt: `Extrait du film ${p.titre}`,
   titre: p.titre,
+  photos: [
+    media(p.poster ?? `${p.image}.webp`),
+    ...(p.briefPhotos ?? []).map((b) => media(b.src)),
+  ],
   meta: `${p.photos} PHOTOS · ${p.duree} S`,
 }));
 

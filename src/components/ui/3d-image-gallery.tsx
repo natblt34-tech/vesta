@@ -15,6 +15,8 @@ export type CarteProjet = {
   imageUrl: string;
   alt: string;
   titre: string;
+  /* Les photos du projet, pour le montage qui défile dans les lettres. */
+  photos?: string[];
   /* Affiché uniquement dans la liste de repli (reduced-motion / mobile). */
   meta?: string;
 };
@@ -126,6 +128,7 @@ function LogoNoyau({ cartes }: { cartes: CarteProjet[] }) {
   const groupe = useRef<THREE.Group>(null);
   const cible = useMemo(() => new THREE.Object3D(), []);
   const [survol, setSurvol] = useState<number | null>(null);
+  const [frame, setFrame] = useState(0);
 
   useFrame(({ camera }, delta) => {
     const g = groupe.current;
@@ -135,12 +138,20 @@ function LogoNoyau({ cartes }: { cartes: CarteProjet[] }) {
     g.quaternion.slerp(cible.quaternion, 1 - Math.pow(0.0009, delta));
   });
 
+  /* Montage : pendant le survol, les photos du projet se succèdent. */
+  useEffect(() => {
+    if (survol === null) return;
+    setFrame(0);
+    const id = window.setInterval(() => setFrame((f) => f + 1), 1200);
+    return () => window.clearInterval(id);
+  }, [survol]);
+
   const police: React.CSSProperties = {
     fontFamily: "var(--font-display)",
     fontWeight: 800,
     fontStretch: "125%",
     letterSpacing: "-0.01em",
-    fontSize: "118px",
+    fontSize: "150px",
     lineHeight: 1,
   };
 
@@ -174,21 +185,23 @@ function LogoNoyau({ cartes }: { cartes: CarteProjet[] }) {
             {LETTRES.map((lettre, i) => {
               const carte = cartes[i % cartes.length];
               const actif = survol === i;
+              const photos = carte?.photos?.length ? carte.photos : carte ? [carte.imageUrl] : [];
+              const img = photos.length ? photos[frame % photos.length] : null;
               return (
                 <span
                   key={i}
                   onMouseEnter={() => entrer(i)}
                   onMouseLeave={() => sortir(i)}
                   style={
-                    actif && carte
+                    actif && img
                       ? {
-                          backgroundImage: `url(${carte.imageUrl})`,
-                          backgroundSize: "auto 320%",
+                          backgroundImage: `url(${img})`,
+                          backgroundSize: "auto 132%",
                           backgroundPosition: "50% 0%",
                           WebkitBackgroundClip: "text",
                           backgroundClip: "text",
                           color: "transparent",
-                          animation: "ref-defile 2.4s linear infinite alternate",
+                          animation: "ref-defile 5s ease-in-out infinite alternate",
                           cursor: "none",
                         }
                       : { color: "var(--color-pierre)", transition: "color 0.25s", cursor: "none" }
