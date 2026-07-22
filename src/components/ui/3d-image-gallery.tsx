@@ -229,7 +229,7 @@ function Marqueur({
 
   return (
     <group ref={groupe} position={position}>
-      <Html transform distanceFactor={13} occlude="blending">
+      <Html transform distanceFactor={13}>
       <button
         type="button"
         data-cursor
