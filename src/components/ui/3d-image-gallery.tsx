@@ -3,9 +3,8 @@
 import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Html, Sphere, useTexture } from "@react-three/drei";
+import { OrbitControls, Html, Sphere } from "@react-three/drei";
 import { useRouter } from "next/navigation";
-import { media } from "@/lib/media";
 
 /* L'environnement 3D des projets. Champ de braises rondes (shader), un
    marqueur-étincelle par projet qui révèle sa carte au survol, et un
@@ -119,14 +118,14 @@ function ChampDeBraises({ boost }: { boost: React.RefObject<number> }) {
   );
 }
 
-/* —————————————————— Le noyau : logo vesta* billboard 2.5D —————————————————— */
+/* —————————————————— Le noyau : logo vesta* interactif —————————————————— */
 
-function LogoNoyau() {
+const LETTRES = ["v", "e", "s", "t", "a"];
+
+function LogoNoyau({ cartes }: { cartes: CarteProjet[] }) {
   const groupe = useRef<THREE.Group>(null);
-  const texture = useTexture(media("vesta-logo.png"));
   const cible = useMemo(() => new THREE.Object3D(), []);
-  const L = 16;
-  const H = L * (496 / 1912);
+  const [survol, setSurvol] = useState<number | null>(null);
 
   useFrame(({ camera }, delta) => {
     const g = groupe.current;
@@ -138,14 +137,57 @@ function LogoNoyau() {
 
   return (
     <group ref={groupe}>
-      <mesh position={[0.22, -0.14, -0.55]} scale={1.08}>
-        <planeGeometry args={[L, H]} />
-        <meshBasicMaterial map={texture} transparent opacity={0.4} color="#c2551e" depthWrite={false} toneMapped={false} />
-      </mesh>
+      {/* Plan invisible : occlusion des cartes qui passent derrière. */}
       <mesh>
-        <planeGeometry args={[L, H]} />
-        <meshBasicMaterial map={texture} transparent alphaTest={0.5} toneMapped={false} />
+        <planeGeometry args={[15, 3.6]} />
+        <meshBasicMaterial colorWrite={false} />
       </mesh>
+
+      {/* Le logo, en DOM : chaque lettre porte une ref, révélée au survol. */}
+      <Html transform distanceFactor={9} position={[0, 0, 0.05]} style={{ pointerEvents: "none" }}>
+        <div
+          className="flex select-none items-baseline"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 800,
+            fontStretch: "125%",
+            letterSpacing: "-0.01em",
+            fontSize: "88px",
+            lineHeight: 1,
+            pointerEvents: "auto",
+          }}
+        >
+          {LETTRES.map((lettre, i) => {
+            const carte = cartes[i % cartes.length];
+            const actif = survol === i;
+            return (
+              <span
+                key={i}
+                data-cursor
+                onMouseEnter={() => setSurvol(i)}
+                onMouseLeave={() => setSurvol((s) => (s === i ? null : s))}
+                style={
+                  actif && carte
+                    ? {
+                        backgroundImage: `url(${carte.imageUrl})`,
+                        backgroundSize: "auto 320%",
+                        backgroundPosition: "50% 0%",
+                        WebkitBackgroundClip: "text",
+                        backgroundClip: "text",
+                        color: "transparent",
+                        animation: "ref-defile 2.4s linear infinite alternate",
+                        cursor: "pointer",
+                      }
+                    : { color: "var(--color-pierre)", transition: "color 0.25s", cursor: "pointer" }
+                }
+              >
+                {lettre}
+              </span>
+            );
+          })}
+          <span style={{ color: "var(--color-braise-vive)", fontSize: "0.7em" }}>*</span>
+        </div>
+      </Html>
     </group>
   );
 }
@@ -311,7 +353,7 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
           <CameraRig />
           <ambientLight intensity={0.5} />
           <ChampDeBraises boost={boost} />
-          <LogoNoyau />
+          <LogoNoyau cartes={cartes} />
 
           {/* Les cercles du temple : sphères filaires concentriques. */}
           <Sphere args={[12, 32, 32]} position={[0, 0, 0]}>

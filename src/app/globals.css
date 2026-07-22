@@ -120,6 +120,12 @@ body {
   100% { transform: translate(0, 0); }
 }
 
+/* La ref qui défile dans une lettre du logo au survol */
+@keyframes ref-defile {
+  from { background-position: 50% 0%; }
+  to { background-position: 50% 100%; }
+}
+
 /* L'étincelle qui scintille (marqueurs de projet dans l'espace 3D) */
 @keyframes etincelle {
   0%, 100% { transform: scale(0.82) rotate(0deg); opacity: 0.55; }
