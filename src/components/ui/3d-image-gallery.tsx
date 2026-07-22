@@ -96,12 +96,19 @@ function ChampDeBraises({ boost }: { boost: React.RefObject<number> }) {
 
   useFrame((_, dt) => {
     uniforms.uTime.value += dt;
-    /* Rampe le boost pendant le warp (effet hyperspace). */
+    /* Rampe le boost + expansion des braises pendant le warp
+       (elles fusent vers l'extérieur, effet vitesse-lumière). */
     const cible = boost.current ?? 1;
-    uniforms.uBoost.value += (cible - uniforms.uBoost.value) * Math.min(1, dt * 6);
-    if (groupe.current) {
-      groupe.current.rotation.y += dt * 0.012;
-      groupe.current.rotation.x += dt * 0.005;
+    const rush = cible > 1;
+    uniforms.uBoost.value += (cible - uniforms.uBoost.value) * Math.min(1, dt * 5);
+    const g = groupe.current;
+    if (g) {
+      const cibleScale = rush ? 3.2 : 1;
+      const s = g.scale.x + (cibleScale - g.scale.x) * Math.min(1, dt * 3.2);
+      g.scale.setScalar(s);
+      const vitesse = rush ? 0.09 : 0.012;
+      g.rotation.y += dt * vitesse;
+      g.rotation.x += dt * vitesse * 0.4;
     }
   });
 
@@ -287,23 +294,27 @@ function Marqueur({
 
 /* —————————————————— Le voyage (warp caméra) —————————————————— */
 
-function Warp({ cible, onDone }: { cible: THREE.Vector3; onDone: () => void }) {
+function Warp({ onDone }: { onDone: () => void }) {
   const { camera } = useThree();
-  const depart = useRef<THREE.Vector3 | null>(null);
+  const dir = useRef<THREE.Vector3 | null>(null);
+  const dist0 = useRef(0);
   const prog = useRef(0);
   const fini = useRef(false);
-  const DUREE = 1.15;
+  const DUREE = 1.2;
 
   useFrame((_, dt) => {
     if (fini.current) return;
-    if (!depart.current) depart.current = camera.position.clone();
+    if (!dir.current) {
+      dir.current = camera.position.clone().normalize();
+      dist0.current = camera.position.length();
+    }
     prog.current = Math.min(1, prog.current + dt / DUREE);
     const p = prog.current;
-    const e = p * p * p; // accélération
-    const dir = new THREE.Vector3().subVectors(cible, depart.current).normalize();
-    const arrivee = new THREE.Vector3().copy(cible).add(dir.multiplyScalar(7));
-    camera.position.lerpVectors(depart.current, arrivee, e);
-    camera.lookAt(cible);
+    const e = p * p; // accélère : le recul prend de la vitesse
+    /* Dézoom : la caméra recule le long de son axe, en visant le centre. */
+    const dist = dist0.current + e * 58;
+    camera.position.copy(dir.current).multiplyScalar(dist);
+    camera.lookAt(0, 0, 0);
     if (p >= 1) {
       fini.current = true;
       onDone();
@@ -353,16 +364,16 @@ function positionsPour(n: number): [number, number, number][] {
 export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
   const positions = useMemo(() => positionsPour(cartes.length), [cartes.length]);
   const [survol, setSurvol] = useState<string | null>(null);
-  const [warp, setWarp] = useState<{ cible: THREE.Vector3; slug: string } | null>(null);
+  const [warp, setWarp] = useState<{ slug: string } | null>(null);
   const boost = useRef(1);
   const controls = useRef<React.ComponentRef<typeof OrbitControls>>(null);
   const router = useRouter();
 
-  const lancerWarp = (p: [number, number, number], slug: string) => {
+  const lancerWarp = (_p: [number, number, number], slug: string) => {
     if (warp) return;
-    boost.current = 8;
+    boost.current = 6;
     setSurvol(null);
-    setWarp({ cible: new THREE.Vector3(p[0], p[1], p[2]), slug });
+    setWarp({ slug });
   };
 
   useEffect(() => {
@@ -401,7 +412,7 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
             />
           ))}
 
-          {warp ? <Warp cible={warp.cible} onDone={() => router.push(`/projets/${warp.slug}`)} /> : null}
+          {warp ? <Warp onDone={() => router.push(`/projets/${warp.slug}`)} /> : null}
 
           <OrbitControls
             ref={controls}
@@ -425,9 +436,9 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--color-braise) 55%, transparent) 0%, var(--color-basalte) 65%)",
+            "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--color-braise-vive) 70%, transparent) 0%, color-mix(in srgb, var(--color-braise) 30%, transparent) 35%, var(--color-basalte) 72%)",
           opacity: warp ? 1 : 0,
-          transition: warp ? "opacity 1s ease-in" : "opacity 0s",
+          transition: warp ? "opacity 0.85s ease-in 0.25s" : "opacity 0s",
         }}
       />
     </div>
