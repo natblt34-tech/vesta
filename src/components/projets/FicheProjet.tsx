@@ -7,7 +7,6 @@ import { media } from "@/lib/media";
 import { MENTION_STAGING } from "@/lib/site";
 import { useFitText } from "@/lib/useFitText";
 import { useReducedMotion } from "@/lib/useReducedMotion";
-import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import DemoRetouche from "./DemoRetouche";
 import DemoStaging from "./DemoStaging";
 import DemoFormats from "./DemoFormats";
@@ -29,49 +28,60 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
   }, [projet]);
 
   const heroFilm = projet.video && !reduced;
+  const posterSrc = projet.poster ? media(projet.poster) : media(`${projet.image}.webp`);
 
   return (
     <main ref={racine}>
-      {/* HERO — le film livré, qui se déploie sous le scroll. */}
-      {heroFilm ? (
-        <ScrollExpandMedia
-          mediaType="video"
-          mediaSrc={media(projet.video!)}
-          posterSrc={projet.poster ? media(projet.poster) : undefined}
-          bgImageSrc={projet.poster ? media(projet.poster) : media(`${projet.image}.webp`)}
-          title={projet.titre}
-          date={`${projet.photos} PHOTOS · ${projet.duree} S`}
-        />
-      ) : (
-        <section className="relative flex h-[86svh] items-end overflow-hidden">
+      {/* HERO — le film livré, plein cadre, qui se lit tout seul.
+         Scroll normal : aucun verrou. */}
+      <section className="relative flex h-svh items-end overflow-hidden">
+        {heroFilm ? (
+          <video
+            src={media(projet.video!)}
+            poster={posterSrc}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
           <img
-            src={media(`${projet.image}.webp`)}
+            src={posterSrc}
             alt={`Image du film ${projet.titre}`}
             className="absolute inset-0 h-full w-full object-cover"
             style={{ objectPosition: projet.posPlate }}
           />
-          <div
-            aria-hidden="true"
-            className="absolute inset-0"
-            style={{ background: "linear-gradient(rgba(18,21,26,0.1) 40%, rgba(18,21,26,0.72))" }}
-          />
-          <div className="relative z-1 w-full p-[var(--spacing-marge)] pb-12">
-            <p className="voix-mono mb-3" style={{ color: "var(--color-braise-vive)" }}>
-              FILM LIVRÉ · {projet.duree} S
-            </p>
-            <h1
-              data-fit
-              className="voix-display w-fit whitespace-nowrap"
-              style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)" }}
-            >
-              {projet.titre}
-            </h1>
-            <p className="voix-mono mt-4" style={{ color: "var(--color-pierre)" }}>
-              {projet.photos} PHOTOS FOURNIES
-            </p>
-          </div>
-        </section>
-      )}
+        )}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(rgba(18,21,26,0.05) 45%, rgba(18,21,26,0.78))" }}
+        />
+        <div className="relative z-1 w-full p-[var(--spacing-marge)] pb-14">
+          <p className="voix-mono mb-3" style={{ color: "var(--color-braise-vive)" }}>
+            FILM LIVRÉ · {projet.duree} S
+          </p>
+          <h1
+            data-fit
+            className="voix-display w-fit whitespace-nowrap"
+            style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)" }}
+          >
+            {projet.titre}
+          </h1>
+          <p className="voix-mono mt-4" style={{ color: "var(--color-pierre)" }}>
+            {projet.photos} PHOTOS FOURNIES
+          </p>
+        </div>
+        <p
+          className="voix-mono absolute bottom-6 right-[var(--spacing-marge)]"
+          style={{ color: "var(--color-gris-pierre)" }}
+          aria-hidden="true"
+        >
+          Scrollez
+        </p>
+      </section>
 
       {/* La retouche */}
       {projet.retouche ? <DemoRetouche projet={projet} /> : null}
