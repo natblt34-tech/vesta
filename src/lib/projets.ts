@@ -32,6 +32,8 @@ export type Projet = {
     avant?: string;
     apres?: string;
   };
+  /* Comparateurs avant/après à curseur (plusieurs pièces). */
+  retouches?: { piece: string; avant: string; apres: string; reglages: string }[];
   staging?: {
     vide: string;
     meuble: string;
@@ -79,13 +81,20 @@ export const PROJETS: Projet[] = [
       "Douze photos d'un T2 vide à Avignon : parquet rouge daté, murs ternes, une lumière plate. Un bien correct que les photos brutes ne mettaient pas en valeur.",
     resultat:
       "Le film complet du bien, la retouche photo sur chaque pièce, le home staging de la chambre, livrés en 16:9 pour les portails et en 9:16 pour les réseaux.",
-    retouche: {
-      src: "avignon-sejour-apres.webp",
-      piece: "SÉJOUR",
-      reglages: "+1.1 EV · MURS RECOLORÉS · VERTICALES · SOL RÉCHAUFFÉ · GRAIN 10%",
-      avant: "avignon-sejour-avant.webp",
-      apres: "avignon-sejour-apres.webp",
-    },
+    retouches: [
+      {
+        piece: "BALCON",
+        avant: "avignon-balcon-avant.webp",
+        apres: "avignon-balcon-apres.webp",
+        reglages: "VERTICALES REDRESSÉES · +1.2 EV · CIEL · VÉGÉTATION RAVIVÉE",
+      },
+      {
+        piece: "CUISINE",
+        avant: "avignon-cuisine-avant.webp",
+        apres: "avignon-cuisine-apres.webp",
+        reglages: "+1.0 EV · BALANCE DES BLANCS · PLANS DE TRAVAIL · GRAIN 10%",
+      },
+    ],
   },
   {
     slug: "maison-cote-pavee",

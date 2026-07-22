@@ -9,6 +9,7 @@ import { useFitText } from "@/lib/useFitText";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import DemoRetouche from "./DemoRetouche";
+import DemoAvantApres from "./DemoAvantApres";
 import DemoStaging from "./DemoStaging";
 import DemoFormats from "./DemoFormats";
 import StagingScene from "@/components/staging/StagingScene";
@@ -73,8 +74,12 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
         </section>
       )}
 
-      {/* La retouche */}
-      {projet.retouche ? <DemoRetouche projet={projet} /> : null}
+      {/* La retouche — comparateur à curseur, ou wipe sur photo unique */}
+      {projet.retouches ? (
+        <DemoAvantApres retouches={projet.retouches} />
+      ) : projet.retouche ? (
+        <DemoRetouche projet={projet} />
+      ) : null}
 
       {/* Le home staging — vidéo (Avignon) ou séquence d'images */}
       {projet.stagingVideo ? <DemoStaging projet={projet} /> : null}
