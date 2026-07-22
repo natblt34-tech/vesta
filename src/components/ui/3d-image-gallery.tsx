@@ -165,8 +165,15 @@ function Marqueur({
   onHover: (slug: string | null) => void;
   onWarp: (p: [number, number, number], slug: string) => void;
 }) {
+  const groupe = useRef<THREE.Group>(null);
+  /* La carte fait face à la caméra en permanence, comme le logo. */
+  useFrame(({ camera }) => {
+    if (groupe.current) groupe.current.lookAt(camera.position);
+  });
+
   return (
-    <Html transform distanceFactor={13} position={position} occlude="blending">
+    <group ref={groupe} position={position}>
+      <Html transform distanceFactor={13} occlude="blending">
       <button
         type="button"
         data-cursor
@@ -204,7 +211,8 @@ function Marqueur({
           {carte.titre}
         </span>
       </button>
-    </Html>
+      </Html>
+    </group>
   );
 }
 
