@@ -103,7 +103,7 @@ function ChampDeBraises({ boost }: { boost: React.RefObject<number> }) {
     uniforms.uBoost.value += (cible - uniforms.uBoost.value) * Math.min(1, dt * 5);
     const g = groupe.current;
     if (g) {
-      const cibleScale = rush ? 3.2 : 1;
+      const cibleScale = rush ? 1.9 : 1;
       const s = g.scale.x + (cibleScale - g.scale.x) * Math.min(1, dt * 3.2);
       g.scale.setScalar(s);
       const vitesse = rush ? 0.09 : 0.012;
@@ -300,7 +300,7 @@ function Warp({ onDone }: { onDone: () => void }) {
   const dist0 = useRef(0);
   const prog = useRef(0);
   const fini = useRef(false);
-  const DUREE = 1.2;
+  const DUREE = 1.5;
 
   useFrame((_, dt) => {
     if (fini.current) return;
@@ -310,9 +310,11 @@ function Warp({ onDone }: { onDone: () => void }) {
     }
     prog.current = Math.min(1, prog.current + dt / DUREE);
     const p = prog.current;
-    const e = p * p; // accélère : le recul prend de la vitesse
-    /* Dézoom : la caméra recule le long de son axe, en visant le centre. */
-    const dist = dist0.current + e * 58;
+    /* Accélération progressive : départ lent, ruée finale. */
+    const e = Math.pow(p, 2.4);
+    /* Dézoom profond : la caméra recule si loin que l'environnement
+       se réduit à un point puis disparaît, en visant le centre. */
+    const dist = dist0.current + e * 520;
     camera.position.copy(dir.current).multiplyScalar(dist);
     camera.lookAt(0, 0, 0);
     if (p >= 1) {
@@ -436,9 +438,10 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--color-braise-vive) 70%, transparent) 0%, color-mix(in srgb, var(--color-braise) 30%, transparent) 35%, var(--color-basalte) 72%)",
+            "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--color-braise) 22%, transparent) 0%, var(--color-basalte) 55%)",
           opacity: warp ? 1 : 0,
-          transition: warp ? "opacity 0.85s ease-in 0.25s" : "opacity 0s",
+          /* Ne couvre que la toute fin : l'environnement a déjà disparu au loin. */
+          transition: warp ? "opacity 0.4s ease-in 1.05s" : "opacity 0s",
         }}
       />
     </div>
