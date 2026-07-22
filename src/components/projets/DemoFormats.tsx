@@ -15,6 +15,7 @@ import Ajuste from "@/components/Ajuste";
 export default function DemoFormats({ projet }: { projet: Projet }) {
   const wrap = useRef<HTMLDivElement>(null);
   const source = projet.video ? media(projet.video) : null;
+  const sourcePhone = projet.video916 ? media(projet.video916) : source;
   const poster = projet.poster ? media(projet.poster) : media(`${projet.image}.webp`);
 
   useEffect(() => {
@@ -65,10 +66,11 @@ export default function DemoFormats({ projet }: { projet: Projet }) {
     return () => io.disconnect();
   }, []);
 
-  const Media = ({ classe }: { classe: string }) =>
-    source ? (
+  const Media = ({ classe, src }: { classe: string; src?: string | null }) => {
+    const s = src ?? source;
+    return s ? (
       <video
-        src={source}
+        src={s}
         poster={poster}
         autoPlay
         muted
@@ -81,6 +83,7 @@ export default function DemoFormats({ projet }: { projet: Projet }) {
     ) : (
       <img src={poster} alt="" aria-hidden="true" className={classe} />
     );
+  };
 
   return (
     <section ref={wrap} className="marge py-(--spacing-section)">
@@ -152,7 +155,7 @@ export default function DemoFormats({ projet }: { projet: Projet }) {
                 style={{ background: "var(--color-basalte)" }}
               />
               <div className="overflow-hidden rounded-[1.5rem]" style={{ aspectRatio: "9 / 16", background: "var(--color-basalte)" }}>
-                <Media classe="h-full w-full object-cover" />
+                <Media classe="h-full w-full object-cover" src={sourcePhone} />
               </div>
             </div>
           </div>

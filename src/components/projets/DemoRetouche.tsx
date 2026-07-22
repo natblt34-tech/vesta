@@ -6,15 +6,16 @@ import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { media } from "@/lib/media";
 import type { Projet } from "@/lib/projets";
 
-/* La retouche, démontrée sur une vraie photo du projet : le scroll est
-   le curseur avant/après. L'« avant » est la même image dégradée en CSS
-   (sous-exposée, verticales tombantes) : l'alignement est parfait. */
+/* La retouche. Deux cas :
+   - avant/après réels (cadrages parfois différents) : fondu croisé scrubé.
+   - à défaut : la même photo dégradée en CSS, révélée par un wipe. */
 
 const DEGRADE = "brightness(0.55) saturate(0.55) contrast(0.88) hue-rotate(-8deg)";
 
 export default function DemoRetouche({ projet }: { projet: Projet }) {
   const r = projet.retouche;
   const wrap = useRef<HTMLDivElement>(null);
+  const reel = !!(r?.avant && r?.apres);
 
   useEffect(() => {
     const el = wrap.current;
@@ -23,9 +24,32 @@ export default function DemoRetouche({ projet }: { projet: Projet }) {
 
     const ctx = gsap.context(() => {
       const apres = el.querySelector<HTMLElement>("[data-apres]");
+
+      if (reel) {
+        /* Fondu croisé avant -> après. */
+        const avant = el.querySelector<HTMLElement>("[data-avant]");
+        const etiq = el.querySelector<HTMLElement>("[data-etiq]");
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: el,
+            start: "top top",
+            end: "+=200%",
+            pin: true,
+            scrub: 0.4,
+            onUpdate: (self) => {
+              const p = self.progress;
+              if (apres) apres.style.opacity = `${Math.min(1, Math.max(0, (p - 0.1) / 0.8))}`;
+              if (avant) avant.style.transform = `scale(${1.06 - p * 0.06})`;
+              if (etiq) etiq.textContent = p < 0.5 ? "PHOTO BRUTE" : "PHOTO LIVRÉE";
+            },
+          },
+        });
+        return;
+      }
+
+      /* Wipe sur photo dégradée. */
       const bord = el.querySelector<HTMLElement>("[data-bord]");
       const avant = el.querySelector<HTMLElement>("[data-avant]");
-
       gsap.timeline({
         scrollTrigger: {
           trigger: el,
@@ -48,10 +72,52 @@ export default function DemoRetouche({ projet }: { projet: Projet }) {
     }, el);
 
     return () => ctx.revert();
-  }, [r]);
+  }, [r, reel]);
 
   if (!r) return null;
 
+  /* —————————————————— Avant / après réels —————————————————— */
+  if (reel) {
+    return (
+      <div ref={wrap}>
+        <section className="relative h-svh overflow-hidden" style={{ background: "var(--color-basalte)" }}>
+          <img
+            data-avant
+            src={media(r.avant!)}
+            alt={`${projet.titre}, ${r.piece.toLowerCase()} avant retouche`}
+            className="absolute inset-0 h-full w-full object-cover will-change-transform"
+          />
+          <img
+            data-apres
+            src={media(r.apres!)}
+            alt={`${projet.titre}, ${r.piece.toLowerCase()} retouchée`}
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ opacity: prefersReducedMotion() ? 1 : 0 }}
+          />
+          <div className="pointer-events-none absolute inset-x-0 top-10 flex justify-between p-[var(--spacing-marge)]">
+            <p className="voix-mono" style={{ color: "var(--color-braise-vive)" }}>
+              01 · LA RETOUCHE
+            </p>
+            <p
+              data-etiq
+              className="voix-mono"
+              style={{ color: "var(--color-pierre)", textShadow: "0 1px 8px rgba(18,21,26,0.8)" }}
+            >
+              PHOTO BRUTE
+            </p>
+          </div>
+          <p
+            className="voix-mono absolute bottom-10 left-[var(--spacing-marge)]"
+            style={{ color: "var(--color-pierre)", textShadow: "0 1px 8px rgba(18,21,26,0.8)", fontSize: "0.75rem" }}
+          >
+            {r.piece} · {r.reglages}
+          </p>
+        </section>
+      </div>
+    );
+  }
+
+  /* —————————————————— Wipe sur photo dégradée —————————————————— */
   return (
     <div ref={wrap}>
       <section className="relative h-svh overflow-hidden">
@@ -80,7 +146,6 @@ export default function DemoRetouche({ projet }: { projet: Projet }) {
             boxShadow: "0 0 24px 2px color-mix(in srgb, var(--color-braise-vive) 55%, transparent)",
           }}
         />
-
         <p
           className="voix-mono absolute bottom-10 left-[var(--spacing-marge)]"
           style={{ color: "var(--color-pierre)", textShadow: "0 1px 8px rgba(18,21,26,0.8)", fontSize: "0.75rem" }}

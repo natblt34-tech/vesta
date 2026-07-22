@@ -9,6 +9,7 @@ import { useFitText } from "@/lib/useFitText";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import DemoRetouche from "./DemoRetouche";
+import DemoStaging from "./DemoStaging";
 import DemoFormats from "./DemoFormats";
 import StagingScene from "@/components/staging/StagingScene";
 import { FooterVesta } from "@/components/ui/motion-footer";
@@ -75,7 +76,8 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
       {/* La retouche */}
       {projet.retouche ? <DemoRetouche projet={projet} /> : null}
 
-      {/* Le home staging (si le projet en a) */}
+      {/* Le home staging — vidéo (Avignon) ou séquence d'images */}
+      {projet.stagingVideo ? <DemoStaging projet={projet} /> : null}
       {projet.staging ? (
         <StagingScene
           vide={projet.staging.vide}

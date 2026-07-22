@@ -16,6 +16,10 @@ export type Projet = {
   /* Film réel livré (public/media). La fiche passe alors en hero scroll-expansion. */
   video?: string;
   poster?: string;
+  /* Version verticale 9:16 réelle, jouée dans le téléphone de la section Formats. */
+  video916?: string;
+  /* Vidéo de home staging (ex. les meubles qui se posent). */
+  stagingVideo?: string;
   /* Photos réelles du brief (public/media). À défaut, tuiles recadrées de l'image. */
   briefPhotos?: { src: string; alt: string }[];
   /* Services démontrés sur la fiche, dans l'ordre. Chaque projet ne montre
@@ -24,6 +28,9 @@ export type Projet = {
     src: string;
     piece: string;
     reglages: string;
+    /* Avant/après réels (cadrages éventuellement différents -> fondu croisé). */
+    avant?: string;
+    apres?: string;
   };
   staging?: {
     vide: string;
@@ -41,6 +48,45 @@ export type Projet = {
 };
 
 export const PROJETS: Projet[] = [
+  {
+    slug: "t2-avignon",
+    titre: "T2 Avignon",
+    type: "T2",
+    surface: 45,
+    quartier: "AVIGNON",
+    photos: 12,
+    traversees: [
+      { nom: "ENTRÉE → SÉJOUR", duree: 5 },
+      { nom: "SÉJOUR → CUISINE", duree: 4 },
+      { nom: "SÉJOUR → BALCON", duree: 4 },
+    ],
+    duree: 31,
+    image: "avignon-poster",
+    posPlate: "center 50%",
+    video: "avignon.mp4",
+    poster: "avignon-poster.jpg",
+    video916: "avignon-9-16.mp4",
+    stagingVideo: "avignon-staging.mp4",
+    briefPhotos: [
+      { src: "avignon-brief-sejour.webp", alt: "Séjour au parquet rouge, cuisine ouverte au fond" },
+      { src: "avignon-brief-cuisine.webp", alt: "Cuisine noire et blanche, verrière" },
+      { src: "avignon-brief-chambre.webp", alt: "Chambre avant home staging" },
+      { src: "avignon-brief-balcon.webp", alt: "Balcon avec vue dégagée sur les arbres" },
+      { src: "avignon-brief-entree.webp", alt: "Entrée du T2" },
+      { src: "avignon-brief-couloir.webp", alt: "Couloir vers les pièces de nuit" },
+    ],
+    brief:
+      "Douze photos d'un T2 vide à Avignon : parquet rouge daté, murs ternes, une lumière plate. Un bien correct que les photos brutes ne mettaient pas en valeur.",
+    resultat:
+      "Le film complet du bien, la retouche photo sur chaque pièce, le home staging de la chambre, livrés en 16:9 pour les portails et en 9:16 pour les réseaux.",
+    retouche: {
+      src: "avignon-sejour-apres.webp",
+      piece: "SÉJOUR",
+      reglages: "+1.1 EV · MURS RECOLORÉS · VERTICALES · SOL RÉCHAUFFÉ · GRAIN 10%",
+      avant: "avignon-sejour-avant.webp",
+      apres: "avignon-sejour-apres.webp",
+    },
+  },
   {
     slug: "maison-cote-pavee",
     titre: "T3 haussmannien",
