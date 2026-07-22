@@ -20,8 +20,9 @@ export type Projet = {
   video916?: string;
   /* Vidéo de home staging (ex. les meubles qui se posent). */
   stagingVideo?: string;
-  /* Photos réelles du brief (public/media). À défaut, tuiles recadrées de l'image. */
-  briefPhotos?: { src: string; alt: string }[];
+  /* Photos réelles du brief (public/media). À défaut, tuiles recadrées de l'image.
+     `apres` : version retouchée révélée au survol. */
+  briefPhotos?: { src: string; alt: string; apres?: string }[];
   /* Services démontrés sur la fiche, dans l'ordre. Chaque projet ne montre
      que ce qu'il a réellement reçu. */
   retouche?: {
@@ -70,31 +71,17 @@ export const PROJETS: Projet[] = [
     video916: "avignon-9-16.mp4",
     stagingVideo: "avignon-staging.mp4",
     briefPhotos: [
-      { src: "avignon-brief-sejour.webp", alt: "Séjour au parquet rouge, cuisine ouverte au fond" },
-      { src: "avignon-brief-cuisine.webp", alt: "Cuisine noire et blanche, verrière" },
-      { src: "avignon-brief-chambre.webp", alt: "Chambre avant home staging" },
-      { src: "avignon-brief-balcon.webp", alt: "Balcon avec vue dégagée sur les arbres" },
-      { src: "avignon-brief-entree.webp", alt: "Entrée du T2" },
-      { src: "avignon-brief-couloir.webp", alt: "Couloir vers les pièces de nuit" },
+      { src: "avignon-brief-sejour.webp", alt: "Séjour au parquet rouge, cuisine ouverte au fond", apres: "avignon-sejour-apres.webp" },
+      { src: "avignon-brief-cuisine.webp", alt: "Cuisine noire et blanche, verrière", apres: "avignon-cuisine-apres.webp" },
+      { src: "avignon-brief-chambre.webp", alt: "Chambre avant home staging", apres: "avignon-brief-chambre-apres.webp" },
+      { src: "avignon-brief-balcon.webp", alt: "Balcon avec vue dégagée sur les arbres", apres: "avignon-balcon-apres.webp" },
+      { src: "avignon-brief-entree.webp", alt: "Entrée du T2", apres: "avignon-brief-entree-apres.webp" },
+      { src: "avignon-brief-couloir.webp", alt: "Couloir vers les pièces de nuit", apres: "avignon-brief-couloir-apres.webp" },
     ],
     brief:
       "Douze photos d'un T2 vide à Avignon : parquet rouge daté, murs ternes, une lumière plate. Un bien correct que les photos brutes ne mettaient pas en valeur.",
     resultat:
       "Le film complet du bien, la retouche photo sur chaque pièce, le home staging de la chambre, livrés en 16:9 pour les portails et en 9:16 pour les réseaux.",
-    retouches: [
-      {
-        piece: "BALCON",
-        avant: "avignon-balcon-avant.webp",
-        apres: "avignon-balcon-apres.webp",
-        reglages: "VERTICALES REDRESSÉES · +1.2 EV · CIEL · VÉGÉTATION RAVIVÉE",
-      },
-      {
-        piece: "CUISINE",
-        avant: "avignon-cuisine-avant.webp",
-        apres: "avignon-cuisine-apres.webp",
-        reglages: "+1.0 EV · BALANCE DES BLANCS · PLANS DE TRAVAIL · GRAIN 10%",
-      },
-    ],
   },
   {
     slug: "maison-cote-pavee",

@@ -9,7 +9,6 @@ import { useFitText } from "@/lib/useFitText";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import DemoRetouche from "./DemoRetouche";
-import DemoAvantApres from "./DemoAvantApres";
 import DemoStaging from "./DemoStaging";
 import DemoFormats from "./DemoFormats";
 import StagingScene from "@/components/staging/StagingScene";
@@ -74,12 +73,8 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
         </section>
       )}
 
-      {/* La retouche — comparateur à curseur, ou wipe sur photo unique */}
-      {projet.retouches ? (
-        <DemoAvantApres retouches={projet.retouches} />
-      ) : projet.retouche ? (
-        <DemoRetouche projet={projet} />
-      ) : null}
+      {/* La retouche sur photo unique (autres projets) */}
+      {projet.retouche ? <DemoRetouche projet={projet} /> : null}
 
       {/* Le home staging — vidéo (Avignon) ou séquence d'images */}
       {projet.stagingVideo ? <DemoStaging projet={projet} /> : null}
@@ -94,18 +89,52 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
       {/* L'animation vidéo, livrée en 16:9 et 9:16 */}
       <DemoFormats projet={projet} />
 
-      {/* Le brief, le résultat. */}
+      {/* Le brief, le résultat. Les photos révèlent leur version retouchée
+         au survol. */}
       <section className="marge grid items-center gap-14 py-(--spacing-section) md:grid-cols-2">
-        <div className="grid grid-cols-2 gap-2">
-          {(projet.briefPhotos ?? []).map((p) => (
-            <img
-              key={p.src}
-              src={media(p.src)}
-              alt={p.alt}
-              loading="lazy"
-              className="aspect-4/3 w-full object-cover"
-            />
-          ))}
+        <div>
+          {projet.briefPhotos?.some((p) => p.apres) ? (
+            <p className="voix-mono mb-3" style={{ color: "var(--color-braise-vive)" }}>
+              SURVOLEZ · LA PHOTO BRUTE DEVIENT LA PHOTO LIVRÉE
+            </p>
+          ) : null}
+          <div className="grid grid-cols-2 gap-2">
+            {(projet.briefPhotos ?? []).map((p) => (
+              <div
+                key={p.src}
+                className="group relative aspect-4/3 overflow-hidden"
+                style={{ border: "1px solid var(--color-filet)" }}
+              >
+                <img
+                  src={media(p.src)}
+                  alt={p.alt}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                {p.apres ? (
+                  <>
+                    <img
+                      src={media(p.apres)}
+                      alt=""
+                      aria-hidden="true"
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                    />
+                    <span
+                      className="voix-mono absolute right-2 top-2 px-2 py-0.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      style={{
+                        color: "var(--color-braise-vive)",
+                        background: "color-mix(in srgb, var(--color-basalte) 60%, transparent)",
+                        fontSize: "0.5625rem",
+                      }}
+                    >
+                      APRÈS
+                    </span>
+                  </>
+                ) : null}
+              </div>
+            ))}
+          </div>
         </div>
 
         <div>
