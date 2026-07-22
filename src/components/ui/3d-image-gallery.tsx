@@ -158,7 +158,7 @@ function LogoNoyau({ cartes }: { cartes: CarteProjet[] }) {
     fontWeight: 800,
     fontStretch: "125%",
     letterSpacing: "-0.01em",
-    fontSize: "150px",
+    fontSize: "204px",
     lineHeight: 1,
   };
 
