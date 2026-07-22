@@ -135,57 +135,71 @@ function LogoNoyau({ cartes }: { cartes: CarteProjet[] }) {
     g.quaternion.slerp(cible.quaternion, 1 - Math.pow(0.0009, delta));
   });
 
+  const police: React.CSSProperties = {
+    fontFamily: "var(--font-display)",
+    fontWeight: 800,
+    fontStretch: "125%",
+    letterSpacing: "-0.01em",
+    fontSize: "88px",
+    lineHeight: 1,
+  };
+
+  const entrer = (i: number) => {
+    setSurvol(i);
+    document.body.dataset.cursorMute = "true";
+  };
+  const sortir = (i: number) => {
+    setSurvol((s) => (s === i ? null : s));
+    delete document.body.dataset.cursorMute;
+  };
+
   return (
     <group ref={groupe}>
-      {/* Plan invisible : occlusion des cartes qui passent derrière. */}
-      <mesh>
-        <planeGeometry args={[15, 3.6]} />
-        <meshBasicMaterial colorWrite={false} />
-      </mesh>
-
-      {/* Le logo, en DOM : chaque lettre porte une ref, révélée au survol. */}
+      {/* Le logo, en DOM. Deux calques détourés, sans fond : un écho braise
+         en retrait, les lettres pierre par-dessus (interactives au survol). */}
       <Html transform distanceFactor={9} position={[0, 0, 0.05]} style={{ pointerEvents: "none" }}>
-        <div
-          className="flex select-none items-baseline"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 800,
-            fontStretch: "125%",
-            letterSpacing: "-0.01em",
-            fontSize: "88px",
-            lineHeight: 1,
-            pointerEvents: "auto",
-          }}
-        >
-          {LETTRES.map((lettre, i) => {
-            const carte = cartes[i % cartes.length];
-            const actif = survol === i;
-            return (
-              <span
-                key={i}
-                data-cursor
-                onMouseEnter={() => setSurvol(i)}
-                onMouseLeave={() => setSurvol((s) => (s === i ? null : s))}
-                style={
-                  actif && carte
-                    ? {
-                        backgroundImage: `url(${carte.imageUrl})`,
-                        backgroundSize: "auto 320%",
-                        backgroundPosition: "50% 0%",
-                        WebkitBackgroundClip: "text",
-                        backgroundClip: "text",
-                        color: "transparent",
-                        animation: "ref-defile 2.4s linear infinite alternate",
-                        cursor: "pointer",
-                      }
-                    : { color: "var(--color-pierre)", transition: "color 0.25s", cursor: "pointer" }
-                }
-              >
-                {lettre}
-              </span>
-            );
-          })}
-          <span style={{ color: "var(--color-braise-vive)", fontSize: "0.7em" }}>*</span>
+        <div className="relative select-none" style={{ pointerEvents: "auto" }}>
+          {/* Calque écho (braise, décalé) */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 flex items-baseline"
+            style={{ ...police, color: "var(--color-braise)", opacity: 0.42, transform: "translate(3px, 4px)" }}
+          >
+            {LETTRES.join("")}
+            <span style={{ fontSize: "0.7em" }}>*</span>
+          </div>
+
+          {/* Calque avant (pierre, interactif) */}
+          <div className="relative flex items-baseline" style={police}>
+            {LETTRES.map((lettre, i) => {
+              const carte = cartes[i % cartes.length];
+              const actif = survol === i;
+              return (
+                <span
+                  key={i}
+                  onMouseEnter={() => entrer(i)}
+                  onMouseLeave={() => sortir(i)}
+                  style={
+                    actif && carte
+                      ? {
+                          backgroundImage: `url(${carte.imageUrl})`,
+                          backgroundSize: "auto 320%",
+                          backgroundPosition: "50% 0%",
+                          WebkitBackgroundClip: "text",
+                          backgroundClip: "text",
+                          color: "transparent",
+                          animation: "ref-defile 2.4s linear infinite alternate",
+                          cursor: "none",
+                        }
+                      : { color: "var(--color-pierre)", transition: "color 0.25s", cursor: "none" }
+                  }
+                >
+                  {lettre}
+                </span>
+              );
+            })}
+            <span style={{ color: "var(--color-braise-vive)", fontSize: "0.7em" }}>*</span>
+          </div>
         </div>
       </Html>
     </group>

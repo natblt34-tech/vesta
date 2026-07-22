@@ -213,6 +213,11 @@ a {
   background: var(--color-pierre);
 }
 
+/* Curseur masqué (survol d'une lettre du logo) */
+body[data-cursor-mute="true"] .cursor-braise {
+  opacity: 0 !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cursor-braise {
     display: none;
