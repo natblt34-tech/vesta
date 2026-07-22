@@ -125,7 +125,7 @@ function LogoNoyau() {
   const groupe = useRef<THREE.Group>(null);
   const texture = useTexture(media("vesta-logo.png"));
   const cible = useMemo(() => new THREE.Object3D(), []);
-  const L = 10.5;
+  const L = 16;
   const H = L * (496 / 1912);
 
   useFrame(({ camera }, delta) => {
