@@ -35,7 +35,7 @@ const VERT = `
     float tw = 0.55 + 0.45 * sin(uTime * 1.4 + aPhase);
     vTw = tw;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = min(aSize * uBoost * (0.7 + 0.5 * tw) * (300.0 / -mv.z), 90.0);
+    gl_PointSize = min(aSize * uBoost * (0.7 + 0.5 * tw) * (185.0 / -mv.z), 34.0);
     gl_Position = projectionMatrix * mv;
   }
 `;
@@ -77,7 +77,7 @@ function ChampDeBraises({ boost }: { boost: React.RefObject<number> }) {
       colors[i * 3] = c.r;
       colors[i * 3 + 1] = c.g;
       colors[i * 3 + 2] = c.b;
-      sizes[i] = 3 + Math.random() * 9;
+      sizes[i] = 1.1 + Math.random() * 2.6;
       phases[i] = Math.random() * Math.PI * 2;
     }
     const g = new THREE.BufferGeometry();
@@ -303,7 +303,7 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
   return (
     <div className="absolute inset-0" style={{ background: "var(--color-basalte)" }}>
       <Canvas
-        camera={{ position: [0, 0, 24], fov: 55 }}
+        camera={{ position: [0, 0, 38], fov: 55 }}
         gl={{ antialias: true, alpha: true }}
         style={{ pointerEvents: warp ? "none" : "auto" }}
       >
