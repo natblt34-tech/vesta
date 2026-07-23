@@ -4,7 +4,7 @@ import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html, Sphere } from "@react-three/drei";
-import { useRouter } from "next/navigation";
+import { useTransitionNavigate } from "@/components/chrome/Transition";
 
 /* L'environnement 3D des projets. Champ de braises rondes (shader), un
    marqueur-étincelle par projet qui révèle sa carte au survol, et un
@@ -310,11 +310,12 @@ function Warp({ onDone }: { onDone: () => void }) {
     }
     prog.current = Math.min(1, prog.current + dt / DUREE);
     const p = prog.current;
-    /* Accélération progressive : départ lent, ruée finale. */
-    const e = Math.pow(p, 2.4);
+    /* Accélération exponentielle : quasi immobile au départ,
+       ruée très violente sur la fin (easeInExpo). */
+    const e = p === 0 ? 0 : Math.pow(2, 10 * (p - 1));
     /* Dézoom profond : la caméra recule si loin que l'environnement
        se réduit à un point puis disparaît, en visant le centre. */
-    const dist = dist0.current + e * 520;
+    const dist = dist0.current + e * 640;
     camera.position.copy(dir.current).multiplyScalar(dist);
     camera.lookAt(0, 0, 0);
     if (p >= 1) {
@@ -369,7 +370,7 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
   const [warp, setWarp] = useState<{ slug: string } | null>(null);
   const boost = useRef(1);
   const controls = useRef<React.ComponentRef<typeof OrbitControls>>(null);
-  const router = useRouter();
+  const naviguer = useTransitionNavigate();
 
   const lancerWarp = (_p: [number, number, number], slug: string) => {
     if (warp) return;
@@ -414,7 +415,9 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
             />
           ))}
 
-          {warp ? <Warp onDone={() => router.push(`/projets/${warp.slug}`)} /> : null}
+          {/* À la fin du voyage : arrivée par le rideau du site, qui
+             s'ouvre sur la fiche — pas de cut sec. */}
+          {warp ? <Warp onDone={() => naviguer(`/projets/${warp.slug}`)} /> : null}
 
           <OrbitControls
             ref={controls}
