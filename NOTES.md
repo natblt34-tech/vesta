@@ -65,3 +65,29 @@ Hébergement : le site restera un temps sur GitHub Pages (statique) ; le portail
 
 ### TypeScript
 - npm avait installé TypeScript 7 (préversion native) → build Next 16 cassé (« The "id" argument must be of type string ») → épinglé typescript@5.9.
+
+### Espace client v2 (2026-07-23) — aligné sur le contrat pipeline
+Refonte selon `brief-espace-client.md` : l'espace client est l'interface entre les
+agences et le pipeline de production (`vesta-pipeline`). Le contrat REST complet est
+documenté dans **PIPELINE.md** (endpoints, token, schéma job, curl).
+
+- `types.ts` réécrit sur le schéma exact du job pipeline (`status` en 6 valeurs,
+  `deliverables` kind `film_16x9`/`film_9x16`/`staging_avant_apres`, `photos[].room`).
+  L'ancien modèle « mandats + connexions entre photos » est supprimé (remplacé par la
+  description d'agencement du brief). Clés localStorage renouvelées (`vesta-jobs`,
+  `vesta-users-v2`) — l'ancienne démo est orpheline, sans migration (mock).
+- Formulaire « Nouvelle demande » : nom du bien + ville ; photos (max 20, jpg/png)
+  nommées par pièce (suggestions cliquables, suffixe numérique auto, normalisation
+  sans accents — `pieces.ts`) ; agencement (message d'incitation du brief + plan
+  image/PDF optionnel) ; options formats 16:9/9:16 (les deux par défaut), staging par
+  pièce + style (3 choix), pièces à exclure ; récapitulatif.
+- Suivi : 6 statuts affichés ; `attention_requise` → message du studio + réponse
+  client (texte + photos) qui repasse le job en `analyse` ; `livre` → lecteurs 16:9
+  et 9:16 + Télécharger + galerie staging avant/après (mention légale).
+- Admin `/vesta-studio` : onglets Demandes (dossier complet, changement de statut,
+  dépôt des livrables, renvoi de l'email de livraison) et Comptes clients (création
+  avec formule nom + quota films/mois — jamais de montant — → lien d'invitation).
+- Quota affiché côté client : « FORMULE X · N FILMS RESTANTS CE MOIS-CI »
+  (jobs du mois calendaire vs quota). Non bloquant en v1.
+- Emails simulés (notify.ts) : nouvelle-demande → studio ; livraison et
+  complement-demande → client ; complement-reponse et aide → studio.

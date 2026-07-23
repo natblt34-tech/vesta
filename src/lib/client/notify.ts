@@ -1,15 +1,19 @@
 "use client";
 
 /* Notifications email. Aujourd'hui : simulées (journal navigateur, visibles
-   dans l'espace démo). En prod : cette fonction appelle une route serveur
-   qui déclenche Resend/Postmark.
+   en console). En prod : cette fonction appelle une route serveur qui
+   déclenche Resend/Postmark. Jamais de fichier en pièce jointe : les emails
+   pointent vers l'espace client.
 
-   Les deux déclencheurs demandés :
-   - nouveau-mandat  : email au studio Vesta à chaque nouvelle demande.
-   - production-livree : email au client dès qu'une vidéo est déposée. */
+   Déclencheurs :
+   - nouvelle-demande   : au studio Vesta à chaque dépôt.
+   - livraison          : au client quand le job passe à `livre` (« Votre film est prêt »).
+   - complement-demande : au client quand le job passe à `attention_requise`.
+   - complement-reponse : au studio quand le client répond.
+   - aide               : au studio depuis la bulle d'aide. */
 
 export type Notification = {
-  type: "nouveau-mandat" | "production-livree" | "aide";
+  type: "nouvelle-demande" | "livraison" | "complement-demande" | "complement-reponse" | "aide";
   destinataire: string;
   sujet: string;
   corps: string;

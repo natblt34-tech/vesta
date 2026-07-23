@@ -6,21 +6,23 @@ import { TransitionLink } from "@/components/chrome/Transition";
 import { Etoile } from "@/components/chrome/Logo";
 import { useAuth } from "@/lib/client/auth";
 import { backend } from "@/lib/client/backend";
-import type { Mandat } from "@/lib/client/types";
+import type { Job } from "@/lib/client/types";
 import NouvelleDemande from "./NouvelleDemande";
-import MesProductions from "./MesProductions";
+import MesDemandes from "./MesDemandes";
 import AideBulle from "./AideBulle";
 
-type Onglet = "demande" | "productions";
+type Onglet = "demandes" | "nouvelle";
 
 export default function Espace() {
   const router = useRouter();
   const { user, pret, deconnexion } = useAuth();
-  const [onglet, setOnglet] = useState<Onglet>("productions");
-  const [mandats, setMandats] = useState<Mandat[]>([]);
+  const [onglet, setOnglet] = useState<Onglet>("demandes");
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [restants, setRestants] = useState<number | null>(null);
 
   const charger = useCallback(async () => {
-    setMandats(await backend.mesMandats());
+    setJobs(await backend.mesJobs());
+    setRestants(await backend.filmsRestants());
   }, []);
 
   useEffect(() => {
@@ -39,8 +41,8 @@ export default function Espace() {
   if (!pret || !user || user.role === "vesta") return null;
 
   return (
-    <main className="marge min-h-svh py-20" style={{ background: "var(--color-basalte)" }}>
-      <header className="mb-14 flex flex-wrap items-center justify-between gap-4">
+    <main className="marge min-h-svh py-14 sm:py-20" style={{ background: "var(--color-basalte)" }}>
+      <header className="mb-10 flex flex-wrap items-center justify-between gap-4 sm:mb-14">
         <TransitionLink
           href="/"
           aria-label="vesta, retour à l'accueil"
@@ -59,8 +61,8 @@ export default function Espace() {
         </TransitionLink>
 
         <div className="flex items-center gap-5">
-          <span className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
-            {user.email}
+          <span className="voix-mono hidden sm:inline" style={{ color: "var(--color-gris-pierre)" }}>
+            {user.agence || user.email}
           </span>
           <button
             type="button"
@@ -76,10 +78,18 @@ export default function Espace() {
         </div>
       </header>
 
-      <nav className="mb-12 flex gap-2" role="tablist">
+      {/* La formule : quota de films, jamais de montant. */}
+      {user.formule && restants !== null ? (
+        <p className="voix-mono mb-8" style={{ color: "var(--color-bronze)" }}>
+          FORMULE {user.formule.nom.toUpperCase()} · {restants} FILM{restants > 1 ? "S" : ""} RESTANT
+          {restants > 1 ? "S" : ""} CE MOIS-CI
+        </p>
+      ) : null}
+
+      <nav className="mb-10 flex gap-2 sm:mb-12" role="tablist">
         {([
-          ["productions", "Mes productions"],
-          ["demande", "Nouvelle demande"],
+          ["demandes", "Mes demandes"],
+          ["nouvelle", "Nouvelle demande"],
         ] as [Onglet, string][]).map(([cle, libelle]) => {
           const actif = onglet === cle;
           return (
@@ -89,7 +99,7 @@ export default function Espace() {
               role="tab"
               aria-selected={actif}
               onClick={() => setOnglet(cle)}
-              className="voix-mono px-5 py-3 transition-colors duration-200"
+              className="voix-mono flex-1 px-4 py-3 transition-colors duration-200 sm:flex-none sm:px-5"
               style={{
                 border: `1px solid ${actif ? "var(--color-braise)" : "var(--color-filet)"}`,
                 color: actif ? "var(--color-pierre)" : "var(--color-gris-pierre)",
@@ -103,13 +113,13 @@ export default function Espace() {
       </nav>
 
       <div className="max-w-3xl">
-        {onglet === "productions" ? (
-          <MesProductions mandats={mandats} />
+        {onglet === "demandes" ? (
+          <MesDemandes jobs={jobs} onMaj={charger} />
         ) : (
           <NouvelleDemande
             onEnvoye={async () => {
               await charger();
-              setOnglet("productions");
+              setOnglet("demandes");
             }}
           />
         )}
