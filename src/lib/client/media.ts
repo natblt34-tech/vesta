@@ -1,8 +1,9 @@
 "use client";
 
-/* Import photo : redimensionne côté navigateur (max 1400 px, JPEG 0.82)
-   pour tenir dans le stockage local en démo. En prod, l'adaptateur
-   enverra le fichier d'origine au storage et renverra une URL signée. */
+/* Import photo : redimensionne côté navigateur (max 1200 px, JPEG 0.78) —
+   assez pour juger les pièces à l'écran, léger pour le stockage de démo
+   (IndexedDB). En prod, l'adaptateur enverra le fichier d'origine au
+   storage et renverra une URL signée. */
 export function importerPhoto(file: File): Promise<{ url: string; nomFichier: string }> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -11,7 +12,7 @@ export function importerPhoto(file: File): Promise<{ url: string; nomFichier: st
       const img = new Image();
       img.onerror = () => reject(new Error("Image invalide."));
       img.onload = () => {
-        const max = 1400;
+        const max = 1200;
         const ratio = Math.min(1, max / Math.max(img.width, img.height));
         const w = Math.round(img.width * ratio);
         const h = Math.round(img.height * ratio);
@@ -21,7 +22,7 @@ export function importerPhoto(file: File): Promise<{ url: string; nomFichier: st
         const ctx = canvas.getContext("2d");
         if (!ctx) return reject(new Error("Canvas indisponible."));
         ctx.drawImage(img, 0, 0, w, h);
-        resolve({ url: canvas.toDataURL("image/jpeg", 0.82), nomFichier: file.name });
+        resolve({ url: canvas.toDataURL("image/jpeg", 0.78), nomFichier: file.name });
       };
       img.src = reader.result as string;
     };

@@ -114,5 +114,10 @@ documenté dans **PIPELINE.md** (endpoints, token, schéma job, curl).
   au compteur mensuel (Flamme : cases limitées au reste du mois, refus backend).
   Anciennes formules stockées normalisées vers le catalogue (essentiel→
   etincelle, studio→flamme, signature→brasier).
+- Stockage des jobs du mock migré vers IndexedDB (base « vesta-demo », store
+  kv) : une vraie demande de 12 photos en data URL (~7 Mo) explosait le quota
+  localStorage (« Failed to execute setItem... exceeded the quota », vu par le
+  client). Migration automatique des anciens jobs localStorage au premier
+  chargement. Photos importées compressées à 1200 px / JPEG 0.78.
 - Cartes 3D de la home : seuil extérieur minimal RAYON_MIN_CARTES = 14.5
   (au-delà de la sphère bronze rayon 12) pour ne pas empiéter sur le logo.

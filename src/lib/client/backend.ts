@@ -144,12 +144,66 @@ function agenceDe(u: User | null): Agence | null {
   return agencesStockees().find((a) => a.id === u.agenceId) ?? null;
 }
 
-function jobs(): Job[] {
-  return lire<Job[]>(CLE_JOBS, []);
+/* ——— Stockage des jobs : IndexedDB. Les photos en data URL dépassent
+   vite le quota localStorage (~5 Mo) dès une vraie demande de 12 photos ;
+   IndexedDB se compte en Go. Comptes, invites et session restent en
+   localStorage, légers. ——— */
+
+const IDB_NOM = "vesta-demo";
+const IDB_STORE = "kv";
+let dbPromesse: Promise<IDBDatabase> | null = null;
+
+function ouvrirIdb(): Promise<IDBDatabase> {
+  if (!dbPromesse) {
+    dbPromesse = new Promise((resolve, reject) => {
+      const req = window.indexedDB.open(IDB_NOM, 1);
+      req.onupgradeneeded = () => {
+        if (!req.result.objectStoreNames.contains(IDB_STORE)) req.result.createObjectStore(IDB_STORE);
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  return dbPromesse;
 }
 
-function trouverJob(jobId: string): { tous: Job[]; i: number } {
-  const tous = jobs();
+async function ecrireJobs(tous: Job[]): Promise<void> {
+  if (typeof window === "undefined" || !window.indexedDB) return;
+  const db = await ouvrirIdb();
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    tx.objectStore(IDB_STORE).put(tous, CLE_JOBS);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function jobs(): Promise<Job[]> {
+  if (typeof window === "undefined" || !window.indexedDB) return [];
+  const db = await ouvrirIdb();
+  const stockes = await new Promise<Job[]>((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readonly");
+    const req = tx.objectStore(IDB_STORE).get(CLE_JOBS);
+    req.onsuccess = () => resolve((req.result as Job[]) ?? []);
+    req.onerror = () => reject(req.error);
+  });
+  /* Migration : les jobs d'avant vivaient en localStorage. */
+  const anciens = window.localStorage.getItem(CLE_JOBS);
+  if (anciens) {
+    window.localStorage.removeItem(CLE_JOBS);
+    try {
+      const fusion = [...(JSON.parse(anciens) as Job[]), ...stockes];
+      await ecrireJobs(fusion);
+      return fusion;
+    } catch {
+      /* anciens illisibles : on continue avec l'IndexedDB */
+    }
+  }
+  return stockes;
+}
+
+async function trouverJob(jobId: string): Promise<{ tous: Job[]; i: number }> {
+  const tous = await jobs();
   const i = tous.findIndex((j) => j.id === jobId);
   if (i < 0) throw new Error("Demande introuvable.");
   return { tous, i };
@@ -267,7 +321,7 @@ export const mockBackend: VestaBackend = {
   async mesJobs() {
     const u = this.utilisateurCourant();
     if (!u?.agenceId) return [];
-    return jobs()
+    return (await jobs())
       .filter((j) => j.client.id === u.agenceId)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
@@ -305,7 +359,11 @@ export const mockBackend: VestaBackend = {
       deliverables: [],
       reponses: [],
     };
-    ecrire(CLE_JOBS, [job, ...jobs()]);
+    try {
+      await ecrireJobs([job, ...(await jobs())]);
+    } catch {
+      throw new Error("Enregistrement impossible sur cet appareil. Libérez de l'espace de stockage et réessayez.");
+    }
     await notifier({
       type: "nouvelle-demande",
       destinataire: "studio@vesta",
@@ -318,7 +376,7 @@ export const mockBackend: VestaBackend = {
   async repondreComplement(jobId, texte, photos) {
     const u = this.utilisateurCourant();
     if (!u) throw new Error("Non connecté.");
-    const { tous, i } = trouverJob(jobId);
+    const { tous, i } = await trouverJob(jobId);
     tous[i] = {
       ...tous[i],
       reponses: [...tous[i].reponses, { texte, photos, le: new Date().toISOString() }],
@@ -326,7 +384,7 @@ export const mockBackend: VestaBackend = {
       status: "analyse",
       statusMessage: null,
     };
-    ecrire(CLE_JOBS, tous);
+    await ecrireJobs(tous);
     await notifier({
       type: "complement-reponse",
       destinataire: "studio@vesta",
@@ -339,14 +397,14 @@ export const mockBackend: VestaBackend = {
   async filmsRestants() {
     const agence = agenceDe(this.utilisateurCourant());
     if (!agence) return null;
-    const utilises = jobs().filter((j) => j.client.id === agence.id && memeMois(j.createdAt)).length;
+    const utilises = (await jobs()).filter((j) => j.client.id === agence.id && memeMois(j.createdAt)).length;
     return Math.max(0, agence.formule.quotaFilmsMois - utilises);
   },
 
   async stagingUtilisesCeMois() {
     const agence = agenceDe(this.utilisateurCourant());
     if (!agence) return 0;
-    return jobs()
+    return (await jobs())
       .filter((j) => j.client.id === agence.id && memeMois(j.createdAt))
       .reduce((n, j) => n + j.options.staging.length, 0);
   },
@@ -354,13 +412,13 @@ export const mockBackend: VestaBackend = {
   /* ——— Côté studio Vesta ——— */
 
   async tousLesJobs() {
-    return jobs().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return (await jobs()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
 
   async changerStatus(jobId, status, message) {
-    const { tous, i } = trouverJob(jobId);
+    const { tous, i } = await trouverJob(jobId);
     tous[i] = { ...tous[i], status, statusMessage: message?.trim() || null };
-    ecrire(CLE_JOBS, tous);
+    await ecrireJobs(tous);
     if (status === "livre") {
       await emailLivraison(tous[i]);
     } else if (status === "attention_requise") {
@@ -375,21 +433,21 @@ export const mockBackend: VestaBackend = {
   },
 
   async deposerLivrable(jobId, livrable) {
-    const { tous, i } = trouverJob(jobId);
+    const { tous, i } = await trouverJob(jobId);
     tous[i] = { ...tous[i], deliverables: [...tous[i].deliverables, livrable] };
-    ecrire(CLE_JOBS, tous);
+    await ecrireJobs(tous);
     return tous[i];
   },
 
   async renvoyerEmailLivraison(jobId) {
-    const { tous, i } = trouverJob(jobId);
+    const { tous, i } = await trouverJob(jobId);
     await emailLivraison(tous[i]);
   },
 
   async agences() {
     semer();
     const users = lire<CompteStocke[]>(CLE_USERS, []);
-    const tous = jobs();
+    const tous = await jobs();
     return agencesStockees().map((a) => ({
       id: a.id,
       nom: a.nom,
