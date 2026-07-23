@@ -343,21 +343,28 @@ function CameraRig() {
   return null;
 }
 
+/* Seuil extérieur minimal des cartes : au-delà de la première sphère
+   (rayon 12), pour ne jamais empiéter sur le logo au centre. */
+const RAYON_MIN_CARTES = 14.5;
+
 function positionsPour(n: number): [number, number, number][] {
   if (n <= 3) {
-    const base: [number, number, number][] = [
-      [10, 1.2, 0],
-      [-5, -0.8, 8.66],
-      [-5, 0.6, -8.66],
+    const directions: [number, number, number][] = [
+      [1, 0.12, 0],
+      [-0.5, -0.08, 0.866],
+      [-0.5, 0.06, -0.866],
     ];
-    return base.slice(0, n);
+    return directions.slice(0, n).map(([x, y, z]) => {
+      const k = RAYON_MIN_CARTES / Math.hypot(x, y, z);
+      return [x * k, y * k, z * k];
+    });
   }
   const goldenRatio = (1 + Math.sqrt(5)) / 2;
   return Array.from({ length: n }, (_, i) => {
     const y = 1 - (i / (n - 1)) * 2;
     const r = Math.sqrt(Math.max(0, 1 - y * y));
     const theta = (2 * Math.PI * i) / goldenRatio;
-    const layer = 12 + (i % 3) * 4;
+    const layer = RAYON_MIN_CARTES + (i % 3) * 4;
     return [Math.cos(theta) * r * layer, y * layer, Math.sin(theta) * r * layer];
   });
 }

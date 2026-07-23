@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/client/auth";
 import { backend } from "@/lib/client/backend";
-import type { Agence, Job } from "@/lib/client/types";
+import { resumeFormule, type Agence, type Job } from "@/lib/client/types";
 import CoquilleEspace, { Ico } from "./CoquilleEspace";
 import { BoutonBraise, EnTetePage, EtatVide, Pastille, TuileStat } from "./Interface";
 import NouvelleDemande from "./NouvelleDemande";
@@ -118,7 +118,7 @@ function VueAgence({
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <EnTetePage titre={agence.nom} sous={`FORMULE ${agence.formule.nom.toUpperCase()} · ${agence.formule.quotaFilmsMois} FILMS / MOIS`} />
+      <EnTetePage titre={agence.nom} sous={`FORMULE ${agence.formule.nom.toUpperCase()} · ${resumeFormule(agence.formule)}`} />
 
       <div className="grid grid-cols-2 gap-3 sm:max-w-sm">
         <TuileStat label="FILMS RESTANTS CE MOIS-CI" valeur={restants ?? "·"} accent />
@@ -264,6 +264,8 @@ export default function Espace() {
 
       {vue === "nouvelle" ? (
         <NouvelleDemande
+          formule={agence?.formule}
+          restants={restants}
           onEnvoye={async () => {
             await charger();
             setVue("demandes");

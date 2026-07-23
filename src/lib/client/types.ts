@@ -5,10 +5,26 @@
 export type Role = "client" | "vesta";
 
 export type Formule = {
-  /* Jamais de montant : nom commercial + quota films/mois uniquement. */
+  /* Jamais de montant : le nom commercial et les restrictions, c'est tout. */
+  id: string;
   nom: string;
   quotaFilmsMois: number;
+  stagingInclus: boolean;
 };
+
+/* LE CATALOGUE DES FORMULES — source de vérité unique. L'admin choisit
+   dans ce menu, les restrictions s'appliquent automatiquement partout
+   (quota bloquant, staging masqué si non inclus). Noms et contenus à
+   ajuster avec l'offre commerciale réelle. */
+export const FORMULES: Formule[] = [
+  { id: "essentiel", nom: "Essentiel", quotaFilmsMois: 4, stagingInclus: false },
+  { id: "studio", nom: "Studio", quotaFilmsMois: 8, stagingInclus: true },
+  { id: "signature", nom: "Signature", quotaFilmsMois: 12, stagingInclus: true },
+];
+
+export function resumeFormule(f: Formule): string {
+  return `${f.quotaFilmsMois} FILMS / MOIS · STAGING ${f.stagingInclus ? "INCLUS" : "NON INCLUS"}`;
+}
 
 /* L'agence est le workspace : les demandes, la formule et le quota lui
    appartiennent. Plusieurs membres (utilisateurs) par agence. */

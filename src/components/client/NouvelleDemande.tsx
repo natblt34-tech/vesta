@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import { backend } from "@/lib/client/backend";
 import { importerFichier, importerPhoto } from "@/lib/client/media";
 import { assainirPiece, PIECES_SUGGEREES, piecesDistinctes, suffixerPiece } from "@/lib/client/pieces";
-import { STYLES_STAGING, type Format, type StyleStaging } from "@/lib/client/types";
-import { BoutonBraise, EnTetePage } from "./Interface";
+import { STYLES_STAGING, type Format, type Formule, type StyleStaging } from "@/lib/client/types";
+import { BoutonBraise, EnTetePage, EtatVide } from "./Interface";
 
 const MAX_PHOTOS = 20;
 
@@ -42,8 +42,18 @@ function Toggle({
 
 /* La demande en assistant par étapes : une décision à la fois, pensé
    téléphone d'abord. Les noms de pièces des photos sont la clé d'entrée
-   du pipeline — suggestions cliquables, suffixe numérique automatique. */
-export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) {
+   du pipeline — suggestions cliquables, suffixe numérique automatique.
+   Les restrictions de la formule s'appliquent d'elles-mêmes : quota
+   atteint = dépôt bloqué, staging masqué si non inclus. */
+export default function NouvelleDemande({
+  onEnvoye,
+  formule,
+  restants,
+}: {
+  onEnvoye: () => void;
+  formule?: Formule;
+  restants?: number | null;
+}) {
   const [etape, setEtape] = useState(0);
   const [titre, setTitre] = useState("");
   const [ville, setVille] = useState("");
@@ -159,6 +169,18 @@ export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) 
       setEnCours(false);
     }
   };
+
+  /* Quota du mois épuisé : le dépôt est bloqué net. */
+  if (restants !== null && restants !== undefined && restants <= 0) {
+    return (
+      <div className="flex max-w-2xl flex-col gap-8">
+        <EnTetePage titre="Nouvelle demande" />
+        <EtatVide titre="QUOTA DU MOIS ATTEINT. VOTRE FORMULE NE PERMET PLUS DE DÉPOSER DE DEMANDE CE MOIS-CI. RAPPROCHEZ-VOUS DU STUDIO POUR L'AJUSTER." />
+      </div>
+    );
+  }
+
+  const stagingInclus = formule ? formule.stagingInclus : true;
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
@@ -417,6 +439,13 @@ export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) 
             <p className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
               HOME STAGING VIRTUEL
             </p>
+            {!stagingInclus ? (
+              <p className="voix-mono" style={{ color: "var(--color-filet)", lineHeight: 1.6 }}>
+                NON INCLUS DANS VOTRE FORMULE{formule ? ` ${formule.nom.toUpperCase()}` : ""}. RAPPROCHEZ-VOUS DU
+                STUDIO POUR L&apos;AJOUTER.
+              </p>
+            ) : (
+              <>
             <div className="flex flex-wrap gap-2">
               {pieces.map((r) => (
                 <Toggle key={r} actif={stagingRooms.includes(r)} onClick={() => basculer(stagingRooms, setStagingRooms, r)}>
@@ -447,6 +476,8 @@ export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) 
               LE STAGING EST LIVRÉ EN VISUELS AVANT/APRÈS. IL N&apos;APPARAÎT DANS LE FILM QUE POUR LES
               PIÈCES VUES SOUS UN SEUL ANGLE.
             </p>
+              </>
+            )}
           </div>
 
           <div className="flex flex-col gap-3">

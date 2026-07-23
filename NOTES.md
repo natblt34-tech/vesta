@@ -105,3 +105,11 @@ documenté dans **PIPELINE.md** (endpoints, token, schéma job, curl).
   Appartement Carmes) : seuls T2 Avignon et Maison d'architecte restent.
   Assets et champs de type (traversee, retouche CSS) conservés, dormants.
 - StatusOverlay masqué sur les routes du portail (double logo sinon).
+- Formules : catalogue unique `FORMULES` dans types.ts (Essentiel 4 films sans
+  staging, Studio 8, Signature 12 — noms/contenus placeholder à ajuster avec
+  l'offre réelle). L'admin choisit au menu déroulant, les restrictions
+  s'appliquent seules : quota BLOQUANT (barrière dans l'assistant + creerJob
+  qui refuse), staging masqué du formulaire et filtré côté backend si non
+  inclus. Résumé affiché partout via resumeFormule().
+- Cartes 3D de la home : seuil extérieur minimal RAYON_MIN_CARTES = 14.5
+  (au-delà de la sphère bronze rayon 12) pour ne pas empiéter sur le logo.

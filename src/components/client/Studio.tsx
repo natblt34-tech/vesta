@@ -9,8 +9,10 @@ import Champ from "./Champ";
 import CoquilleEspace, { Ico } from "./CoquilleEspace";
 import { BoutonBraise, Chronologie, EnTetePage, EtatVide, Pastille, TuileStat } from "./Interface";
 import {
+  FORMULES,
   LIBELLE_LIVRABLE,
   LIBELLE_STATUS,
+  resumeFormule,
   type CompteAgence,
   type DeliverableKind,
   type Job,
@@ -274,8 +276,10 @@ function DetailJob({ job, onRetour, onMaj }: { job: Job; onRetour: () => void; o
    ce qui crée le workspace, puis invite ses collègues lui-même. */
 function Comptes() {
   const [comptes, setComptes] = useState<CompteAgence[]>([]);
+  const [formuleId, setFormuleId] = useState(FORMULES[0].id);
   const [lien, setLien] = useState("");
   const [erreur, setErreur] = useState("");
+  const formule = FORMULES.find((f) => f.id === formuleId) ?? FORMULES[0];
 
   const charger = useCallback(async () => {
     setComptes(await backend.agences());
@@ -298,10 +302,7 @@ function Comptes() {
           setLien("");
           const data = new FormData(e.currentTarget);
           try {
-            const { lienInvitation } = await backend.creerInvitationClient(String(data.get("email")), {
-              nom: String(data.get("formule")),
-              quotaFilmsMois: Number(data.get("quota")),
-            });
+            const { lienInvitation } = await backend.creerInvitationClient(String(data.get("email")), formule);
             setLien(lienInvitation);
             (e.target as HTMLFormElement).reset();
           } catch (err) {
@@ -312,11 +313,30 @@ function Comptes() {
         <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
           INVITER UNE NOUVELLE AGENCE
         </p>
-        <div className="grid gap-5 sm:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2">
           <Champ label="EMAIL DU FONDATEUR" name="email" type="email" required />
-          <Champ label="FORMULE" name="formule" placeholder="Ex : Essentiel" required />
-          <Champ label="FILMS / MOIS" name="quota" type="number" min={1} defaultValue={4} required />
+          <label className="flex flex-col gap-2">
+            <span className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
+              FORMULE
+            </span>
+            <select
+              value={formuleId}
+              onChange={(e) => setFormuleId(e.target.value)}
+              className="w-full bg-transparent px-3 py-3 outline-none"
+              style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
+            >
+              {FORMULES.map((f) => (
+                <option key={f.id} value={f.id} style={{ background: "var(--color-basalte)" }}>
+                  {f.nom}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
+        {/* Les restrictions de l'offre choisie, appliquées automatiquement. */}
+        <p className="voix-mono -mt-1" style={{ color: "var(--color-bronze)" }}>
+          {resumeFormule(formule)}
+        </p>
         <p className="voix-mono -mt-2" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
           LE CLIENT NOMMERA SON AGENCE À LA CRÉATION DE SES ACCÈS, PUIS INVITERA SES COLLÈGUES LUI-MÊME.
         </p>

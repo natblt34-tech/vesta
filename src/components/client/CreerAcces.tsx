@@ -6,7 +6,7 @@ import { TransitionLink } from "@/components/chrome/Transition";
 import { useAuth } from "@/lib/client/auth";
 import { backend } from "@/lib/client/backend";
 import { media } from "@/lib/media";
-import type { Invitation } from "@/lib/client/types";
+import { resumeFormule, type Invitation } from "@/lib/client/types";
 import CoquilleConnexion, { ChampMotDePasse } from "@/components/ui/sign-in";
 import Champ from "./Champ";
 
@@ -76,6 +76,9 @@ function Formulaire() {
     >
       {fondateur ? (
         <>
+          <p className="voix-mono -mt-1" style={{ color: "var(--color-bronze)", lineHeight: 1.6 }}>
+            FORMULE {info.formule.nom.toUpperCase()} · {resumeFormule(info.formule)}
+          </p>
           <Champ
             label="NOM DE VOTRE AGENCE"
             name="agence"

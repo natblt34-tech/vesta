@@ -18,17 +18,18 @@
    (voir PIPELINE.md) : `client.id` est l'identifiant de l'agence.
    ———————————————————————————————————————————————————————————— */
 
-import type {
-  Agence,
-  CompteAgence,
-  Deliverable,
-  Formule,
-  Invitation,
-  Job,
-  JobPhoto,
-  NouvelleDemandeData,
-  StatusJob,
-  User,
+import {
+  FORMULES,
+  type Agence,
+  type CompteAgence,
+  type Deliverable,
+  type Formule,
+  type Invitation,
+  type Job,
+  type JobPhoto,
+  type NouvelleDemandeData,
+  type StatusJob,
+  type User,
 } from "./types";
 import { notifier } from "./notify";
 
@@ -108,7 +109,7 @@ function semer() {
       {
         id: "cli_demo",
         nom: "Agence Démo",
-        formule: { nom: "Essentiel", quotaFilmsMois: 4 },
+        formule: FORMULES.find((f) => f.id === "studio")!,
         creeLe: new Date().toISOString(),
       } satisfies Agence,
     ]);
@@ -176,7 +177,7 @@ export const mockBackend: VestaBackend = {
   async infoInvitation(jeton) {
     semer();
     if (jeton === "demo-invite") {
-      return { type: "fondateur", formule: { nom: "Essentiel", quotaFilmsMois: 4 } };
+      return { type: "fondateur", formule: FORMULES[0] };
     }
     const inv = lire<InviteStockee[]>(CLE_INVITES, []).find((x) => x.jeton === jeton);
     if (!inv) return null;
@@ -260,6 +261,13 @@ export const mockBackend: VestaBackend = {
     const u = this.utilisateurCourant();
     const agence = agenceDe(u);
     if (!u || !agence) throw new Error("Non connecté.");
+    /* Les restrictions de la formule s'appliquent ici aussi (pas
+       seulement dans l'interface) : quota bloquant, staging filtré. */
+    const restants = await this.filmsRestants();
+    if (restants !== null && restants <= 0) {
+      throw new Error("Quota du mois atteint. Rapprochez-vous du studio pour ajuster votre formule.");
+    }
+    if (!agence.formule.stagingInclus) d = { ...d, options: { ...d.options, staging: [] } };
     const job: Job = {
       id: id("job"),
       createdAt: new Date().toISOString(),
