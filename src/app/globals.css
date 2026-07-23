@@ -223,3 +223,45 @@ body[data-cursor-mute="true"] .cursor-braise {
     display: none;
   }
 }
+
+/* ————— Espace connexion : révélations échelonnées (masque + poids) ————— */
+.anim-connexion {
+  opacity: 0;
+  transform: translateY(14px);
+  clip-path: inset(0 0 100% 0);
+  animation: connexion-reveal 0.7s var(--ease-poids) forwards;
+  animation-delay: var(--delai, 0s);
+}
+
+@keyframes connexion-reveal {
+  60% {
+    clip-path: inset(0 0 0% 0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    clip-path: inset(0 0 0% 0);
+  }
+}
+
+/* Le panneau image : wipe latéral, à la manière des transitions de page. */
+.anim-connexion-hero {
+  clip-path: inset(0 0 0 100%);
+  animation: connexion-hero 0.9s var(--ease-pierre) 0.15s forwards;
+}
+
+@keyframes connexion-hero {
+  to {
+    clip-path: inset(0 0 0 0%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-connexion,
+  .anim-connexion-hero {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}
