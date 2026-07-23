@@ -23,9 +23,8 @@ export default function Connexion() {
     <CoquilleConnexion
       surTitre="ESPACE CLIENT"
       titre="Connexion"
-      heroSrc={media("avignon-poster.jpg")}
-      heroPosition="center 40%"
-      heroLegende="FILM LIVRÉ · T2 AVIGNON · 24 S"
+      heroSrc={media("connexion-hero.webp")}
+      heroPosition="center 55%"
       pied={
         <div className="mt-8 flex flex-col gap-3">
           <p className="voix-mono" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
