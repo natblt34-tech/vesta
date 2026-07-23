@@ -49,10 +49,12 @@ export default function NouvelleDemande({
   onEnvoye,
   formule,
   restants,
+  stagingUtilises,
 }: {
   onEnvoye: () => void;
   formule?: Formule;
   restants?: number | null;
+  stagingUtilises?: number;
 }) {
   const [etape, setEtape] = useState(0);
   const [titre, setTitre] = useState("");
@@ -180,7 +182,18 @@ export default function NouvelleDemande({
     );
   }
 
-  const stagingInclus = formule ? formule.stagingInclus : true;
+  /* Home staging selon la formule : non inclus, plafonné (photos/mois)
+     ou illimité. Le plafond compte les pièces déjà commandées ce mois-ci. */
+  const quotaStaging = formule ? formule.stagingPhotosMois : "illimite";
+  const stagingRestants =
+    typeof quotaStaging === "number" ? Math.max(0, quotaStaging - (stagingUtilises ?? 0)) : null;
+  const stagingChoisis = stagingRooms.filter((r) => pieces.includes(r)).length;
+
+  const basculerStaging = (room: string) => {
+    const dejaActif = stagingRooms.includes(room);
+    if (!dejaActif && stagingRestants !== null && stagingChoisis >= stagingRestants) return;
+    basculer(stagingRooms, setStagingRooms, room);
+  };
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
@@ -439,16 +452,27 @@ export default function NouvelleDemande({
             <p className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
               HOME STAGING VIRTUEL
             </p>
-            {!stagingInclus ? (
+            {quotaStaging === null ? (
               <p className="voix-mono" style={{ color: "var(--color-filet)", lineHeight: 1.6 }}>
                 NON INCLUS DANS VOTRE FORMULE{formule ? ` ${formule.nom.toUpperCase()}` : ""}. RAPPROCHEZ-VOUS DU
                 STUDIO POUR L&apos;AJOUTER.
               </p>
+            ) : stagingRestants === 0 && stagingChoisis === 0 ? (
+              <p className="voix-mono" style={{ color: "var(--color-filet)", lineHeight: 1.6 }}>
+                QUOTA DE STAGING DU MOIS ATTEINT ({quotaStaging} PHOTOS / MOIS).
+              </p>
             ) : (
               <>
+            {stagingRestants !== null ? (
+              <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
+                {Math.max(0, stagingRestants - stagingChoisis)} PHOTO
+                {Math.max(0, stagingRestants - stagingChoisis) > 1 ? "S" : ""} DE STAGING RESTANTE
+                {Math.max(0, stagingRestants - stagingChoisis) > 1 ? "S" : ""} CE MOIS-CI
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-2">
               {pieces.map((r) => (
-                <Toggle key={r} actif={stagingRooms.includes(r)} onClick={() => basculer(stagingRooms, setStagingRooms, r)}>
+                <Toggle key={r} actif={stagingRooms.includes(r)} onClick={() => basculerStaging(r)}>
                   {r}
                 </Toggle>
               ))}

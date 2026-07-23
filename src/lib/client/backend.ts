@@ -50,6 +50,8 @@ export interface VestaBackend {
   repondreComplement(jobId: string, texte: string, photos: JobPhoto[]): Promise<Job>;
   /* Films restants ce mois-ci pour la formule de l'agence. */
   filmsRestants(): Promise<number | null>;
+  /* Photos de home staging déjà commandées ce mois-ci par l'agence. */
+  stagingUtilisesCeMois(): Promise<number>;
 
   // Côté studio Vesta (admin)
   tousLesJobs(): Promise<Job[]>;
@@ -109,7 +111,7 @@ function semer() {
       {
         id: "cli_demo",
         nom: "Agence Démo",
-        formule: FORMULES.find((f) => f.id === "studio")!,
+        formule: FORMULES.find((f) => f.id === "flamme")!,
         creeLe: new Date().toISOString(),
       } satisfies Agence,
     ]);
@@ -120,8 +122,21 @@ function semer() {
   }
 }
 
+/* Les agences créées avant la plaquette portent l'ancien format de
+   formule : on les rattache au catalogue actuel. */
+const ANCIENNES_FORMULES: Record<string, string> = {
+  essentiel: "etincelle",
+  studio: "flamme",
+  signature: "brasier",
+};
+
+function normaliserFormule(f: Formule | { id?: string } | undefined): Formule {
+  if (f && "stagingPhotosMois" in f && "montageInclus" in f) return f as Formule;
+  return FORMULES.find((x) => x.id === ANCIENNES_FORMULES[f?.id ?? ""]) ?? FORMULES[0];
+}
+
 function agencesStockees(): Agence[] {
-  return lire<Agence[]>(CLE_AGENCES, []);
+  return lire<Agence[]>(CLE_AGENCES, []).map((a) => ({ ...a, formule: normaliserFormule(a.formule) }));
 }
 
 function agenceDe(u: User | null): Agence | null {
@@ -262,12 +277,20 @@ export const mockBackend: VestaBackend = {
     const agence = agenceDe(u);
     if (!u || !agence) throw new Error("Non connecté.");
     /* Les restrictions de la formule s'appliquent ici aussi (pas
-       seulement dans l'interface) : quota bloquant, staging filtré. */
+       seulement dans l'interface) : quotas bloquants, staging plafonné. */
     const restants = await this.filmsRestants();
     if (restants !== null && restants <= 0) {
       throw new Error("Quota du mois atteint. Rapprochez-vous du studio pour ajuster votre formule.");
     }
-    if (!agence.formule.stagingInclus) d = { ...d, options: { ...d.options, staging: [] } };
+    const quotaStaging = agence.formule.stagingPhotosMois;
+    if (quotaStaging === null) {
+      d = { ...d, options: { ...d.options, staging: [] } };
+    } else if (typeof quotaStaging === "number") {
+      const utilises = await this.stagingUtilisesCeMois();
+      if (d.options.staging.length > Math.max(0, quotaStaging - utilises)) {
+        throw new Error("Quota de home staging du mois dépassé.");
+      }
+    }
     const job: Job = {
       id: id("job"),
       createdAt: new Date().toISOString(),
@@ -318,6 +341,14 @@ export const mockBackend: VestaBackend = {
     if (!agence) return null;
     const utilises = jobs().filter((j) => j.client.id === agence.id && memeMois(j.createdAt)).length;
     return Math.max(0, agence.formule.quotaFilmsMois - utilises);
+  },
+
+  async stagingUtilisesCeMois() {
+    const agence = agenceDe(this.utilisateurCourant());
+    if (!agence) return 0;
+    return jobs()
+      .filter((j) => j.client.id === agence.id && memeMois(j.createdAt))
+      .reduce((n, j) => n + j.options.staging.length, 0);
   },
 
   /* ——— Côté studio Vesta ——— */

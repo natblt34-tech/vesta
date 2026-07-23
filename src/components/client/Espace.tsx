@@ -194,11 +194,13 @@ export default function Espace() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [agence, setAgence] = useState<(Agence & { membres: string[] }) | null>(null);
   const [restants, setRestants] = useState<number | null>(null);
+  const [stagingUtilises, setStagingUtilises] = useState(0);
 
   const charger = useCallback(async () => {
     setJobs(await backend.mesJobs());
     setAgence(await backend.monAgence());
     setRestants(await backend.filmsRestants());
+    setStagingUtilises(await backend.stagingUtilisesCeMois());
   }, []);
 
   useEffect(() => {
@@ -266,6 +268,7 @@ export default function Espace() {
         <NouvelleDemande
           formule={agence?.formule}
           restants={restants}
+          stagingUtilises={stagingUtilises}
           onEnvoye={async () => {
             await charger();
             setVue("demandes");

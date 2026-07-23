@@ -105,11 +105,14 @@ documenté dans **PIPELINE.md** (endpoints, token, schéma job, curl).
   Appartement Carmes) : seuls T2 Avignon et Maison d'architecte restent.
   Assets et champs de type (traversee, retouche CSS) conservés, dormants.
 - StatusOverlay masqué sur les routes du portail (double logo sinon).
-- Formules : catalogue unique `FORMULES` dans types.ts (Essentiel 4 films sans
-  staging, Studio 8, Signature 12 — noms/contenus placeholder à ajuster avec
-  l'offre réelle). L'admin choisit au menu déroulant, les restrictions
-  s'appliquent seules : quota BLOQUANT (barrière dans l'assistant + creerJob
-  qui refuse), staging masqué du formulaire et filtré côté backend si non
-  inclus. Résumé affiché partout via resumeFormule().
+- Formules : catalogue unique `FORMULES` dans types.ts, aligné sur la plaquette
+  (PPT Présentation.pdf) : Étincelle 3 films sans staging, Flamme 5 films +
+  staging 10 photos/mois, Brasier 10 films + staging illimité + montage inclus.
+  Montants JAMAIS affichés dans l'espace client. L'admin choisit au menu
+  déroulant, les restrictions s'appliquent seules : quota films BLOQUANT
+  (barrière assistant + refus creerJob), staging masqué (Étincelle) ou plafonné
+  au compteur mensuel (Flamme : cases limitées au reste du mois, refus backend).
+  Anciennes formules stockées normalisées vers le catalogue (essentiel→
+  etincelle, studio→flamme, signature→brasier).
 - Cartes 3D de la home : seuil extérieur minimal RAYON_MIN_CARTES = 14.5
   (au-delà de la sphère bronze rayon 12) pour ne pas empiéter sur le logo.

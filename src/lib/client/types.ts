@@ -4,26 +4,37 @@
 
 export type Role = "client" | "vesta";
 
+/* Quota de home staging virtuel : null = non inclus, nombre = photos
+   par mois, "illimite" = sans limite. */
+export type QuotaStaging = number | "illimite" | null;
+
 export type Formule = {
   /* Jamais de montant : le nom commercial et les restrictions, c'est tout. */
   id: string;
   nom: string;
   quotaFilmsMois: number;
-  stagingInclus: boolean;
+  stagingPhotosMois: QuotaStaging;
+  montageInclus: boolean;
 };
 
-/* LE CATALOGUE DES FORMULES — source de vérité unique. L'admin choisit
-   dans ce menu, les restrictions s'appliquent automatiquement partout
-   (quota bloquant, staging masqué si non inclus). Noms et contenus à
-   ajuster avec l'offre commerciale réelle. */
+/* LE CATALOGUE DES FORMULES — source de vérité unique, alignée sur la
+   plaquette commerciale. L'admin choisit dans ce menu, les restrictions
+   s'appliquent automatiquement partout (quotas bloquants, staging masqué
+   ou plafonné). Les montants restent hors de l'espace client. */
 export const FORMULES: Formule[] = [
-  { id: "essentiel", nom: "Essentiel", quotaFilmsMois: 4, stagingInclus: false },
-  { id: "studio", nom: "Studio", quotaFilmsMois: 8, stagingInclus: true },
-  { id: "signature", nom: "Signature", quotaFilmsMois: 12, stagingInclus: true },
+  { id: "etincelle", nom: "Étincelle", quotaFilmsMois: 3, stagingPhotosMois: null, montageInclus: false },
+  { id: "flamme", nom: "Flamme", quotaFilmsMois: 5, stagingPhotosMois: 10, montageInclus: false },
+  { id: "brasier", nom: "Brasier", quotaFilmsMois: 10, stagingPhotosMois: "illimite", montageInclus: true },
 ];
 
 export function resumeFormule(f: Formule): string {
-  return `${f.quotaFilmsMois} FILMS / MOIS · STAGING ${f.stagingInclus ? "INCLUS" : "NON INCLUS"}`;
+  const staging =
+    f.stagingPhotosMois === null
+      ? "STAGING NON INCLUS"
+      : f.stagingPhotosMois === "illimite"
+        ? "STAGING ILLIMITÉ"
+        : `STAGING ${f.stagingPhotosMois} PHOTOS / MOIS`;
+  return `${f.quotaFilmsMois} FILMS / MOIS · ${staging} · MONTAGE ${f.montageInclus ? "INCLUS" : "EN OPTION"}`;
 }
 
 /* L'agence est le workspace : les demandes, la formule et le quota lui
