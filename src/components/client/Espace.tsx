@@ -4,14 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/client/auth";
 import { backend } from "@/lib/client/backend";
-import type { Job } from "@/lib/client/types";
+import type { Agence, Job } from "@/lib/client/types";
 import CoquilleEspace, { Ico } from "./CoquilleEspace";
 import { BoutonBraise, EnTetePage, EtatVide, Pastille, TuileStat } from "./Interface";
 import NouvelleDemande from "./NouvelleDemande";
 import MesDemandes from "./MesDemandes";
 import AideBulle from "./AideBulle";
 
-type Vue = "apercu" | "demandes" | "nouvelle";
+type Vue = "apercu" | "demandes" | "nouvelle" | "agence";
 
 const EN_COURS = ["recu", "analyse", "en_production", "controle_qualite"];
 
@@ -100,16 +100,104 @@ function Apercu({
   );
 }
 
+/* L'agence : le workspace, sa formule, son équipe, l'invitation des
+   collègues (rattachés automatiquement à l'espace de l'agence). */
+function VueAgence({
+  agence,
+  restants,
+  emailCourant,
+}: {
+  agence: (Agence & { membres: string[] }) | null;
+  restants: number | null;
+  emailCourant: string;
+}) {
+  const [lien, setLien] = useState("");
+  const [erreur, setErreur] = useState("");
+
+  if (!agence) return null;
+
+  return (
+    <div className="flex max-w-2xl flex-col gap-8">
+      <EnTetePage titre={agence.nom} sous={`FORMULE ${agence.formule.nom.toUpperCase()} · ${agence.formule.quotaFilmsMois} FILMS / MOIS`} />
+
+      <div className="grid grid-cols-2 gap-3 sm:max-w-sm">
+        <TuileStat label="FILMS RESTANTS CE MOIS-CI" valeur={restants ?? "·"} accent />
+        <TuileStat label="MEMBRES" valeur={agence.membres.length} />
+      </div>
+
+      <section className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
+            L&apos;ÉQUIPE
+          </p>
+          <BoutonBraise
+            className="!px-5 !py-2.5"
+            onClick={async () => {
+              setErreur("");
+              try {
+                const { lienInvitation } = await backend.inviterMembre();
+                setLien(lienInvitation);
+              } catch {
+                setErreur("Invitation impossible.");
+              }
+            }}
+          >
+            Inviter un collègue
+          </BoutonBraise>
+        </div>
+
+        <ul className="flex flex-col" style={{ borderTop: "1px solid var(--color-filet)" }}>
+          {agence.membres.map((m) => (
+            <li
+              key={m}
+              className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-3.5"
+              style={{ borderBottom: "1px solid var(--color-filet)" }}
+            >
+              <span style={{ color: "var(--color-pierre)" }}>{m}</span>
+              {m === emailCourant ? (
+                <span className="voix-mono" style={{ color: "var(--color-bronze)" }}>
+                  VOUS
+                </span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+
+        {lien ? (
+          <div className="flex flex-col gap-2 p-4" style={{ border: "1px solid var(--color-filet)", background: "var(--color-basalte-2)" }}>
+            <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
+              LIEN À TRANSMETTRE À VOTRE COLLÈGUE · VALABLE UNE FOIS
+            </p>
+            <p className="voix-mono break-all" style={{ color: "var(--color-pierre)", lineHeight: 1.6 }}>
+              {lien}
+            </p>
+            <p className="voix-mono" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
+              IL CRÉERA SES ACCÈS ET REJOINDRA AUTOMATIQUEMENT L&apos;ESPACE DE {agence.nom.toUpperCase()}.
+            </p>
+          </div>
+        ) : null}
+        {erreur ? (
+          <p className="voix-mono" style={{ color: "var(--color-braise-vive)" }}>
+            {erreur}
+          </p>
+        ) : null}
+      </section>
+    </div>
+  );
+}
+
 export default function Espace() {
   const router = useRouter();
   const { user, pret, deconnexion } = useAuth();
   const [vue, setVue] = useState<Vue>("apercu");
   const [ouvert, setOuvert] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [agence, setAgence] = useState<(Agence & { membres: string[] }) | null>(null);
   const [restants, setRestants] = useState<number | null>(null);
 
   const charger = useCallback(async () => {
     setJobs(await backend.mesJobs());
+    setAgence(await backend.monAgence());
     setRestants(await backend.filmsRestants());
   }, []);
 
@@ -137,13 +225,14 @@ export default function Espace() {
         { id: "apercu", libelle: "Vue d'ensemble", icone: Ico.apercu },
         { id: "demandes", libelle: "Demandes", icone: Ico.demandes, alerte },
         { id: "nouvelle", libelle: "Nouvelle demande", icone: Ico.nouvelle },
+        { id: "agence", libelle: "Agence", icone: Ico.comptes },
       ]}
       actif={vue}
       onChange={(id) => {
         setVue(id as Vue);
         setOuvert(null);
       }}
-      agence={user.agence}
+      agence={agence?.nom}
       email={user.email}
       onDeconnexion={() => {
         deconnexion();
@@ -154,7 +243,7 @@ export default function Espace() {
         <Apercu
           jobs={jobs}
           restants={restants}
-          formule={user.formule?.nom}
+          formule={agence?.formule.nom}
           onOuvrir={(id) => {
             setOuvert(id);
             setVue("demandes");
@@ -181,6 +270,8 @@ export default function Espace() {
           }}
         />
       ) : null}
+
+      {vue === "agence" ? <VueAgence agence={agence} restants={restants} emailCourant={user.email} /> : null}
 
       <AideBulle />
     </CoquilleEspace>

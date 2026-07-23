@@ -91,3 +91,17 @@ documenté dans **PIPELINE.md** (endpoints, token, schéma job, curl).
   (jobs du mois calendaire vs quota). Non bloquant en v1.
 - Emails simulés (notify.ts) : nouvelle-demande → studio ; livraison et
   complement-demande → client ; complement-reponse et aide → studio.
+
+### Workspaces agence (2026-07-23, même journée)
+- L'agence devient le workspace : demandes, formule et quota lui appartiennent
+  (`job.client.id` = id d'agence). Vesta invite un fondateur (email + formule) ;
+  il NOMME SON AGENCE à la création de ses accès (création du workspace), puis
+  invite ses collègues depuis l'onglet Agence (lien à usage unique, rattachement
+  automatique). `/creer-acces` a deux modes selon le jeton (fondateur/membre).
+- Interface refondue en coquille SaaS : sidebar desktop + barre d'onglets basse
+  mobile, vue d'ensemble à tuiles, chronologie de production, demandes avec
+  recherche/filtres et détail 2 colonnes, assistant de demande en 5 étapes.
+- Projets fictifs retirés du site vitrine (T3 haussmannien, T3 Saint-Aubin,
+  Appartement Carmes) : seuls T2 Avignon et Maison d'architecte restent.
+  Assets et champs de type (traversee, retouche CSS) conservés, dormants.
+- StatusOverlay masqué sur les routes du portail (double logo sinon).

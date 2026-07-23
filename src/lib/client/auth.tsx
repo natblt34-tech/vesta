@@ -11,7 +11,7 @@ type AuthCtx = {
   user: User | null;
   pret: boolean;
   connexion: (email: string, mdp: string) => Promise<void>;
-  creerAcces: (invite: string, email: string, mdp: string) => Promise<void>;
+  creerAcces: (invite: string, email: string, mdp: string, nomAgence?: string) => Promise<void>;
   deconnexion: () => void;
 };
 
@@ -30,8 +30,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await backend.connexion(email, mdp));
   }, []);
 
-  const creerAcces = useCallback(async (invite: string, email: string, mdp: string) => {
-    setUser(await backend.creerAcces(invite, email, mdp));
+  const creerAcces = useCallback(async (invite: string, email: string, mdp: string, nomAgence?: string) => {
+    setUser(await backend.creerAcces(invite, email, mdp, nomAgence));
   }, []);
 
   const deconnexion = useCallback(() => {

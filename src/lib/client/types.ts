@@ -10,13 +10,25 @@ export type Formule = {
   quotaFilmsMois: number;
 };
 
+/* L'agence est le workspace : les demandes, la formule et le quota lui
+   appartiennent. Plusieurs membres (utilisateurs) par agence. */
+export type Agence = {
+  id: string; // cli_xxx — c'est lui qui apparaît dans job.client.id
+  nom: string;
+  formule: Formule;
+  creeLe: string; // ISO
+};
+
 export type User = {
   id: string;
   email: string;
   role: Role;
-  agence?: string;
-  formule?: Formule;
+  agenceId?: string;
 };
+
+export type Invitation =
+  | { type: "fondateur"; formule: Formule; email?: string }
+  | { type: "membre"; agenceId: string; agenceNom: string };
 
 export type Format = "16:9" | "9:16";
 
@@ -110,11 +122,11 @@ export type NouvelleDemandeData = {
   options: OptionsJob;
 };
 
-/* Compte client vu par l'admin. */
-export type CompteClient = {
+/* Agence vue par l'admin. */
+export type CompteAgence = {
   id: string;
-  email: string;
-  agence: string;
+  nom: string;
   formule: Formule;
   filmsCeMois: number;
+  membres: string[]; // emails
 };

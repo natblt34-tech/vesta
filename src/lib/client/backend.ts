@@ -9,14 +9,21 @@
    réel (Supabase ou petit serveur Node) implémente la même interface
    et on change la seule ligne `export const backend = ...` en bas.
 
+   Modèle : l'AGENCE est le workspace. Le fondateur (invité par Vesta)
+   nomme son agence à la création de ses accès ; il invite ensuite ses
+   collègues, rattachés automatiquement au même workspace. Demandes,
+   formule et quota appartiennent à l'agence.
+
    Les jobs sont stockés AU FORMAT EXACT du contrat pipeline
-   (voir PIPELINE.md) : l'API REST les servira tels quels.
+   (voir PIPELINE.md) : `client.id` est l'identifiant de l'agence.
    ———————————————————————————————————————————————————————————— */
 
 import type {
-  CompteClient,
+  Agence,
+  CompteAgence,
   Deliverable,
   Formule,
+  Invitation,
   Job,
   JobPhoto,
   NouvelleDemandeData,
@@ -26,17 +33,21 @@ import type {
 import { notifier } from "./notify";
 
 export interface VestaBackend {
-  // Auth — comptes créés par Vesta, pas d'inscription libre.
+  // Auth — pas d'inscription libre : invitation Vesta (fondateur)
+  // ou invitation d'agence (membre).
   utilisateurCourant(): User | null;
   connexion(email: string, motDePasse: string): Promise<User>;
-  creerAcces(invite: string, email: string, motDePasse: string): Promise<User>;
+  infoInvitation(jeton: string): Promise<Invitation | null>;
+  creerAcces(invite: string, email: string, motDePasse: string, nomAgence?: string): Promise<User>;
   deconnexion(): void;
 
-  // Côté client
+  // Côté client (workspace agence)
+  monAgence(): Promise<(Agence & { membres: string[] }) | null>;
+  inviterMembre(): Promise<{ lienInvitation: string }>;
   mesJobs(): Promise<Job[]>;
   creerJob(d: NouvelleDemandeData): Promise<Job>;
   repondreComplement(jobId: string, texte: string, photos: JobPhoto[]): Promise<Job>;
-  /* Films restants ce mois-ci pour la formule du compte (null : sans formule). */
+  /* Films restants ce mois-ci pour la formule de l'agence. */
   filmsRestants(): Promise<number | null>;
 
   // Côté studio Vesta (admin)
@@ -44,22 +55,25 @@ export interface VestaBackend {
   changerStatus(jobId: string, status: StatusJob, message?: string): Promise<Job>;
   deposerLivrable(jobId: string, livrable: Deliverable): Promise<Job>;
   renvoyerEmailLivraison(jobId: string): Promise<void>;
-  comptesClients(): Promise<CompteClient[]>;
-  /* Crée le compte côté Vesta et renvoie le lien d'invitation à envoyer. */
-  creerCompteClient(email: string, agence: string, formule: Formule): Promise<{ lienInvitation: string }>;
+  agences(): Promise<CompteAgence[]>;
+  /* Invitation fondateur : email + formule ; le client nommera son agence. */
+  creerInvitationClient(email: string, formule: Formule): Promise<{ lienInvitation: string }>;
 
   demanderAide(message: string): Promise<void>;
 }
 
 /* —————————————————— Implémentation mock (démo locale) —————————————————— */
 
-const CLE_USERS = "vesta-users-v2";
+const CLE_USERS = "vesta-users-v3";
+const CLE_AGENCES = "vesta-agences";
 const CLE_JOBS = "vesta-jobs";
-const CLE_SESSION = "vesta-session-v2";
-const CLE_INVITES = "vesta-invites";
+const CLE_SESSION = "vesta-session-v3";
+const CLE_INVITES = "vesta-invites-v2";
 
 type CompteStocke = User & { motDePasse: string };
-type InviteStockee = { jeton: string; email: string; agence: string; formule: Formule };
+type InviteStockee =
+  | { jeton: string; type: "fondateur"; email: string; formule: Formule }
+  | { jeton: string; type: "membre"; agenceId: string };
 
 function lire<T>(cle: string, defaut: T): T {
   if (typeof window === "undefined") return defaut;
@@ -90,18 +104,28 @@ function memeMois(iso: string): boolean {
 function semer() {
   const users = lire<CompteStocke[]>(CLE_USERS, []);
   if (users.length === 0) {
+    ecrire(CLE_AGENCES, [
+      {
+        id: "cli_demo",
+        nom: "Agence Démo",
+        formule: { nom: "Essentiel", quotaFilmsMois: 4 },
+        creeLe: new Date().toISOString(),
+      } satisfies Agence,
+    ]);
     ecrire(CLE_USERS, [
       { id: "vesta", email: "studio@vesta", role: "vesta", motDePasse: "vesta" },
-      {
-        id: "demo",
-        email: "agence@demo",
-        role: "client",
-        agence: "Agence Démo",
-        formule: { nom: "Essentiel", quotaFilmsMois: 4 },
-        motDePasse: "demo",
-      },
+      { id: "demo", email: "agence@demo", role: "client", agenceId: "cli_demo", motDePasse: "demo" },
     ]);
   }
+}
+
+function agencesStockees(): Agence[] {
+  return lire<Agence[]>(CLE_AGENCES, []);
+}
+
+function agenceDe(u: User | null): Agence | null {
+  if (!u?.agenceId) return null;
+  return agencesStockees().find((a) => a.id === u.agenceId) ?? null;
 }
 
 function jobs(): Job[] {
@@ -115,10 +139,13 @@ function trouverJob(jobId: string): { tous: Job[]; i: number } {
   return { tous, i };
 }
 
+function base(): string {
+  if (typeof window === "undefined") return "";
+  return `${window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`;
+}
+
 function lienEspace(): string {
-  if (typeof window === "undefined") return "/espace";
-  const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-  return `${window.location.origin}${base}/espace/`;
+  return `${base()}/espace/`;
 }
 
 async function emailLivraison(job: Job) {
@@ -146,23 +173,50 @@ export const mockBackend: VestaBackend = {
     return user;
   },
 
-  async creerAcces(invite, email, motDePasse) {
+  async infoInvitation(jeton) {
     semer();
-    if (!invite) throw new Error("Lien d'invitation invalide.");
+    if (jeton === "demo-invite") {
+      return { type: "fondateur", formule: { nom: "Essentiel", quotaFilmsMois: 4 } };
+    }
+    const inv = lire<InviteStockee[]>(CLE_INVITES, []).find((x) => x.jeton === jeton);
+    if (!inv) return null;
+    if (inv.type === "fondateur") return { type: "fondateur", formule: inv.formule, email: inv.email };
+    const agence = agencesStockees().find((a) => a.id === inv.agenceId);
+    if (!agence) return null;
+    return { type: "membre", agenceId: agence.id, agenceNom: agence.nom };
+  },
+
+  async creerAcces(invite, email, motDePasse, nomAgence) {
+    semer();
+    const info = await this.infoInvitation(invite);
+    if (!info) throw new Error("Lien d'invitation invalide ou déjà utilisé.");
     const users = lire<CompteStocke[]>(CLE_USERS, []);
     if (users.some((x) => x.email.toLowerCase() === email.toLowerCase())) {
       throw new Error("Un compte existe déjà pour cet email.");
     }
-    /* En prod : jeton signé validé côté serveur. En mock : l'invitation
-       créée par l'admin porte l'agence et la formule ; à défaut
-       (« demo-invite »), compte de démonstration. */
-    const invites = lire<InviteStockee[]>(CLE_INVITES, []);
-    const inv = invites.find((x) => x.jeton === invite);
-    const user: User = inv
-      ? { id: id("cli"), email, role: "client", agence: inv.agence, formule: inv.formule }
-      : { id: id("cli"), email, role: "client", agence: email.split("@")[0], formule: { nom: "Essentiel", quotaFilmsMois: 4 } };
-    if (inv) ecrire(CLE_INVITES, invites.filter((x) => x.jeton !== invite));
+
+    let agenceId: string;
+    if (info.type === "fondateur") {
+      /* Le fondateur crée le workspace de son agence. */
+      if (!nomAgence?.trim()) throw new Error("Indiquez le nom de votre agence.");
+      const agence: Agence = {
+        id: id("cli"),
+        nom: nomAgence.trim(),
+        formule: info.formule,
+        creeLe: new Date().toISOString(),
+      };
+      ecrire(CLE_AGENCES, [...agencesStockees(), agence]);
+      agenceId = agence.id;
+    } else {
+      /* Le membre rejoint le workspace existant. */
+      agenceId = info.agenceId;
+    }
+
+    const user: User = { id: id("usr"), email, role: "client", agenceId };
     ecrire(CLE_USERS, [...users, { ...user, motDePasse }]);
+    if (invite !== "demo-invite") {
+      ecrire(CLE_INVITES, lire<InviteStockee[]>(CLE_INVITES, []).filter((x) => x.jeton !== invite));
+    }
     ecrire(CLE_SESSION, user);
     return user;
   },
@@ -171,23 +225,45 @@ export const mockBackend: VestaBackend = {
     if (typeof window !== "undefined") window.localStorage.removeItem(CLE_SESSION);
   },
 
-  /* ——— Côté client ——— */
+  /* ——— Côté client (workspace agence) ——— */
+
+  async monAgence() {
+    semer();
+    const u = this.utilisateurCourant();
+    const agence = agenceDe(u);
+    if (!agence) return null;
+    const membres = lire<CompteStocke[]>(CLE_USERS, [])
+      .filter((x) => x.agenceId === agence.id)
+      .map((x) => x.email);
+    return { ...agence, membres };
+  },
+
+  async inviterMembre() {
+    const u = this.utilisateurCourant();
+    const agence = agenceDe(u);
+    if (!agence) throw new Error("Non connecté.");
+    const jeton = id("inv");
+    ecrire(CLE_INVITES, [...lire<InviteStockee[]>(CLE_INVITES, []), { jeton, type: "membre", agenceId: agence.id }]);
+    /* En prod : email d'invitation envoyé au collègue (Resend). */
+    return { lienInvitation: `${base()}/creer-acces/?invite=${jeton}` };
+  },
 
   async mesJobs() {
     const u = this.utilisateurCourant();
-    if (!u) return [];
+    if (!u?.agenceId) return [];
     return jobs()
-      .filter((j) => j.client.id === u.id)
+      .filter((j) => j.client.id === u.agenceId)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
 
   async creerJob(d) {
     const u = this.utilisateurCourant();
-    if (!u) throw new Error("Non connecté.");
+    const agence = agenceDe(u);
+    if (!u || !agence) throw new Error("Non connecté.");
     const job: Job = {
       id: id("job"),
       createdAt: new Date().toISOString(),
-      client: { id: u.id, agence: u.agence ?? "", email: u.email },
+      client: { id: agence.id, agence: agence.nom, email: u.email },
       property: d.property,
       photos: d.photos,
       floorplanUrl: d.floorplanUrl,
@@ -203,7 +279,7 @@ export const mockBackend: VestaBackend = {
       type: "nouvelle-demande",
       destinataire: "studio@vesta",
       sujet: `Nouvelle demande : ${job.property.title} (${job.property.city})`,
-      corps: `${u.email} a déposé « ${job.property.title} » : ${job.photos.length} photos, formats ${job.options.formats.join(" + ")}, staging ${job.options.staging.length ? job.options.staging.map((s) => s.room).join(", ") : "non"}.`,
+      corps: `${agence.nom} (${u.email}) a déposé « ${job.property.title} » : ${job.photos.length} photos, formats ${job.options.formats.join(" + ")}, staging ${job.options.staging.length ? job.options.staging.map((s) => s.room).join(", ") : "non"}.`,
     });
     return job;
   },
@@ -230,10 +306,10 @@ export const mockBackend: VestaBackend = {
   },
 
   async filmsRestants() {
-    const u = this.utilisateurCourant();
-    if (!u?.formule) return null;
-    const utilises = jobs().filter((j) => j.client.id === u.id && memeMois(j.createdAt)).length;
-    return Math.max(0, u.formule.quotaFilmsMois - utilises);
+    const agence = agenceDe(this.utilisateurCourant());
+    if (!agence) return null;
+    const utilises = jobs().filter((j) => j.client.id === agence.id && memeMois(j.createdAt)).length;
+    return Math.max(0, agence.formule.quotaFilmsMois - utilises);
   },
 
   /* ——— Côté studio Vesta ——— */
@@ -271,32 +347,28 @@ export const mockBackend: VestaBackend = {
     await emailLivraison(tous[i]);
   },
 
-  async comptesClients() {
+  async agences() {
     semer();
     const users = lire<CompteStocke[]>(CLE_USERS, []);
     const tous = jobs();
-    return users
-      .filter((u) => u.role === "client")
-      .map((u) => ({
-        id: u.id,
-        email: u.email,
-        agence: u.agence ?? "",
-        formule: u.formule ?? { nom: "Sans formule", quotaFilmsMois: 0 },
-        filmsCeMois: tous.filter((j) => j.client.id === u.id && memeMois(j.createdAt)).length,
-      }));
+    return agencesStockees().map((a) => ({
+      id: a.id,
+      nom: a.nom,
+      formule: a.formule,
+      filmsCeMois: tous.filter((j) => j.client.id === a.id && memeMois(j.createdAt)).length,
+      membres: users.filter((u) => u.agenceId === a.id).map((u) => u.email),
+    }));
   },
 
-  async creerCompteClient(email, agence, formule) {
+  async creerInvitationClient(email, formule) {
     semer();
     const users = lire<CompteStocke[]>(CLE_USERS, []);
     if (users.some((x) => x.email.toLowerCase() === email.toLowerCase())) {
       throw new Error("Un compte existe déjà pour cet email.");
     }
     const jeton = id("inv");
-    const invites = lire<InviteStockee[]>(CLE_INVITES, []);
-    ecrire(CLE_INVITES, [...invites, { jeton, email, agence, formule }]);
-    const base = typeof window !== "undefined" ? `${window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}` : "";
-    return { lienInvitation: `${base}/creer-acces/?invite=${jeton}` };
+    ecrire(CLE_INVITES, [...lire<InviteStockee[]>(CLE_INVITES, []), { jeton, type: "fondateur", email, formule }]);
+    return { lienInvitation: `${base()}/creer-acces/?invite=${jeton}` };
   },
 
   async demanderAide(message) {

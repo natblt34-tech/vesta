@@ -11,7 +11,7 @@ import { BoutonBraise, Chronologie, EnTetePage, EtatVide, Pastille, TuileStat } 
 import {
   LIBELLE_LIVRABLE,
   LIBELLE_STATUS,
-  type CompteClient,
+  type CompteAgence,
   type DeliverableKind,
   type Job,
   type StatusJob,
@@ -269,15 +269,16 @@ function DetailJob({ job, onRetour, onMaj }: { job: Job; onRetour: () => void; o
   );
 }
 
-/* Comptes clients : création par Vesta (pas d'inscription libre) avec
-   formule (nom + quota films/mois, jamais de montant) -> lien d'invitation. */
+/* Agences clientes : Vesta invite un fondateur (email + formule, jamais
+   de montant) ; celui-ci nomme son agence à la création de ses accès,
+   ce qui crée le workspace, puis invite ses collègues lui-même. */
 function Comptes() {
-  const [comptes, setComptes] = useState<CompteClient[]>([]);
+  const [comptes, setComptes] = useState<CompteAgence[]>([]);
   const [lien, setLien] = useState("");
   const [erreur, setErreur] = useState("");
 
   const charger = useCallback(async () => {
-    setComptes(await backend.comptesClients());
+    setComptes(await backend.agences());
   }, []);
 
   useEffect(() => {
@@ -286,7 +287,7 @@ function Comptes() {
 
   return (
     <div className="flex flex-col gap-8">
-      <EnTetePage titre="Comptes clients" sous={`${comptes.length} COMPTE${comptes.length > 1 ? "S" : ""}`} />
+      <EnTetePage titre="Agences clientes" sous={`${comptes.length} AGENCE${comptes.length > 1 ? "S" : ""}`} />
 
       <form
         className="flex flex-col gap-5 p-5 sm:p-6"
@@ -297,35 +298,35 @@ function Comptes() {
           setLien("");
           const data = new FormData(e.currentTarget);
           try {
-            const { lienInvitation } = await backend.creerCompteClient(
-              String(data.get("email")),
-              String(data.get("agence")),
-              { nom: String(data.get("formule")), quotaFilmsMois: Number(data.get("quota")) },
-            );
+            const { lienInvitation } = await backend.creerInvitationClient(String(data.get("email")), {
+              nom: String(data.get("formule")),
+              quotaFilmsMois: Number(data.get("quota")),
+            });
             setLien(lienInvitation);
             (e.target as HTMLFormElement).reset();
-            charger();
           } catch (err) {
             setErreur(err instanceof Error ? err.message : "Création impossible.");
           }
         }}
       >
         <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
-          NOUVEAU COMPTE
+          INVITER UNE NOUVELLE AGENCE
         </p>
-        <div className="grid gap-5 sm:grid-cols-2">
-          <Champ label="EMAIL" name="email" type="email" required />
-          <Champ label="AGENCE" name="agence" required />
+        <div className="grid gap-5 sm:grid-cols-3">
+          <Champ label="EMAIL DU FONDATEUR" name="email" type="email" required />
           <Champ label="FORMULE" name="formule" placeholder="Ex : Essentiel" required />
           <Champ label="FILMS / MOIS" name="quota" type="number" min={1} defaultValue={4} required />
         </div>
+        <p className="voix-mono -mt-2" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
+          LE CLIENT NOMMERA SON AGENCE À LA CRÉATION DE SES ACCÈS, PUIS INVITERA SES COLLÈGUES LUI-MÊME.
+        </p>
         {erreur ? (
           <p className="voix-mono" style={{ color: "var(--color-braise-vive)" }}>
             {erreur}
           </p>
         ) : null}
         <BoutonBraise type="submit" className="self-start">
-          Créer et générer le lien d&apos;invitation
+          Générer le lien d&apos;invitation
         </BoutonBraise>
         {lien ? (
           <p className="voix-mono break-all" style={{ color: "var(--color-bronze)", lineHeight: 1.6 }}>
@@ -341,9 +342,10 @@ function Comptes() {
             className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-4"
             style={{ borderBottom: "1px solid var(--color-filet)" }}
           >
-            <span style={{ color: "var(--color-pierre)" }}>{c.agence || c.email}</span>
+            <span style={{ color: "var(--color-pierre)" }}>{c.nom}</span>
             <span className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
-              {c.email} · {c.formule.nom.toUpperCase()} · {c.filmsCeMois}/{c.formule.quotaFilmsMois} FILMS CE MOIS-CI
+              {c.membres.length} MEMBRE{c.membres.length > 1 ? "S" : ""} · {c.formule.nom.toUpperCase()} ·{" "}
+              {c.filmsCeMois}/{c.formule.quotaFilmsMois} FILMS CE MOIS-CI
             </span>
           </li>
         ))}
