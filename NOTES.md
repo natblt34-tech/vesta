@@ -119,5 +119,13 @@ documenté dans **PIPELINE.md** (endpoints, token, schéma job, curl).
   localStorage (« Failed to execute setItem... exceeded the quota », vu par le
   client). Migration automatique des anciens jobs localStorage au premier
   chargement. Photos importées compressées à 1200 px / JPEG 0.78.
+- Attribution des demandes : prénom demandé à la première connexion (écran
+  dédié avant l'espace, `definirPrenom`), stocké sur l'utilisateur et copié
+  dans `job.client.prenom` — affiché « PAR X » dans listes et détails, et
+  dans l'équipe (onglet Agence). Touche Entrée dans l'assistant = Continuer
+  (Envoyer au récap) ; dans un champ pièce, Entrée valide juste le nom.
+  Noms de pièces re-normalisés au passage d'étape (updater PUR : StrictMode
+  double-exécute les updaters en dev, un tableau muté en closure donnait
+  sejour2/sejour3).
 - Cartes 3D de la home : seuil extérieur minimal RAYON_MIN_CARTES = 14.5
   (au-delà de la sphère bronze rayon 12) pour ne pas empiéter sur le logo.

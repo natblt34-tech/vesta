@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/client/auth";
 import { backend } from "@/lib/client/backend";
-import { resumeFormule, type Agence, type Job } from "@/lib/client/types";
+import { resumeFormule, type Agence, type Job, type Membre } from "@/lib/client/types";
+import Champ from "./Champ";
 import CoquilleEspace, { Ico } from "./CoquilleEspace";
 import { BoutonBraise, EnTetePage, EtatVide, Pastille, TuileStat } from "./Interface";
 import NouvelleDemande from "./NouvelleDemande";
@@ -100,6 +101,64 @@ function Apercu({
   );
 }
 
+/* Première connexion : l'utilisateur s'attribue son prénom, qui
+   signera chacune de ses demandes auprès de son équipe. */
+function PremiereConnexion() {
+  const { definirPrenom } = useAuth();
+  const [erreur, setErreur] = useState("");
+  const [enCours, setEnCours] = useState(false);
+
+  return (
+    <main
+      className="flex min-h-svh flex-col items-center justify-center px-6 py-24"
+      style={{ background: "var(--color-basalte)" }}
+    >
+      <div className="w-full max-w-sm p-8" style={{ border: "1px solid var(--color-filet)", background: "var(--color-basalte-2)" }}>
+        <p className="voix-mono mb-2" style={{ color: "var(--color-bronze)" }}>
+          PREMIÈRE CONNEXION
+        </p>
+        <h1 className="voix-display mb-3" style={{ fontSize: "1.75rem", color: "var(--color-pierre)", lineHeight: 1 }}>
+          Votre prénom
+        </h1>
+        <p className="voix-mono mb-8" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
+          IL SIGNERA VOS DEMANDES AUPRÈS DE VOTRE ÉQUIPE.
+        </p>
+        <form
+          className="flex flex-col gap-5"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setErreur("");
+            setEnCours(true);
+            const data = new FormData(e.currentTarget);
+            try {
+              await definirPrenom(String(data.get("prenom")));
+            } catch (err) {
+              setErreur(err instanceof Error ? err.message : "Erreur.");
+              setEnCours(false);
+            }
+          }}
+        >
+          <Champ label="PRÉNOM" name="prenom" autoComplete="given-name" placeholder="Ex : Claire" autoFocus required />
+          {erreur ? (
+            <p className="voix-mono" style={{ color: "var(--color-braise-vive)" }}>
+              {erreur}
+            </p>
+          ) : null}
+          <button
+            type="submit"
+            disabled={enCours}
+            className="voix-mono mt-2 inline-flex items-center justify-center gap-3 px-6 py-4 transition-colors duration-200 hover:border-(--color-braise-vive) disabled:opacity-60"
+            style={{ border: "1px solid var(--color-braise)", color: "var(--color-pierre)" }}
+          >
+            <span className="braise-point" aria-hidden="true" />
+            {enCours ? "Un instant…" : "Entrer dans l'espace"}
+          </button>
+        </form>
+      </div>
+    </main>
+  );
+}
+
 /* L'agence : le workspace, sa formule, son équipe, l'invitation des
    collègues (rattachés automatiquement à l'espace de l'agence). */
 function VueAgence({
@@ -107,7 +166,7 @@ function VueAgence({
   restants,
   emailCourant,
 }: {
-  agence: (Agence & { membres: string[] }) | null;
+  agence: (Agence & { membres: Membre[] }) | null;
   restants: number | null;
   emailCourant: string;
 }) {
@@ -149,12 +208,19 @@ function VueAgence({
         <ul className="flex flex-col" style={{ borderTop: "1px solid var(--color-filet)" }}>
           {agence.membres.map((m) => (
             <li
-              key={m}
+              key={m.email}
               className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-3.5"
               style={{ borderBottom: "1px solid var(--color-filet)" }}
             >
-              <span style={{ color: "var(--color-pierre)" }}>{m}</span>
-              {m === emailCourant ? (
+              <span style={{ color: "var(--color-pierre)" }}>
+                {m.prenom ? m.prenom : m.email}
+                {m.prenom ? (
+                  <span className="voix-mono ml-3" style={{ color: "var(--color-gris-pierre)" }}>
+                    {m.email}
+                  </span>
+                ) : null}
+              </span>
+              {m.email === emailCourant ? (
                 <span className="voix-mono" style={{ color: "var(--color-bronze)" }}>
                   VOUS
                 </span>
@@ -192,7 +258,7 @@ export default function Espace() {
   const [vue, setVue] = useState<Vue>("apercu");
   const [ouvert, setOuvert] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [agence, setAgence] = useState<(Agence & { membres: string[] }) | null>(null);
+  const [agence, setAgence] = useState<(Agence & { membres: Membre[] }) | null>(null);
   const [restants, setRestants] = useState<number | null>(null);
   const [stagingUtilises, setStagingUtilises] = useState(0);
 
@@ -217,6 +283,9 @@ export default function Espace() {
   }, [pret, user, router, charger]);
 
   if (!pret || !user || user.role === "vesta") return null;
+
+  /* Première connexion : le prénom d'abord, l'espace ensuite. */
+  if (!user.prenom) return <PremiereConnexion />;
 
   const alerte = jobs.some((j) => j.status === "attention_requise");
 

@@ -12,6 +12,7 @@ type AuthCtx = {
   pret: boolean;
   connexion: (email: string, mdp: string) => Promise<void>;
   creerAcces: (invite: string, email: string, mdp: string, nomAgence?: string) => Promise<void>;
+  definirPrenom: (prenom: string) => Promise<void>;
   deconnexion: () => void;
 };
 
@@ -34,14 +35,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await backend.creerAcces(invite, email, mdp, nomAgence));
   }, []);
 
+  const definirPrenom = useCallback(async (prenom: string) => {
+    setUser(await backend.definirPrenom(prenom));
+  }, []);
+
   const deconnexion = useCallback(() => {
     backend.deconnexion();
     setUser(null);
   }, []);
 
   const value = useMemo(
-    () => ({ user, pret, connexion, creerAcces, deconnexion }),
-    [user, pret, connexion, creerAcces, deconnexion],
+    () => ({ user, pret, connexion, creerAcces, definirPrenom, deconnexion }),
+    [user, pret, connexion, creerAcces, definirPrenom, deconnexion],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -106,7 +106,8 @@ backend — mécanisme à documenter ici au déploiement).
 
 - `client.id` : identifiant du **workspace agence** (plusieurs membres par agence ;
   le fondateur nomme son agence à la création de ses accès, ses collègues sont
-  rattachés au même workspace). `client.email` : le membre qui a déposé la demande.
+  rattachés au même workspace). `client.email` et `client.prenom` : le membre qui
+  a déposé la demande (prénom attribué à sa première connexion).
 - `kind` ∈ `film_16x9` | `film_9x16` | `staging_avant_apres` (+ `room` pour le staging).
 - `photos[].room` : clé d'entrée du pipeline — noms courts normalisés
   (`sejour1`, `cuisine1`…), garantis uniques par le formulaire.

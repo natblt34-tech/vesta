@@ -51,7 +51,11 @@ export type User = {
   email: string;
   role: Role;
   agenceId?: string;
+  /* Attribué par l'utilisateur à sa première connexion : signe ses demandes. */
+  prenom?: string;
 };
+
+export type Membre = { email: string; prenom?: string };
 
 export type Invitation =
   | { type: "fondateur"; formule: Formule; email?: string }
@@ -129,7 +133,8 @@ export type ReponseComplement = {
 export type Job = {
   id: string; // job_xxx
   createdAt: string; // ISO 8601
-  client: { id: string; agence: string; email: string };
+  /* prenom : extension espace client — le membre qui a déposé la demande. */
+  client: { id: string; agence: string; email: string; prenom?: string };
   property: { title: string; city: string };
   photos: JobPhoto[];
   floorplanUrl: string | null;

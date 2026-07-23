@@ -139,6 +139,20 @@ export default function NouvelleDemande({
   const continuer = () => {
     const e = validerEtape(etape);
     if (e) return setErreur(e);
+    /* En quittant l'étape photos : normalisation finale des noms de
+       pièces (accents, doublons) — la clé d'entrée du pipeline doit
+       être propre quel que soit le chemin de saisie. */
+    if (etape === 1) {
+      /* Updater pur (StrictMode l'exécute deux fois en dev). */
+      setPhotos((prev) => {
+        const pris: string[] = [];
+        return prev.map((p) => {
+          const n = assainirPiece(p.room, pris) || suffixerPiece("piece", pris);
+          pris.push(n);
+          return { ...p, room: n };
+        });
+      });
+    }
     setErreur("");
     setEtape((n) => Math.min(n + 1, ETAPES.length - 1));
   };
@@ -195,8 +209,23 @@ export default function NouvelleDemande({
     basculer(stagingRooms, setStagingRooms, room);
   };
 
+  /* Entrée = Continuer (Envoyer sur la dernière étape). Exceptions :
+     textarea (retour à la ligne), nom de pièce (valide juste le nom). */
+  const surTouche = (e: React.KeyboardEvent) => {
+    if (e.key !== "Enter") return;
+    const cible = e.target as HTMLElement;
+    if (cible.tagName === "TEXTAREA" || cible.tagName === "SELECT") return;
+    e.preventDefault();
+    if (cible.getAttribute("aria-label") === "Nom de la pièce") {
+      (cible as HTMLInputElement).blur();
+      return;
+    }
+    if (etape < ETAPES.length - 1) continuer();
+    else if (!enCours) envoyer();
+  };
+
   return (
-    <div className="flex max-w-2xl flex-col gap-8">
+    <div className="flex max-w-2xl flex-col gap-8" onKeyDown={surTouche}>
       <EnTetePage titre="Nouvelle demande" sous={`ÉTAPE ${etape + 1}/${ETAPES.length} · ${ETAPES[etape]}`} />
 
       {/* Progression */}

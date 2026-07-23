@@ -182,6 +182,7 @@ function Detail({ job, onRetour, onMaj }: { job: Job; onRetour: () => void; onMa
           </h1>
           <p className="voix-mono mt-2" style={{ color: "var(--color-gris-pierre)" }}>
             {job.property.city} · DÉPOSÉE LE {dateCourte(job.createdAt)}
+            {job.client.prenom ? ` · PAR ${job.client.prenom.toUpperCase()}` : ""}
           </p>
         </div>
         <Pastille status={job.status} />
@@ -358,6 +359,7 @@ export default function MesDemandes({
                       </span>
                       <span className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
                         {j.property.city}
+                        {j.client.prenom ? ` · PAR ${j.client.prenom.toUpperCase()}` : ""}
                       </span>
                     </span>
                     <span className="voix-mono hidden sm:block" style={{ color: "var(--color-gris-pierre)" }}>

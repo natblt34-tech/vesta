@@ -78,6 +78,7 @@ function DetailJob({ job, onRetour, onMaj }: { job: Job; onRetour: () => void; o
           </h1>
           <p className="voix-mono mt-2" style={{ color: "var(--color-gris-pierre)" }}>
             {job.client.agence || job.client.email} · {job.property.city} · DÉPOSÉE LE {dateCourte(job.createdAt)}
+            {job.client.prenom ? ` · PAR ${job.client.prenom.toUpperCase()}` : ""}
           </p>
         </div>
         <Pastille status={job.status} />

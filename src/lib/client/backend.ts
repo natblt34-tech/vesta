@@ -27,6 +27,7 @@ import {
   type Invitation,
   type Job,
   type JobPhoto,
+  type Membre,
   type NouvelleDemandeData,
   type StatusJob,
   type User,
@@ -40,10 +41,12 @@ export interface VestaBackend {
   connexion(email: string, motDePasse: string): Promise<User>;
   infoInvitation(jeton: string): Promise<Invitation | null>;
   creerAcces(invite: string, email: string, motDePasse: string, nomAgence?: string): Promise<User>;
+  /* Première connexion : l'utilisateur s'attribue son prénom. */
+  definirPrenom(prenom: string): Promise<User>;
   deconnexion(): void;
 
   // Côté client (workspace agence)
-  monAgence(): Promise<(Agence & { membres: string[] }) | null>;
+  monAgence(): Promise<(Agence & { membres: Membre[] }) | null>;
   inviterMembre(): Promise<{ lienInvitation: string }>;
   mesJobs(): Promise<Job[]>;
   creerJob(d: NouvelleDemandeData): Promise<Job>;
@@ -291,6 +294,22 @@ export const mockBackend: VestaBackend = {
     return user;
   },
 
+  async definirPrenom(prenom) {
+    const u = this.utilisateurCourant();
+    if (!u) throw new Error("Non connecté.");
+    const propre = prenom.trim();
+    if (!propre) throw new Error("Indiquez votre prénom.");
+    const users = lire<CompteStocke[]>(CLE_USERS, []);
+    const i = users.findIndex((x) => x.id === u.id);
+    if (i >= 0) {
+      users[i] = { ...users[i], prenom: propre };
+      ecrire(CLE_USERS, users);
+    }
+    const maj: User = { ...u, prenom: propre };
+    ecrire(CLE_SESSION, maj);
+    return maj;
+  },
+
   deconnexion() {
     if (typeof window !== "undefined") window.localStorage.removeItem(CLE_SESSION);
   },
@@ -302,9 +321,9 @@ export const mockBackend: VestaBackend = {
     const u = this.utilisateurCourant();
     const agence = agenceDe(u);
     if (!agence) return null;
-    const membres = lire<CompteStocke[]>(CLE_USERS, [])
+    const membres: Membre[] = lire<CompteStocke[]>(CLE_USERS, [])
       .filter((x) => x.agenceId === agence.id)
-      .map((x) => x.email);
+      .map((x) => ({ email: x.email, prenom: x.prenom }));
     return { ...agence, membres };
   },
 
@@ -348,7 +367,7 @@ export const mockBackend: VestaBackend = {
     const job: Job = {
       id: id("job"),
       createdAt: new Date().toISOString(),
-      client: { id: agence.id, agence: agence.nom, email: u.email },
+      client: { id: agence.id, agence: agence.nom, email: u.email, prenom: u.prenom },
       property: d.property,
       photos: d.photos,
       floorplanUrl: d.floorplanUrl,
