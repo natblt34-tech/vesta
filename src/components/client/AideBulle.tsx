@@ -10,7 +10,7 @@ export default function AideBulle() {
   const [envoye, setEnvoye] = useState(false);
 
   return (
-    <div className="fixed bottom-6 right-6 z-90 flex flex-col items-end gap-3">
+    <div className="fixed bottom-20 right-4 z-90 flex flex-col items-end gap-3 md:bottom-6 md:right-6">
       {ouvert ? (
         <div
           className="w-72 p-5"

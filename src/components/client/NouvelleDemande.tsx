@@ -5,8 +5,11 @@ import { backend } from "@/lib/client/backend";
 import { importerFichier, importerPhoto } from "@/lib/client/media";
 import { assainirPiece, PIECES_SUGGEREES, piecesDistinctes, suffixerPiece } from "@/lib/client/pieces";
 import { STYLES_STAGING, type Format, type StyleStaging } from "@/lib/client/types";
+import { BoutonBraise, EnTetePage } from "./Interface";
 
 const MAX_PHOTOS = 20;
+
+const ETAPES = ["LE BIEN", "LES PHOTOS", "L'AGENCEMENT", "LES OPTIONS", "ENVOI"];
 
 type PhotoForm = { id: string; url: string; room: string };
 
@@ -37,18 +40,11 @@ function Toggle({
   );
 }
 
-function Legende({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
-      {children}
-    </p>
-  );
-}
-
-/* Le formulaire de demande : c'est l'entrée du pipeline de production.
-   Les noms de pièces des photos en sont la clé — suggestions cliquables,
-   suffixe numérique automatique. */
+/* La demande en assistant par étapes : une décision à la fois, pensé
+   téléphone d'abord. Les noms de pièces des photos sont la clé d'entrée
+   du pipeline — suggestions cliquables, suffixe numérique automatique. */
 export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) {
+  const [etape, setEtape] = useState(0);
   const [titre, setTitre] = useState("");
   const [ville, setVille] = useState("");
   const [photos, setPhotos] = useState<PhotoForm[]>([]);
@@ -82,13 +78,10 @@ export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) 
     }
   };
 
-  const retirerPhoto = (pid: string) => {
-    setPhotos((p) => p.filter((x) => x.id !== pid));
-  };
+  const retirerPhoto = (pid: string) => setPhotos((p) => p.filter((x) => x.id !== pid));
 
-  const nommer = (pid: string, room: string) => {
+  const nommer = (pid: string, room: string) =>
     setPhotos((p) => p.map((x) => (x.id === pid ? { ...x, room } : x)));
-  };
 
   /* Suggestion cliquée : premier nom libre pour cette base (sejour1, sejour2…). */
   const suggerer = (pid: string, base: string) => {
@@ -104,13 +97,11 @@ export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) 
     setActif(null);
   };
 
-  const basculer = (liste: string[], setListe: (v: string[]) => void, room: string) => {
+  const basculer = (liste: string[], setListe: (v: string[]) => void, room: string) =>
     setListe(liste.includes(room) ? liste.filter((r) => r !== room) : [...liste, room]);
-  };
 
-  const basculerFormat = (f: Format) => {
+  const basculerFormat = (f: Format) =>
     setFormats((prev) => (prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f]));
-  };
 
   const joindrePlan = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -121,12 +112,33 @@ export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) 
     }
   };
 
+  /* Validation par étape : on n'avance pas sur un dossier incomplet. */
+  const validerEtape = (n: number): string => {
+    if (n === 0 && (!titre.trim() || !ville.trim())) return "Nom du bien et ville sont nécessaires.";
+    if (n === 1) {
+      if (photos.length === 0) return "Déposez au moins une photo.";
+      const sansNom = photos.filter((p) => !p.room.trim()).length;
+      if (sansNom > 0) return `${sansNom} photo(s) sans nom de pièce. Nommez chaque photo.`;
+    }
+    if (n === 3 && formats.length === 0) return "Choisissez au moins un format.";
+    return "";
+  };
+
+  const continuer = () => {
+    const e = validerEtape(etape);
+    if (e) return setErreur(e);
+    setErreur("");
+    setEtape((n) => Math.min(n + 1, ETAPES.length - 1));
+  };
+
   const envoyer = async () => {
-    const sansNom = photos.filter((p) => !p.room.trim()).length;
-    if (!titre.trim() || !ville.trim()) return setErreur("Nom du bien et ville sont nécessaires.");
-    if (photos.length === 0) return setErreur("Déposez au moins une photo.");
-    if (sansNom > 0) return setErreur(`${sansNom} photo(s) sans nom de pièce. Nommez chaque photo.`);
-    if (formats.length === 0) return setErreur("Choisissez au moins un format.");
+    for (let n = 0; n < 4; n += 1) {
+      const e = validerEtape(n);
+      if (e) {
+        setEtape(n);
+        return setErreur(e);
+      }
+    }
     setErreur("");
     setEnCours(true);
     try {
@@ -149,11 +161,45 @@ export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) 
   };
 
   return (
-    <div className="flex flex-col gap-12">
-      {/* Le bien */}
-      <section className="flex flex-col gap-5">
-        <Legende>LE BIEN</Legende>
-        <div className="grid gap-5 sm:grid-cols-[2fr_1fr]">
+    <div className="flex max-w-2xl flex-col gap-8">
+      <EnTetePage titre="Nouvelle demande" sous={`ÉTAPE ${etape + 1}/${ETAPES.length} · ${ETAPES[etape]}`} />
+
+      {/* Progression */}
+      <div className="-mt-4 flex flex-col gap-3">
+        <div aria-hidden="true" className="h-0.5 w-full" style={{ background: "var(--color-filet)" }}>
+          <div
+            className="h-full transition-all duration-500"
+            style={{ width: `${((etape + 1) / ETAPES.length) * 100}%`, background: "var(--color-braise)" }}
+          />
+        </div>
+        <div className="hidden justify-between sm:flex">
+          {ETAPES.map((e, i) => (
+            <button
+              key={e}
+              type="button"
+              onClick={() => {
+                /* On peut revenir en arrière librement, jamais sauter en avant. */
+                if (i < etape) {
+                  setErreur("");
+                  setEtape(i);
+                }
+              }}
+              className="voix-mono"
+              style={{
+                fontSize: "0.5625rem",
+                color: i === etape ? "var(--color-braise-vive)" : i < etape ? "var(--color-gris-pierre)" : "var(--color-filet)",
+                cursor: i < etape ? "pointer" : "default",
+              }}
+            >
+              {e}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ——— Étape 1 · Le bien ——— */}
+      {etape === 0 ? (
+        <section className="grid gap-5 sm:grid-cols-[2fr_1fr]">
           <label className="flex flex-col gap-2">
             <span className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
               NOM DU BIEN
@@ -162,6 +208,7 @@ export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) 
               value={titre}
               onChange={(e) => setTitre(e.target.value)}
               placeholder="Ex : T2 lumineux, dernier étage"
+              autoFocus
               className="w-full bg-transparent px-3 py-3 outline-none focus-visible:border-(--color-bronze)"
               style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
             />
@@ -178,227 +225,234 @@ export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) 
               style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
             />
           </label>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
-      {/* Les photos, nommées par pièce */}
-      <section className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <Legende>
-            LES PHOTOS · {photos.length}/{MAX_PHOTOS}
-          </Legende>
-          <label
-            className="voix-mono cursor-pointer px-4 py-2.5"
-            style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
-          >
-            + Ajouter des photos
-            <input
-              type="file"
-              accept="image/jpeg,image/png"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                ajouterPhotos(e.target.files);
-                e.target.value = "";
-              }}
-            />
-          </label>
-        </div>
-        <p className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
-          8 À 12 PHOTOS RECOMMANDÉES · CHAQUE PHOTO DOIT PORTER LE NOM DE SA PIÈCE
-        </p>
+      {/* ——— Étape 2 · Les photos ——— */}
+      {etape === 1 ? (
+        <section className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
+              {photos.length}/{MAX_PHOTOS} · 8 À 12 RECOMMANDÉES
+            </p>
+            <label
+              className="voix-mono cursor-pointer px-4 py-2.5"
+              style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
+            >
+              + Ajouter des photos
+              <input
+                type="file"
+                accept="image/jpeg,image/png"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  ajouterPhotos(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
+          <p className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
+            CHAQUE PHOTO DOIT PORTER LE NOM DE SA PIÈCE
+          </p>
 
-        {photos.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {photos.map((p) => (
-              <div key={p.id} className="flex flex-col">
-                <div className="relative aspect-4/3 overflow-hidden" style={{ border: "1px solid var(--color-filet)" }}>
-                  <img src={p.url} alt={p.room || "Photo sans pièce"} className="h-full w-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => retirerPhoto(p.id)}
-                    aria-label="Retirer la photo"
-                    className="voix-mono absolute right-1 top-1 flex h-6 w-6 items-center justify-center"
-                    style={{ background: "var(--color-basalte)", color: "var(--color-pierre)", fontSize: "0.65rem" }}
-                  >
-                    ✕
-                  </button>
-                </div>
-                <input
-                  value={p.room}
-                  onChange={(e) => nommer(p.id, e.target.value)}
-                  onFocus={() => setActif(p.id)}
-                  onBlur={() => assainir(p.id)}
-                  placeholder="pièce ?"
-                  aria-label="Nom de la pièce"
-                  className="voix-mono w-full bg-transparent px-2 py-2 outline-none focus-visible:border-(--color-bronze)"
-                  style={{
-                    border: "1px solid var(--color-filet)",
-                    borderTop: "none",
-                    color: p.room ? "var(--color-pierre)" : "var(--color-braise-vive)",
-                  }}
-                />
-                {actif === p.id ? (
-                  <div className="mt-1.5 flex flex-wrap gap-1">
-                    {PIECES_SUGGEREES.map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        /* mousedown : avant le blur de l'input, sinon le clic se perd. */
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          suggerer(p.id, s);
-                          setActif(null);
-                        }}
-                        className="voix-mono px-2 py-1"
-                        style={{
-                          border: "1px solid var(--color-filet)",
-                          color: "var(--color-gris-pierre)",
-                          fontSize: "0.5625rem",
-                        }}
-                      >
-                        {s}
-                      </button>
-                    ))}
+          {photos.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {photos.map((p) => (
+                <div key={p.id} className="flex flex-col">
+                  <div className="relative aspect-4/3 overflow-hidden" style={{ border: "1px solid var(--color-filet)" }}>
+                    <img src={p.url} alt={p.room || "Photo sans pièce"} className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => retirerPhoto(p.id)}
+                      aria-label="Retirer la photo"
+                      className="voix-mono absolute right-1 top-1 flex h-6 w-6 items-center justify-center"
+                      style={{ background: "var(--color-basalte)", color: "var(--color-pierre)", fontSize: "0.65rem" }}
+                    >
+                      ✕
+                    </button>
                   </div>
-                ) : null}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
-            AUCUNE PHOTO POUR L&apos;INSTANT
-          </p>
-        )}
-      </section>
-
-      {/* L'agencement */}
-      <section className="flex flex-col gap-4">
-        <Legende>L&apos;AGENCEMENT</Legende>
-        <p
-          className="max-w-xl px-4 py-3"
-          style={{
-            borderLeft: "2px solid var(--color-braise)",
-            color: "var(--color-pierre)",
-            background: "var(--color-basalte-2)",
-            lineHeight: 1.6,
-          }}
-        >
-          Décrivez comment les pièces communiquent (ex. « la cuisine donne sur le séjour par un
-          passe-plat ; l&apos;ouverture à droite de l&apos;entrée mène au séjour »). Une description précise,
-          ou un plan joint, améliore nettement le résultat.
-        </p>
-        <textarea
-          value={agencement}
-          onChange={(e) => setAgencement(e.target.value)}
-          rows={5}
-          placeholder="L'entrée donne sur…"
-          className="w-full resize-y bg-transparent px-3 py-3 outline-none focus-visible:border-(--color-bronze)"
-          style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
-        />
-        <div className="flex flex-wrap items-center gap-3">
-          <label
-            className="voix-mono cursor-pointer px-4 py-2.5"
-            style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
-          >
-            {plan ? "Remplacer le plan" : "+ Joindre un plan (image ou PDF)"}
-            <input
-              type="file"
-              accept="image/*,.pdf"
-              className="hidden"
-              onChange={(e) => {
-                joindrePlan(e.target.files);
-                e.target.value = "";
-              }}
-            />
-          </label>
-          {plan ? (
-            <span className="voix-mono" style={{ color: "var(--color-bronze)" }}>
-              {plan.nomFichier}
-              <button
-                type="button"
-                onClick={() => setPlan(null)}
-                className="ml-3 underline underline-offset-2"
-                style={{ color: "var(--color-gris-pierre)" }}
-              >
-                Retirer
-              </button>
-            </span>
-          ) : null}
-        </div>
-      </section>
-
-      {/* Les options */}
-      <section className="flex flex-col gap-6">
-        <Legende>LES OPTIONS</Legende>
-
-        <div className="flex flex-col gap-3">
-          <p className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
-            FORMATS LIVRÉS
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Toggle actif={formats.includes("16:9")} onClick={() => basculerFormat("16:9")}>
-              16:9 · PORTAILS
-            </Toggle>
-            <Toggle actif={formats.includes("9:16")} onClick={() => basculerFormat("9:16")}>
-              9:16 · RÉSEAUX
-            </Toggle>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <p className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
-            HOME STAGING VIRTUEL
-          </p>
-          {pieces.length === 0 ? (
-            <p className="voix-mono" style={{ color: "var(--color-filet)" }}>
-              NOMMEZ VOS PHOTOS POUR CHOISIR LES PIÈCES À MEUBLER
-            </p>
+                  <input
+                    value={p.room}
+                    onChange={(e) => nommer(p.id, e.target.value)}
+                    onFocus={() => setActif(p.id)}
+                    onBlur={() => assainir(p.id)}
+                    placeholder="pièce ?"
+                    aria-label="Nom de la pièce"
+                    className="voix-mono w-full bg-transparent px-2 py-2 outline-none focus-visible:border-(--color-bronze)"
+                    style={{
+                      border: "1px solid var(--color-filet)",
+                      borderTop: "none",
+                      color: p.room ? "var(--color-pierre)" : "var(--color-braise-vive)",
+                    }}
+                  />
+                  {actif === p.id ? (
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      {PIECES_SUGGEREES.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          /* mousedown : avant le blur de l'input, sinon le clic se perd. */
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            suggerer(p.id, s);
+                            setActif(null);
+                          }}
+                          className="voix-mono px-2 py-1"
+                          style={{
+                            border: "1px solid var(--color-filet)",
+                            color: "var(--color-gris-pierre)",
+                            fontSize: "0.5625rem",
+                          }}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
           ) : (
-            <>
-              <div className="flex flex-wrap gap-2">
-                {pieces.map((r) => (
-                  <Toggle key={r} actif={stagingRooms.includes(r)} onClick={() => basculer(stagingRooms, setStagingRooms, r)}>
-                    {r}
-                  </Toggle>
-                ))}
-              </div>
-              {stagingRooms.filter((r) => pieces.includes(r)).length > 0 ? (
-                <label className="flex max-w-xs flex-col gap-2">
-                  <span className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
-                    STYLE
-                  </span>
-                  <select
-                    value={stagingStyle}
-                    onChange={(e) => setStagingStyle(e.target.value as StyleStaging)}
-                    className="w-full bg-transparent px-3 py-3 outline-none"
-                    style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
-                  >
-                    {STYLES_STAGING.map((s) => (
-                      <option key={s} value={s} style={{ background: "var(--color-basalte)" }}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ) : null}
-              <p className="voix-mono max-w-xl" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
-                LE STAGING EST LIVRÉ EN VISUELS AVANT/APRÈS. IL N&apos;APPARAÎT DANS LE FILM QUE POUR LES
-                PIÈCES VUES SOUS UN SEUL ANGLE.
-              </p>
-            </>
+            <label
+              className="flex cursor-pointer flex-col items-center gap-3 px-6 py-14 text-center"
+              style={{ border: "1px dashed var(--color-filet)" }}
+            >
+              <span className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
+                DÉPOSEZ LES PHOTOS DU BIEN · JPG OU PNG
+              </span>
+              <span className="voix-mono px-4 py-2.5" style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}>
+                Parcourir
+              </span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  ajouterPhotos(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </label>
           )}
-        </div>
+        </section>
+      ) : null}
 
-        <div className="flex flex-col gap-3">
-          <p className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
-            PIÈCES À EXCLURE DU FILM
+      {/* ——— Étape 3 · L'agencement ——— */}
+      {etape === 2 ? (
+        <section className="flex flex-col gap-4">
+          <p
+            className="px-4 py-3"
+            style={{
+              borderLeft: "2px solid var(--color-braise)",
+              color: "var(--color-pierre)",
+              background: "var(--color-basalte-2)",
+              lineHeight: 1.6,
+            }}
+          >
+            Décrivez comment les pièces communiquent (ex. « la cuisine donne sur le séjour par un
+            passe-plat ; l&apos;ouverture à droite de l&apos;entrée mène au séjour »). Une description précise,
+            ou un plan joint, améliore nettement le résultat.
           </p>
-          {pieces.length === 0 ? (
-            <p className="voix-mono" style={{ color: "var(--color-filet)" }}>
-              AUCUNE PIÈCE NOMMÉE
+          <textarea
+            value={agencement}
+            onChange={(e) => setAgencement(e.target.value)}
+            rows={6}
+            placeholder="L'entrée donne sur…"
+            className="w-full resize-y bg-transparent px-3 py-3 outline-none focus-visible:border-(--color-bronze)"
+            style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
+          />
+          <div className="flex flex-wrap items-center gap-3">
+            <label
+              className="voix-mono cursor-pointer px-4 py-2.5"
+              style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
+            >
+              {plan ? "Remplacer le plan" : "+ Joindre un plan (image ou PDF)"}
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                className="hidden"
+                onChange={(e) => {
+                  joindrePlan(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+            {plan ? (
+              <span className="voix-mono" style={{ color: "var(--color-bronze)" }}>
+                {plan.nomFichier}
+                <button
+                  type="button"
+                  onClick={() => setPlan(null)}
+                  className="ml-3 underline underline-offset-2"
+                  style={{ color: "var(--color-gris-pierre)" }}
+                >
+                  Retirer
+                </button>
+              </span>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {/* ——— Étape 4 · Les options ——— */}
+      {etape === 3 ? (
+        <section className="flex flex-col gap-7">
+          <div className="flex flex-col gap-3">
+            <p className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
+              FORMATS LIVRÉS
             </p>
-          ) : (
+            <div className="flex flex-wrap gap-2">
+              <Toggle actif={formats.includes("16:9")} onClick={() => basculerFormat("16:9")}>
+                16:9 · PORTAILS
+              </Toggle>
+              <Toggle actif={formats.includes("9:16")} onClick={() => basculerFormat("9:16")}>
+                9:16 · RÉSEAUX
+              </Toggle>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <p className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
+              HOME STAGING VIRTUEL
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {pieces.map((r) => (
+                <Toggle key={r} actif={stagingRooms.includes(r)} onClick={() => basculer(stagingRooms, setStagingRooms, r)}>
+                  {r}
+                </Toggle>
+              ))}
+            </div>
+            {stagingRooms.filter((r) => pieces.includes(r)).length > 0 ? (
+              <label className="flex max-w-xs flex-col gap-2">
+                <span className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
+                  STYLE
+                </span>
+                <select
+                  value={stagingStyle}
+                  onChange={(e) => setStagingStyle(e.target.value as StyleStaging)}
+                  className="w-full bg-transparent px-3 py-3 outline-none"
+                  style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
+                >
+                  {STYLES_STAGING.map((s) => (
+                    <option key={s} value={s} style={{ background: "var(--color-basalte)" }}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+            <p className="voix-mono max-w-xl" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
+              LE STAGING EST LIVRÉ EN VISUELS AVANT/APRÈS. IL N&apos;APPARAÎT DANS LE FILM QUE POUR LES
+              PIÈCES VUES SOUS UN SEUL ANGLE.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <p className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
+              PIÈCES À EXCLURE DU FILM
+            </p>
             <div className="flex flex-wrap gap-2">
               {pieces.map((r) => (
                 <Toggle key={r} actif={excludeRooms.includes(r)} onClick={() => basculer(excludeRooms, setExcludeRooms, r)}>
@@ -406,35 +460,36 @@ export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) 
                 </Toggle>
               ))}
             </div>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      ) : null}
 
-      {/* Récapitulatif */}
-      <section className="flex flex-col gap-3 p-5" style={{ border: "1px solid var(--color-filet)" }}>
-        <Legende>RÉCAPITULATIF</Legende>
-        <ul className="flex flex-col gap-1.5">
-          {[
-            ["BIEN", titre.trim() ? `${titre.trim()}${ville.trim() ? ` · ${ville.trim()}` : ""}` : "À RENSEIGNER"],
-            ["PHOTOS", photos.length ? `${photos.length} · ${pieces.join(", ") || "PIÈCES À NOMMER"}` : "AUCUNE"],
-            ["AGENCEMENT", agencement.trim() ? "DÉCRIT" : plan ? "PLAN JOINT" : "NON DÉCRIT"],
-            ["PLAN", plan ? plan.nomFichier : "AUCUN"],
-            ["FORMATS", formats.length ? formats.join(" + ") : "AUCUN"],
-            [
-              "STAGING",
-              stagingRooms.filter((r) => pieces.includes(r)).length
-                ? `${stagingRooms.filter((r) => pieces.includes(r)).join(", ")} · ${stagingStyle}`
-                : "NON",
-            ],
-            ["EXCLUSIONS", excludeRooms.filter((r) => pieces.includes(r)).join(", ") || "AUCUNE"],
-          ].map(([k, v]) => (
-            <li key={k} className="voix-mono" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
-              <span style={{ color: "var(--color-bronze)" }}>{k} · </span>
-              {v}
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* ——— Étape 5 · Récapitulatif et envoi ——— */}
+      {etape === 4 ? (
+        <section className="flex flex-col gap-3 p-5" style={{ border: "1px solid var(--color-filet)", background: "var(--color-basalte-2)" }}>
+          <ul className="flex flex-col gap-1.5">
+            {[
+              ["BIEN", `${titre.trim()} · ${ville.trim()}`],
+              ["PHOTOS", `${photos.length} · ${pieces.join(", ")}`],
+              ["AGENCEMENT", agencement.trim() ? "DÉCRIT" : plan ? "PLAN JOINT" : "NON DÉCRIT"],
+              ["PLAN", plan ? plan.nomFichier : "AUCUN"],
+              ["FORMATS", formats.join(" + ")],
+              [
+                "STAGING",
+                stagingRooms.filter((r) => pieces.includes(r)).length
+                  ? `${stagingRooms.filter((r) => pieces.includes(r)).join(", ")} · ${stagingStyle}`
+                  : "NON",
+              ],
+              ["EXCLUSIONS", excludeRooms.filter((r) => pieces.includes(r)).join(", ") || "AUCUNE"],
+            ].map(([k, v]) => (
+              <li key={k} className="voix-mono" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.7 }}>
+                <span style={{ color: "var(--color-bronze)" }}>{k} · </span>
+                {v}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {erreur ? (
         <p className="voix-mono" style={{ color: "var(--color-braise-vive)" }}>
@@ -442,16 +497,31 @@ export default function NouvelleDemande({ onEnvoye }: { onEnvoye: () => void }) 
         </p>
       ) : null}
 
-      <button
-        type="button"
-        onClick={envoyer}
-        disabled={enCours}
-        className="voix-mono inline-flex items-center justify-center gap-3 self-start px-8 py-4 transition-colors duration-200 hover:border-(--color-braise-vive) disabled:opacity-60"
-        style={{ border: "1px solid var(--color-braise)", color: "var(--color-pierre)" }}
-      >
-        <span className="braise-point" aria-hidden="true" />
-        {enCours ? "Envoi…" : "Envoyer la demande"}
-      </button>
+      {/* Navigation d'étapes */}
+      <div className="flex items-center justify-between gap-4">
+        {etape > 0 ? (
+          <button
+            type="button"
+            onClick={() => {
+              setErreur("");
+              setEtape((n) => n - 1);
+            }}
+            className="voix-mono px-5 py-3.5"
+            style={{ border: "1px solid var(--color-filet)", color: "var(--color-gris-pierre)" }}
+          >
+            ← Précédent
+          </button>
+        ) : (
+          <span />
+        )}
+        {etape < ETAPES.length - 1 ? (
+          <BoutonBraise onClick={continuer}>Continuer</BoutonBraise>
+        ) : (
+          <BoutonBraise onClick={envoyer} disabled={enCours}>
+            {enCours ? "Envoi…" : "Envoyer la demande"}
+          </BoutonBraise>
+        )}
+      </div>
     </div>
   );
 }

@@ -2,21 +2,109 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TransitionLink } from "@/components/chrome/Transition";
-import { Etoile } from "@/components/chrome/Logo";
 import { useAuth } from "@/lib/client/auth";
 import { backend } from "@/lib/client/backend";
 import type { Job } from "@/lib/client/types";
+import CoquilleEspace, { Ico } from "./CoquilleEspace";
+import { BoutonBraise, EnTetePage, EtatVide, Pastille, TuileStat } from "./Interface";
 import NouvelleDemande from "./NouvelleDemande";
 import MesDemandes from "./MesDemandes";
 import AideBulle from "./AideBulle";
 
-type Onglet = "demandes" | "nouvelle";
+type Vue = "apercu" | "demandes" | "nouvelle";
+
+const EN_COURS = ["recu", "analyse", "en_production", "controle_qualite"];
+
+/* Vue d'ensemble : l'état du compte d'un coup d'œil, puis l'activité. */
+function Apercu({
+  jobs,
+  restants,
+  formule,
+  onOuvrir,
+  onNouvelle,
+}: {
+  jobs: Job[];
+  restants: number | null;
+  formule?: string;
+  onOuvrir: (id: string) => void;
+  onNouvelle: () => void;
+}) {
+  const enCours = jobs.filter((j) => EN_COURS.includes(j.status)).length;
+  const livrees = jobs.filter((j) => j.status === "livre").length;
+  const aCompleter = jobs.filter((j) => j.status === "attention_requise");
+  const recentes = jobs.slice(0, 4);
+
+  return (
+    <div className="flex flex-col gap-8">
+      <EnTetePage titre="Vue d'ensemble" sous={formule ? `FORMULE ${formule.toUpperCase()}` : undefined} />
+
+      {aCompleter.length > 0 ? (
+        <button
+          type="button"
+          onClick={() => onOuvrir(aCompleter[0].id)}
+          className="flex items-center justify-between gap-4 px-4 py-3.5 text-left transition-colors duration-200 hover:border-(--color-braise-vive)"
+          style={{ border: "1px solid var(--color-braise)", background: "var(--color-basalte-2)" }}
+        >
+          <span className="voix-mono" style={{ color: "var(--color-braise-vive)", lineHeight: 1.5 }}>
+            {aCompleter.length > 1
+              ? `${aCompleter.length} DEMANDES ATTENDENT UNE PRÉCISION`
+              : `« ${aCompleter[0].property.title.toUpperCase()} » ATTEND UNE PRÉCISION`}
+          </span>
+          <span aria-hidden="true" className="voix-mono" style={{ color: "var(--color-braise-vive)" }}>
+            →
+          </span>
+        </button>
+      ) : null}
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <TuileStat label="FILMS RESTANTS CE MOIS-CI" valeur={restants ?? "·"} accent />
+        <TuileStat label="EN PRODUCTION" valeur={enCours} />
+        <TuileStat label="LIVRÉES" valeur={livrees} />
+        <TuileStat label="DEMANDES AU TOTAL" valeur={jobs.length} />
+      </div>
+
+      <section className="flex flex-col gap-4">
+        <div className="flex items-baseline justify-between">
+          <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
+            DERNIÈRES DEMANDES
+          </p>
+          <BoutonBraise onClick={onNouvelle} className="!px-5 !py-2.5">
+            Nouvelle demande
+          </BoutonBraise>
+        </div>
+        {recentes.length === 0 ? (
+          <EtatVide titre="VOTRE PREMIÈRE DEMANDE LANCE LA PRODUCTION. COMPTEZ 72 H ENTRE LE DÉPÔT DES PHOTOS ET LE FILM LIVRÉ." />
+        ) : (
+          <ul className="flex flex-col" style={{ borderTop: "1px solid var(--color-filet)" }}>
+            {recentes.map((j) => (
+              <li key={j.id} style={{ borderBottom: "1px solid var(--color-filet)" }}>
+                <button
+                  type="button"
+                  onClick={() => onOuvrir(j.id)}
+                  className="group flex w-full flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-4 text-left"
+                >
+                  <span
+                    className="transition-colors duration-200 group-hover:text-(--color-braise-vive)"
+                    style={{ color: "var(--color-pierre)", fontSize: "1.02rem" }}
+                  >
+                    {j.property.title}
+                  </span>
+                  <Pastille status={j.status} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}
 
 export default function Espace() {
   const router = useRouter();
   const { user, pret, deconnexion } = useAuth();
-  const [onglet, setOnglet] = useState<Onglet>("demandes");
+  const [vue, setVue] = useState<Vue>("apercu");
+  const [ouvert, setOuvert] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [restants, setRestants] = useState<number | null>(null);
 
@@ -40,92 +128,61 @@ export default function Espace() {
 
   if (!pret || !user || user.role === "vesta") return null;
 
+  const alerte = jobs.some((j) => j.status === "attention_requise");
+
   return (
-    <main className="marge min-h-svh py-14 sm:py-20" style={{ background: "var(--color-basalte)" }}>
-      <header className="mb-10 flex flex-wrap items-center justify-between gap-4 sm:mb-14">
-        <TransitionLink
-          href="/"
-          aria-label="vesta, retour à l'accueil"
-          className="inline-flex items-baseline"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 800,
-            fontStretch: "125%",
-            fontSize: "1.25rem",
-            color: "var(--color-pierre)",
-            lineHeight: 1,
+    <CoquilleEspace
+      marque="ESPACE CLIENT"
+      nav={[
+        { id: "apercu", libelle: "Vue d'ensemble", icone: Ico.apercu },
+        { id: "demandes", libelle: "Demandes", icone: Ico.demandes, alerte },
+        { id: "nouvelle", libelle: "Nouvelle demande", icone: Ico.nouvelle },
+      ]}
+      actif={vue}
+      onChange={(id) => {
+        setVue(id as Vue);
+        setOuvert(null);
+      }}
+      agence={user.agence}
+      email={user.email}
+      onDeconnexion={() => {
+        deconnexion();
+        router.replace("/");
+      }}
+    >
+      {vue === "apercu" ? (
+        <Apercu
+          jobs={jobs}
+          restants={restants}
+          formule={user.formule?.nom}
+          onOuvrir={(id) => {
+            setOuvert(id);
+            setVue("demandes");
           }}
-        >
-          vesta
-          <Etoile />
-        </TransitionLink>
-
-        <div className="flex items-center gap-5">
-          <span className="voix-mono hidden sm:inline" style={{ color: "var(--color-gris-pierre)" }}>
-            {user.agence || user.email}
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              deconnexion();
-              router.replace("/");
-            }}
-            className="voix-mono underline underline-offset-4"
-            style={{ color: "var(--color-pierre)" }}
-          >
-            Déconnexion
-          </button>
-        </div>
-      </header>
-
-      {/* La formule : quota de films, jamais de montant. */}
-      {user.formule && restants !== null ? (
-        <p className="voix-mono mb-8" style={{ color: "var(--color-bronze)" }}>
-          FORMULE {user.formule.nom.toUpperCase()} · {restants} FILM{restants > 1 ? "S" : ""} RESTANT
-          {restants > 1 ? "S" : ""} CE MOIS-CI
-        </p>
+          onNouvelle={() => setVue("nouvelle")}
+        />
       ) : null}
 
-      <nav className="mb-10 flex gap-2 sm:mb-12" role="tablist">
-        {([
-          ["demandes", "Mes demandes"],
-          ["nouvelle", "Nouvelle demande"],
-        ] as [Onglet, string][]).map(([cle, libelle]) => {
-          const actif = onglet === cle;
-          return (
-            <button
-              key={cle}
-              type="button"
-              role="tab"
-              aria-selected={actif}
-              onClick={() => setOnglet(cle)}
-              className="voix-mono flex-1 px-4 py-3 transition-colors duration-200 sm:flex-none sm:px-5"
-              style={{
-                border: `1px solid ${actif ? "var(--color-braise)" : "var(--color-filet)"}`,
-                color: actif ? "var(--color-pierre)" : "var(--color-gris-pierre)",
-                background: actif ? "var(--color-basalte-2)" : "transparent",
-              }}
-            >
-              {libelle}
-            </button>
-          );
-        })}
-      </nav>
+      {vue === "demandes" ? (
+        <MesDemandes
+          jobs={jobs}
+          ouvert={ouvert}
+          onOuvrir={setOuvert}
+          onMaj={charger}
+          onNouvelle={() => setVue("nouvelle")}
+        />
+      ) : null}
 
-      <div className="max-w-3xl">
-        {onglet === "demandes" ? (
-          <MesDemandes jobs={jobs} onMaj={charger} />
-        ) : (
-          <NouvelleDemande
-            onEnvoye={async () => {
-              await charger();
-              setOnglet("demandes");
-            }}
-          />
-        )}
-      </div>
+      {vue === "nouvelle" ? (
+        <NouvelleDemande
+          onEnvoye={async () => {
+            await charger();
+            setVue("demandes");
+          }}
+        />
+      ) : null}
 
       <AideBulle />
-    </main>
+    </CoquilleEspace>
   );
 }

@@ -1,20 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { backend } from "@/lib/client/backend";
 import { importerPhoto } from "@/lib/client/media";
+import { BoutonBraise, Chronologie, EnTetePage, EtatVide, Pastille } from "./Interface";
 import {
-  couleurStatus,
   LIBELLE_LIVRABLE,
-  LIBELLE_STATUS,
   type Job,
   type JobPhoto,
+  type StatusJob,
 } from "@/lib/client/types";
 
 function dateCourte(iso: string): string {
   const d = new Date(iso);
   return `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}.${d.getFullYear()}`;
 }
+
+const EN_COURS: StatusJob[] = ["recu", "analyse", "en_production", "controle_qualite"];
 
 /* Réponse à un « Complément demandé » : texte et/ou photos supplémentaires. */
 function ReponseComplement({ job, onRepondu }: { job: Job; onRepondu: () => void }) {
@@ -34,9 +36,12 @@ function ReponseComplement({ job, onRepondu }: { job: Job; onRepondu: () => void
   };
 
   return (
-    <section className="flex flex-col gap-4 p-5" style={{ border: "1px solid var(--color-braise)", background: "var(--color-basalte-2)" }}>
+    <section
+      className="flex flex-col gap-4 p-5 sm:p-6"
+      style={{ border: "1px solid var(--color-braise)", background: "var(--color-basalte-2)" }}
+    >
       <p className="voix-mono" style={{ color: "var(--color-braise-vive)" }}>
-        COMPLÉMENT DEMANDÉ
+        LE STUDIO A BESOIN D&apos;UNE PRÉCISION
       </p>
       {job.statusMessage ? (
         <p style={{ color: "var(--color-pierre)", lineHeight: 1.6 }}>{job.statusMessage}</p>
@@ -61,7 +66,7 @@ function ReponseComplement({ job, onRepondu }: { job: Job; onRepondu: () => void
           {erreur}
         </p>
       ) : null}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <label className="voix-mono cursor-pointer px-4 py-2.5" style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}>
           + Joindre des photos
           <input
@@ -75,8 +80,7 @@ function ReponseComplement({ job, onRepondu }: { job: Job; onRepondu: () => void
             }}
           />
         </label>
-        <button
-          type="button"
+        <BoutonBraise
           disabled={enCours || (!texte.trim() && photos.length === 0)}
           onClick={async () => {
             setEnCours(true);
@@ -88,11 +92,9 @@ function ReponseComplement({ job, onRepondu }: { job: Job; onRepondu: () => void
               setEnCours(false);
             }
           }}
-          className="voix-mono px-6 py-2.5 disabled:opacity-50"
-          style={{ border: "1px solid var(--color-braise)", color: "var(--color-pierre)" }}
         >
           {enCours ? "Envoi…" : "Envoyer la réponse"}
-        </button>
+        </BoutonBraise>
       </div>
     </section>
   );
@@ -159,107 +161,221 @@ function Livraison({ job }: { job: Job }) {
   );
 }
 
-/* Suivi des demandes : la liste, puis le détail (statut, complément,
-   livraison, photos déposées). */
-export default function MesDemandes({ jobs, onMaj }: { jobs: Job[]; onMaj: () => void }) {
-  const [ouvert, setOuvert] = useState<string | null>(null);
-  const job = jobs.find((j) => j.id === ouvert) ?? null;
+/* Détail d'une demande : contenu principal + panneau latéral (chronologie,
+   métadonnées) — la lecture d'un dossier, pas une simple fiche. */
+function Detail({ job, onRetour, onMaj }: { job: Job; onRetour: () => void; onMaj: () => void }) {
+  return (
+    <div className="flex flex-col gap-8">
+      <button
+        type="button"
+        onClick={onRetour}
+        className="voix-mono self-start underline underline-offset-4"
+        style={{ color: "var(--color-gris-pierre)" }}
+      >
+        ← Toutes les demandes
+      </button>
 
-  if (jobs.length === 0) {
-    return (
-      <p className="voix-mono" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
-        AUCUNE DEMANDE POUR L&apos;INSTANT. DÉPOSEZ LA PREMIÈRE DEPUIS L&apos;ONGLET « NOUVELLE DEMANDE ».
-      </p>
-    );
-  }
-
-  if (job) {
-    return (
-      <div className="flex flex-col gap-8">
-        <button
-          type="button"
-          onClick={() => setOuvert(null)}
-          className="voix-mono self-start underline underline-offset-4"
-          style={{ color: "var(--color-gris-pierre)" }}
-        >
-          ← Toutes les demandes
-        </button>
-
-        <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <h2 className="voix-display" style={{ fontSize: "var(--text-titre)", color: "var(--color-pierre)" }}>
+      <div className="flex flex-wrap items-baseline justify-between gap-4">
+        <div>
+          <h1 className="voix-display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", color: "var(--color-pierre)", lineHeight: 0.95 }}>
             {job.property.title}
-          </h2>
-          <span className="voix-mono" style={{ color: couleurStatus(job.status) }}>
-            {LIBELLE_STATUS[job.status]}
-          </span>
+          </h1>
+          <p className="voix-mono mt-2" style={{ color: "var(--color-gris-pierre)" }}>
+            {job.property.city} · DÉPOSÉE LE {dateCourte(job.createdAt)}
+          </p>
         </div>
-        <p className="voix-mono -mt-6" style={{ color: "var(--color-gris-pierre)" }}>
-          {job.property.city} · DÉPOSÉE LE {dateCourte(job.createdAt)}
-        </p>
+        <Pastille status={job.status} />
+      </div>
 
-        {job.status === "attention_requise" ? <ReponseComplement job={job} onRepondu={onMaj} /> : null}
+      <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
+        {/* Colonne principale */}
+        <div className="flex min-w-0 flex-col gap-10">
+          {job.status === "attention_requise" ? <ReponseComplement job={job} onRepondu={onMaj} /> : null}
 
-        {job.status === "livre" && job.deliverables.length > 0 ? (
-          <Livraison job={job} />
-        ) : job.status !== "attention_requise" ? (
-          <p className="voix-mono" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
-            {job.status === "livre"
-              ? "LIVRAISON EN COURS DE DÉPÔT."
-              : "VOUS SEREZ AVERTI PAR EMAIL DÈS LA LIVRAISON."}
-          </p>
-        ) : null}
+          {job.status === "livre" && job.deliverables.length > 0 ? (
+            <Livraison job={job} />
+          ) : job.status !== "attention_requise" ? (
+            <p className="voix-mono px-4 py-3" style={{ borderLeft: "2px solid var(--color-filet)", color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
+              {job.status === "livre" ? "LIVRAISON EN COURS DE DÉPÔT." : "VOUS SEREZ AVERTI PAR EMAIL DÈS LA LIVRAISON."}
+            </p>
+          ) : null}
 
-        <section className="flex flex-col gap-3">
-          <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
-            {job.photos.length} PHOTOS DÉPOSÉES
-          </p>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-            {job.photos.map((p, i) => (
-              <figure key={i} className="flex flex-col gap-1">
-                <img src={p.url} alt={p.room} className="aspect-4/3 w-full object-cover" style={{ border: "1px solid var(--color-filet)" }} />
-                <figcaption className="voix-mono" style={{ color: "var(--color-gris-pierre)", fontSize: "0.5625rem" }}>
-                  {p.room}
-                </figcaption>
-              </figure>
+          <section className="flex flex-col gap-3">
+            <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
+              {job.photos.length} PHOTOS DÉPOSÉES
+            </p>
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              {job.photos.map((p, i) => (
+                <figure key={i} className="flex flex-col gap-1">
+                  <img src={p.url} alt={p.room} className="aspect-4/3 w-full object-cover" style={{ border: "1px solid var(--color-filet)" }} />
+                  <figcaption className="voix-mono" style={{ color: "var(--color-gris-pierre)", fontSize: "0.5625rem" }}>
+                    {p.room}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
+
+          {job.agencement ? (
+            <section className="flex flex-col gap-2">
+              <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
+                AGENCEMENT DÉCRIT
+              </p>
+              <p className="max-w-xl whitespace-pre-wrap" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
+                {job.agencement}
+              </p>
+            </section>
+          ) : null}
+        </div>
+
+        {/* Panneau latéral */}
+        <aside
+          className="flex flex-col gap-6 p-5 lg:sticky lg:top-12"
+          style={{ border: "1px solid var(--color-filet)", background: "var(--color-basalte-2)" }}
+        >
+          <div>
+            <p className="voix-mono mb-4" style={{ color: "var(--color-bronze)" }}>
+              PRODUCTION
+            </p>
+            <Chronologie status={job.status} />
+          </div>
+          <div className="flex flex-col gap-1.5 pt-5" style={{ borderTop: "1px solid var(--color-filet)" }}>
+            {[
+              ["FORMATS", job.options.formats.join(" + ") || "AUCUN"],
+              ["STAGING", job.options.staging.length ? job.options.staging.map((s) => s.room).join(", ") : "NON"],
+              ["EXCLUSIONS", job.options.exclude.join(", ") || "AUCUNE"],
+              ["PLAN", job.floorplanUrl ? "JOINT" : "AUCUN"],
+            ].map(([k, v]) => (
+              <p key={k} className="voix-mono" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.7 }}>
+                <span style={{ color: "var(--color-bronze)" }}>{k} · </span>
+                {v}
+              </p>
             ))}
           </div>
-        </section>
-
-        {job.agencement ? (
-          <section className="flex flex-col gap-2">
-            <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
-              AGENCEMENT DÉCRIT
-            </p>
-            <p className="max-w-xl whitespace-pre-wrap" style={{ color: "var(--color-gris-pierre)", lineHeight: 1.6 }}>
-              {job.agencement}
-            </p>
-          </section>
-        ) : null}
+        </aside>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+type Filtre = "toutes" | "en-cours" | "livrees" | "a-completer";
+
+const FILTRES: { id: Filtre; libelle: string }[] = [
+  { id: "toutes", libelle: "TOUTES" },
+  { id: "en-cours", libelle: "EN COURS" },
+  { id: "livrees", libelle: "LIVRÉES" },
+  { id: "a-completer", libelle: "À COMPLÉTER" },
+];
+
+/* Liste des demandes : recherche + filtres de statut, lignes tabulaires. */
+export default function MesDemandes({
+  jobs,
+  ouvert,
+  onOuvrir,
+  onMaj,
+  onNouvelle,
+}: {
+  jobs: Job[];
+  ouvert: string | null;
+  onOuvrir: (id: string | null) => void;
+  onMaj: () => void;
+  onNouvelle: () => void;
+}) {
+  const [recherche, setRecherche] = useState("");
+  const [filtre, setFiltre] = useState<Filtre>("toutes");
+
+  const job = jobs.find((j) => j.id === ouvert) ?? null;
+
+  const visibles = useMemo(() => {
+    const q = recherche.trim().toLowerCase();
+    return jobs.filter((j) => {
+      if (q && !`${j.property.title} ${j.property.city}`.toLowerCase().includes(q)) return false;
+      if (filtre === "en-cours") return EN_COURS.includes(j.status);
+      if (filtre === "livrees") return j.status === "livre";
+      if (filtre === "a-completer") return j.status === "attention_requise";
+      return true;
+    });
+  }, [jobs, recherche, filtre]);
+
+  if (job) return <Detail job={job} onRetour={() => onOuvrir(null)} onMaj={onMaj} />;
 
   return (
-    <ul className="flex flex-col">
-      {jobs.map((j) => (
-        <li key={j.id} style={{ borderTop: "1px solid var(--color-filet)" }}>
-          <button
-            type="button"
-            onClick={() => setOuvert(j.id)}
-            className="group flex w-full flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5 text-left"
-          >
-            <span
-              className="voix-display transition-colors duration-200 group-hover:text-(--color-braise-vive)"
-              style={{ fontSize: "var(--text-titre)", color: "var(--color-pierre)" }}
-            >
-              {j.property.title}
-            </span>
-            <span className="voix-mono" style={{ color: couleurStatus(j.status) }}>
-              {j.property.city} · {dateCourte(j.createdAt)} · {LIBELLE_STATUS[j.status]}
-            </span>
-          </button>
-        </li>
-      ))}
-    </ul>
+    <div className="flex flex-col gap-7">
+      <EnTetePage titre="Demandes" sous={`${jobs.length} AU TOTAL`} />
+
+      {jobs.length === 0 ? (
+        <EtatVide
+          titre="AUCUNE DEMANDE POUR L'INSTANT."
+          action={<BoutonBraise onClick={onNouvelle}>Déposer une demande</BoutonBraise>}
+        />
+      ) : (
+        <>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <input
+              value={recherche}
+              onChange={(e) => setRecherche(e.target.value)}
+              placeholder="RECHERCHER UN BIEN, UNE VILLE…"
+              aria-label="Rechercher une demande"
+              className="voix-mono w-full bg-transparent px-3 py-2.5 outline-none focus-visible:border-(--color-bronze) sm:max-w-xs"
+              style={{ border: "1px solid var(--color-filet)", color: "var(--color-pierre)" }}
+            />
+            <div className="flex flex-wrap gap-1.5">
+              {FILTRES.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setFiltre(f.id)}
+                  aria-pressed={filtre === f.id}
+                  className="voix-mono px-3 py-2 transition-colors duration-200"
+                  style={{
+                    border: `1px solid ${filtre === f.id ? "var(--color-braise)" : "var(--color-filet)"}`,
+                    color: filtre === f.id ? "var(--color-pierre)" : "var(--color-gris-pierre)",
+                  }}
+                >
+                  {f.libelle}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {visibles.length === 0 ? (
+            <EtatVide titre="RIEN NE CORRESPOND À CETTE RECHERCHE." />
+          ) : (
+            <ul className="flex flex-col" style={{ borderTop: "1px solid var(--color-filet)" }}>
+              {visibles.map((j) => (
+                <li key={j.id} style={{ borderBottom: "1px solid var(--color-filet)" }}>
+                  <button
+                    type="button"
+                    onClick={() => onOuvrir(j.id)}
+                    className="group grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-1 py-4 text-left sm:grid-cols-[minmax(0,1fr)_7rem_11rem_auto]"
+                  >
+                    <span className="min-w-0">
+                      <span
+                        className="block truncate transition-colors duration-200 group-hover:text-(--color-braise-vive)"
+                        style={{ color: "var(--color-pierre)", fontSize: "1.02rem" }}
+                      >
+                        {j.property.title}
+                      </span>
+                      <span className="voix-mono" style={{ color: "var(--color-gris-pierre)" }}>
+                        {j.property.city}
+                      </span>
+                    </span>
+                    <span className="voix-mono hidden sm:block" style={{ color: "var(--color-gris-pierre)" }}>
+                      {dateCourte(j.createdAt)}
+                    </span>
+                    <span className="justify-self-start">
+                      <Pastille status={j.status} />
+                    </span>
+                    <span aria-hidden="true" className="voix-mono transition-colors duration-200 group-hover:text-(--color-braise-vive)" style={{ color: "var(--color-filet)" }}>
+                      →
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+    </div>
   );
 }
