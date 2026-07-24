@@ -6,7 +6,9 @@ export const anybody = Anybody({
   subsets: ["latin"],
   axes: ["wdth"],
   variable: "--font-anybody",
-  display: "block",
+  /* swap : le texte s'affiche immédiatement (repli) puis bascule sur
+     Anybody. Évite le texte invisible qui pénalisait le LCP. */
+  display: "swap",
 });
 
 /* Utility — Martian Mono, la voix technique du studio. */

@@ -11,6 +11,14 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main>
+      {/* Contenu sémantique pour les moteurs et les lecteurs d'écran :
+         l'environnement 3D ne porte aucun texte indexable. */}
+      <h1 className="sr-only">Vesta, studio vidéo immobilier en France</h1>
+      <p className="sr-only">
+        Vesta transforme les photos de vos biens en films cinématiques pour vos annonces immobilières :
+        montage humain, retouche photo et home staging virtuel, livrés en 16:9 pour les portails et en
+        9:16 pour les réseaux sociaux, partout en France. Le premier film est offert.
+      </p>
       <GalerieProjets />
     </main>
   );
