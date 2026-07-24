@@ -14,11 +14,19 @@ export const metadata: Metadata = {
     "Studio vidéo immobilier à Toulouse. Vos photos deviennent un film cinématique : génération IA, montage humain, livré en 72 h. Le premier film est offert.",
   keywords: [
     "vidéo immobilière",
+    "vidéo immobilière Toulouse",
     "film immobilier",
-    "studio vidéo immobilier Toulouse",
+    "vidéaste immobilier Toulouse",
+    "studio vidéo immobilier",
+    "vidéo pour agence immobilière",
+    "vidéo annonce immobilière",
+    "visite vidéo immobilier",
     "visite virtuelle immobilier",
     "home staging virtuel",
-    "vidéo pour agence immobilière",
+    "retouche photo immobilier",
+    "création vidéo bien immobilier",
+    "montage vidéo immobilier",
+    "vidéo immobilier Occitanie",
   ],
   alternates: { canonical: `${SITE_URL}/` },
   openGraph: {
@@ -54,8 +62,46 @@ const JSON_LD = {
     addressRegion: "Occitanie",
     addressCountry: "FR",
   },
-  areaServed: { "@type": "City", name: "Toulouse" },
+  areaServed: [
+    { "@type": "City", name: "Toulouse" },
+    { "@type": "AdministrativeArea", name: "Occitanie" },
+  ],
   serviceType: "Production de vidéos immobilières",
+  knowsAbout: [
+    "vidéo immobilière",
+    "film immobilier",
+    "vidéo pour agence immobilière",
+    "home staging virtuel",
+    "retouche photo immobilier",
+    "montage vidéo",
+  ],
+  makesOffer: [
+    {
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "Service",
+        name: "Film immobilier · vidéo d'annonce",
+        description:
+          "Un film cinématique du bien à partir des photos, livré en 16:9 pour les portails et 9:16 pour les réseaux.",
+      },
+    },
+    {
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "Service",
+        name: "Home staging virtuel",
+        description: "Des pièces vides meublées virtuellement, en visuels avant/après non contractuels.",
+      },
+    },
+    {
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "Service",
+        name: "Retouche photo immobilier",
+        description: "Retouche et étalonnage des photos de biens immobiliers.",
+      },
+    },
+  ],
   priceRange: "Sur rendez-vous",
 };
 
