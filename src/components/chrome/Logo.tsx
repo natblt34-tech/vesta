@@ -2,7 +2,7 @@
 
 import { TransitionLink } from "./Transition";
 
-/* Le logo : vesta en minuscules, l'étoile braise en guise d'astérisque.
+/* Le logo : lares en minuscules, l'étoile braise en guise d'astérisque.
    L'astérisque est LE signe de la marque : il revient dans les punchlines. */
 
 export function Etoile({ taille = "0.9em" }: { taille?: string }) {
@@ -27,7 +27,7 @@ export default function Logo() {
   return (
     <TransitionLink
       href="/"
-      aria-label="vesta, retour à l'accueil"
+      aria-label="lares, retour à l'accueil"
       className="pointer-events-auto inline-flex items-baseline"
       style={{
         fontFamily: "var(--font-display)",
@@ -39,7 +39,7 @@ export default function Logo() {
         lineHeight: 1,
       }}
     >
-      vesta
+      lares
       <Etoile />
     </TransitionLink>
   );

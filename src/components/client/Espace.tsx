@@ -276,7 +276,7 @@ export default function Espace() {
       return;
     }
     if (user.role === "vesta") {
-      router.replace("/vesta-studio");
+      router.replace("/studio");
       return;
     }
     charger();

@@ -1,6 +1,6 @@
-# CLAUDE.md — Projet Vesta
+# CLAUDE.md — Projet Lares
 
-Site-expérience scroll-driven pour Vesta, studio vidéo immobilier (France entière).
+Site-expérience scroll-driven pour Lares, studio vidéo immobilier (France entière).
 **Lire `DESIGN_PLAN.md` (la DA validée) et `.claude/skills/vesta-brand/SKILL.md` avant toute décision visuelle. Tenir `NOTES.md` à jour.**
 
 ## Stack

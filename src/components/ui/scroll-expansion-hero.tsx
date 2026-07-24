@@ -12,7 +12,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 
 /* ScrollExpandMedia — le film s'ouvre sous le scroll (fiche projet).
-   Adapté à la charte Vesta : voix display/mono, pierre sur basalte,
+   Adapté à la charte Lares : voix display/mono, pierre sur basalte,
    pas de radius ni d'ombre portée, filet hairline. Le scroll de page
    est verrouillé (événements vesta:scroll-lock/unlock écoutés par
    LenisProvider) tant que le média n'est pas déployé. */

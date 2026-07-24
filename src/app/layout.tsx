@@ -7,8 +7,8 @@ import SiteChrome from "@/components/chrome/SiteChrome";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Vesta · Studio vidéo immobilier · France",
-    template: "%s · Vesta",
+    default: "Lares · Studio vidéo immobilier · France",
+    template: "%s · Lares",
   },
   description:
     "Studio vidéo immobilier partout en France. Vos photos deviennent un film cinématique : génération IA, montage humain, livré en 72 h. Le premier film est offert.",
@@ -31,16 +31,16 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    siteName: "Vesta",
+    siteName: "Lares",
     url: `${SITE_URL}/`,
-    title: "Vesta · Studio vidéo immobilier · France",
+    title: "Lares · Studio vidéo immobilier · France",
     description:
       "Vos photos deviennent un film cinématique, livré en 72 h. Studio vidéo immobilier partout en France.",
-    images: [{ url: OG_IMAGE, alt: "Un film immobilier signé Vesta" }],
+    images: [{ url: OG_IMAGE, alt: "Un film immobilier signé Lares" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vesta · Studio vidéo immobilier · France",
+    title: "Lares · Studio vidéo immobilier · France",
     description: "Vos photos deviennent un film cinématique, livré en 72 h.",
     images: [OG_IMAGE],
   },
@@ -49,11 +49,11 @@ export const metadata: Metadata = {
 const JSON_LD = {
   "@context": "https://schema.org",
   "@type": ["Organization", "ProfessionalService"],
-  name: "Vesta",
+  name: "Lares",
   description:
     "Studio vidéo immobilier partout en France : films cinématiques d'annonces à partir de photos, retouche photo et home staging virtuel, livrés en 16:9 et 9:16.",
   url: SITE_URL,
-  logo: absolu("media/vesta-logo.png"),
+  logo: absolu("icon.png"),
   image: OG_IMAGE,
   address: { "@type": "PostalAddress", addressCountry: "FR" },
   areaServed: { "@type": "Country", name: "France" },

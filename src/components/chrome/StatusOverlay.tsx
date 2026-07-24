@@ -7,7 +7,7 @@ import Logo from "./Logo";
 
 /* Routes du portail client : elles portent leur propre chrome (coquille
    applicative, pages de connexion) — l'overlay du site vitrine s'efface. */
-const ROUTES_PORTAIL = ["/espace", "/vesta-studio", "/connexion", "/creer-acces"];
+const ROUTES_PORTAIL = ["/espace", "/studio", "/connexion", "/creer-acces"];
 
 /* L'overlay dynamique haut de page (réf. analogueagency) :
    le logo cliquable à gauche, l'état courant du scroll au centre.

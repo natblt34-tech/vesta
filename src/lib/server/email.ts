@@ -5,7 +5,7 @@ import { Resend } from "resend";
    vérifié, quota) n'interrompt jamais l'opération métier. L'adresse
    d'expédition et le destinataire studio viennent de l'environnement. */
 
-const FROM = process.env.EMAIL_FROM ?? "Vesta <contact@vesta-re.com>";
+const FROM = process.env.EMAIL_FROM ?? "Lares <contact@vesta-re.com>";
 export const EMAIL_STUDIO = process.env.ADMIN_EMAIL ?? "contact@vesta-re.com";
 
 export async function envoyerEmail(

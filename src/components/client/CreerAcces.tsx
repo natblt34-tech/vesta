@@ -12,7 +12,7 @@ import Champ from "./Champ";
 
 /* Création des accès depuis un lien d'invitation : /creer-acces?invite=XXX
    Deux cas :
-   - invitation Vesta (fondateur) : le client nomme son agence, ce qui
+   - invitation Lares (fondateur) : le client nomme son agence, ce qui
      crée le workspace dédié ;
    - invitation d'agence (membre) : le collègue rejoint automatiquement
      le workspace de son agence. */
@@ -128,7 +128,7 @@ function Formulaire() {
 export default function CreerAcces() {
   return (
     <CoquilleConnexion
-      surTitre="BIENVENUE CHEZ VESTA"
+      surTitre="BIENVENUE CHEZ LARES"
       titre="Créez vos accès"
       heroSrc={media("archi-salon.webp")}
       heroPosition="center 50%"

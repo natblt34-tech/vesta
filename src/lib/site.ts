@@ -1,6 +1,6 @@
 /* Constantes du site. */
 export const CAL_URL = "https://calendly.com/nbellet-vesta-re/30min";
-export const SITE_NAME = "Vesta";
+export const SITE_NAME = "Lares";
 
 /* Origine publique du site, basePath inclus. Pilotée par l'environnement :
    aujourd'hui GitHub Pages (sous /vesta), demain https://vesta-re.com sur

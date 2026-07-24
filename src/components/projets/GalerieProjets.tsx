@@ -84,7 +84,7 @@ export default function GalerieProjets() {
       <>
         <header className="marge flex flex-col justify-end pb-4 pt-28">
           <p className="voix-mono" style={{ color: "var(--color-bronze)" }}>
-            VESTA
+            LARES
             <Etoile taille="1.1em" /> · STUDIO VIDÉO IMMOBILIER · FRANCE
           </p>
         </header>

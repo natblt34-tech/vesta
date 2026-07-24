@@ -8,9 +8,9 @@ import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import { CAL_URL } from "@/lib/site";
 import { TransitionLink } from "@/components/chrome/Transition";
 
-/* Footer cinématique adapté à Vesta (base : motion-footer).
+/* Footer cinématique adapté à Lares (base : motion-footer).
    Rideau de révélation, texte géant, boutons magnétiques, retour haut.
-   Couleurs et typos de la charte, contenu Vesta. */
+   Couleurs et typos de la charte, contenu Lares. */
 
 const STYLES = `
 @keyframes footer-marquee {
@@ -137,7 +137,7 @@ function Bande() {
   );
 }
 
-export function FooterVesta() {
+export function FooterLares() {
   const wrap = useRef<HTMLDivElement>(null);
   const geant = useRef<HTMLDivElement>(null);
   const contenu = useRef<HTMLDivElement>(null);
@@ -205,7 +205,7 @@ export function FooterVesta() {
             ref={geant}
             className="footer-giant voix-display pointer-events-none absolute -bottom-[4vh] left-1/2 z-0 -translate-x-1/2 select-none whitespace-nowrap"
           >
-            VESTA
+            LARES
           </div>
 
           {/* Bande défilante */}
@@ -265,7 +265,7 @@ export function FooterVesta() {
           {/* Barre du bas */}
           <div className="relative z-20 flex w-full flex-col items-center justify-between gap-4 px-6 pb-8 md:flex-row md:px-12">
             <div className="voix-mono order-2 md:order-1" style={{ color: "var(--color-gris-pierre)" }}>
-              © 2026 VESTA · STUDIO VIDÉO IMMOBILIER
+              © 2026 LARES · STUDIO VIDÉO IMMOBILIER
             </div>
             <MagneticButton
               as="button"

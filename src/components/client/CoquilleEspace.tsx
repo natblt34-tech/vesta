@@ -83,7 +83,7 @@ export default function CoquilleEspace({
         <div className="px-6 pt-7">
           <TransitionLink
             href="/"
-            aria-label="vesta, retour à l'accueil"
+            aria-label="lares, retour à l'accueil"
             className="inline-flex items-baseline"
             style={{
               fontFamily: "var(--font-display)",
@@ -94,7 +94,7 @@ export default function CoquilleEspace({
               lineHeight: 1,
             }}
           >
-            vesta
+            lares
             <Etoile />
           </TransitionLink>
           <p className="voix-mono mt-2" style={{ color: "var(--color-bronze)" }}>
@@ -164,7 +164,7 @@ export default function CoquilleEspace({
       >
         <TransitionLink
           href="/"
-          aria-label="vesta, retour à l'accueil"
+          aria-label="lares, retour à l'accueil"
           className="inline-flex items-baseline"
           style={{
             fontFamily: "var(--font-display)",
@@ -175,7 +175,7 @@ export default function CoquilleEspace({
             lineHeight: 1,
           }}
         >
-          vesta
+          lares
           <Etoile />
         </TransitionLink>
         <div className="flex items-center gap-4">

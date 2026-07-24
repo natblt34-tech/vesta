@@ -3,7 +3,7 @@ import Connexion from "@/components/client/Connexion";
 
 export const metadata: Metadata = {
   title: "Espace client",
-  description: "Connexion à l'espace client Vesta.",
+  description: "Connexion à l'espace client Lares.",
   robots: { index: false, follow: false },
 };
 

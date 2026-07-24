@@ -4,12 +4,12 @@ import { useState, type InputHTMLAttributes, type ReactNode } from "react";
 import { TransitionLink } from "@/components/chrome/Transition";
 import { Etoile } from "@/components/chrome/Logo";
 
-/* Coquille de l'espace connexion — adaptation Vesta du composant SignInPage :
+/* Coquille de l'espace connexion — adaptation Lares du composant SignInPage :
    split-screen formulaire / image pleine hauteur, révélations échelonnées.
    À la charte : filets hairline, aucun radius, pas de verre dépoli ; les
    entrées se font par masque + poids (pas de fade-in-up) ; l'accent reste
    la braise. Pas d'OAuth ni de témoignages : les comptes sont créés par
-   Vesta, l'image de droite montre un film réellement livré. */
+   Lares, l'image de droite montre un film réellement livré. */
 
 function Delai({ n, children }: { n: number; children: ReactNode }) {
   return (
@@ -86,7 +86,7 @@ export default function CoquilleConnexion({
         <Delai n={0}>
           <TransitionLink
             href="/"
-            aria-label="vesta, retour à l'accueil"
+            aria-label="lares, retour à l'accueil"
             className="inline-flex items-baseline"
             style={{
               fontFamily: "var(--font-display)",
@@ -97,7 +97,7 @@ export default function CoquilleConnexion({
               lineHeight: 1,
             }}
           >
-            vesta
+            lares
             <Etoile />
           </TransitionLink>
         </Delai>

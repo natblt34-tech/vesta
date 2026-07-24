@@ -16,7 +16,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const projet = getProjet(slug);
   if (!projet) return {};
-  const description = `${projet.titre} : ${projet.photos} photos fournies, un film cinématique de ${projet.duree} s livré en 16:9 et 9:16 par Vesta, studio vidéo immobilier en France.`;
+  const description = `${projet.titre} : ${projet.photos} photos fournies, un film cinématique de ${projet.duree} s livré en 16:9 et 9:16 par Lares, studio vidéo immobilier en France.`;
   const image = absolu(`media/${projet.poster ?? `${projet.image}.webp`}`);
   const url = `${SITE_URL}/projets/${projet.slug}/`;
   return {
@@ -26,9 +26,9 @@ export async function generateMetadata({
     openGraph: {
       type: "article",
       url,
-      title: `${projet.titre} · Vesta`,
+      title: `${projet.titre} · Lares`,
       description,
-      images: [{ url: image, alt: `Le film ${projet.titre} par Vesta` }],
+      images: [{ url: image, alt: `Le film ${projet.titre} par Lares` }],
     },
     twitter: { card: "summary_large_image", images: [image] },
   };

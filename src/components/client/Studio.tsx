@@ -272,7 +272,7 @@ function DetailJob({ job, onRetour, onMaj }: { job: Job; onRetour: () => void; o
   );
 }
 
-/* Agences clientes : Vesta invite un fondateur (email + formule, jamais
+/* Agences clientes : Lares invite un fondateur (email + formule, jamais
    de montant) ; celui-ci nomme son agence à la création de ses accès,
    ce qui crée le workspace, puis invite ses collègues lui-même. */
 function Comptes() {
@@ -377,7 +377,7 @@ function Comptes() {
 
 type Vue = "demandes" | "comptes";
 
-/* Interface studio (côté Vesta) : toutes les demandes tous clients,
+/* Interface studio (côté Lares) : toutes les demandes tous clients,
    pilotage de production, comptes. */
 export default function Studio() {
   const router = useRouter();
@@ -426,7 +426,7 @@ export default function Studio() {
         setVue(id as Vue);
         setOuvert(null);
       }}
-      agence="Studio Vesta"
+      agence="Studio Lares"
       email={user.email}
       onDeconnexion={() => {
         deconnexion();

@@ -66,7 +66,7 @@ export type Format = "16:9" | "9:16";
 export const STYLES_STAGING = [
   "bois clair & tons neutres",
   "contemporain contrasté",
-  "laisser Vesta choisir",
+  "laisser Lares choisir",
 ] as const;
 export type StyleStaging = (typeof STYLES_STAGING)[number];
 

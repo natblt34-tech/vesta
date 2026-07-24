@@ -16,7 +16,7 @@ export default function Connexion() {
   const [enCours, setEnCours] = useState(false);
 
   useEffect(() => {
-    if (pret && user) router.replace(user.role === "vesta" ? "/vesta-studio" : "/espace");
+    if (pret && user) router.replace(user.role === "vesta" ? "/studio" : "/espace");
   }, [pret, user, router]);
 
   return (

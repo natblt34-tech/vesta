@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/espace/", "/vesta-studio/", "/connexion/", "/creer-acces/"],
+      disallow: ["/espace/", "/studio/", "/connexion/", "/creer-acces/"],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };

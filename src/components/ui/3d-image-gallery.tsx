@@ -129,9 +129,9 @@ function ChampDeBraises({ boost }: { boost: React.RefObject<number> }) {
   );
 }
 
-/* —————————————————— Le noyau : logo vesta* interactif —————————————————— */
+/* —————————————————— Le noyau : logo lares* interactif —————————————————— */
 
-const LETTRES = ["v", "e", "s", "t", "a"];
+const LETTRES = ["l", "a", "r", "e", "s"];
 
 function LogoNoyau({ cartes }: { cartes: CarteProjet[] }) {
   const groupe = useRef<THREE.Group>(null);

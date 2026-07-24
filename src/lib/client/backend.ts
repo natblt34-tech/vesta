@@ -147,7 +147,7 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   return data;
 }
 
-export interface VestaBackend {
+export interface LaresBackend {
   infoInvitation(jeton: string): Promise<Invitation | null>;
 
   monAgence(): Promise<(Agence & { membres: Membre[] }) | null>;
@@ -168,7 +168,7 @@ export interface VestaBackend {
   demanderAide(message: string): Promise<void>;
 }
 
-export const supabaseBackend: VestaBackend = {
+export const supabaseBackend: LaresBackend = {
   async infoInvitation(jeton) {
     try {
       return await fetchJson<Invitation>(`/api/invitations/${jeton}`);
@@ -397,4 +397,4 @@ export const supabaseBackend: VestaBackend = {
   },
 };
 
-export const backend: VestaBackend = supabaseBackend;
+export const backend: LaresBackend = supabaseBackend;

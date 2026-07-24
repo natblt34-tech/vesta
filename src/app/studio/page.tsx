@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Studio from "@/components/client/Studio";
 
 export const metadata: Metadata = {
-  title: "Studio Vesta",
+  title: "Studio Lares",
   robots: { index: false, follow: false },
 };
 

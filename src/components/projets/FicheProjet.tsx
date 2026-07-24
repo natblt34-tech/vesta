@@ -12,7 +12,7 @@ import DemoRetouche from "./DemoRetouche";
 import DemoStaging from "./DemoStaging";
 import DemoFormats from "./DemoFormats";
 import StagingScene from "@/components/staging/StagingScene";
-import { FooterVesta } from "@/components/ui/motion-footer";
+import { FooterLares } from "@/components/ui/motion-footer";
 import Ajuste from "@/components/Ajuste";
 
 /* La fiche projet est la démonstration complète par l'exemple :
@@ -151,7 +151,7 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
         </div>
       </section>
 
-      <FooterVesta />
+      <FooterLares />
     </main>
   );
 }
