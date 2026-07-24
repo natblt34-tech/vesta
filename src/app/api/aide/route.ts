@@ -9,6 +9,6 @@ export async function POST(req: Request) {
   const { message } = (await req.json()) as { message?: string };
   if (!message?.trim()) return NextResponse.json({ erreur: "Message vide." }, { status: 400 });
 
-  await envoyerEmail(EMAIL_STUDIO, "Demande d'aide espace client", `${moi.email} : ${message.trim()}`);
+  await envoyerEmail(EMAIL_STUDIO, "Demande d'aide espace client", `${moi.email} : ${message.trim()}`, moi.email);
   return NextResponse.json({ ok: true });
 }

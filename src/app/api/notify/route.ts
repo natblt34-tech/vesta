@@ -26,12 +26,14 @@ export async function POST(req: Request) {
       EMAIL_STUDIO,
       `Nouvelle demande : ${job.property_title} (${job.property_city})`,
       `${agence} (${job.client_email}) a déposé une nouvelle demande.`,
+      job.client_email,
     );
   } else if (type === "complement-reponse") {
     await envoyerEmail(
       EMAIL_STUDIO,
       `Complément reçu : ${job.property_title}`,
       `${job.client_email} a répondu à la demande de précision.`,
+      job.client_email,
     );
   }
   return NextResponse.json({ ok: true });
