@@ -94,10 +94,7 @@ export default function DemoRetouche({ projet }: { projet: Projet }) {
             className="absolute inset-0 h-full w-full object-cover"
             style={{ opacity: prefersReducedMotion() ? 1 : 0 }}
           />
-          <div className="pointer-events-none absolute inset-x-0 top-10 flex justify-between p-[var(--spacing-marge)]">
-            <p className="voix-mono" style={{ color: "var(--color-braise-vive)" }}>
-              01 · LA RETOUCHE
-            </p>
+          <div className="pointer-events-none absolute inset-x-0 top-10 flex justify-end p-[var(--spacing-marge)]">
             <p
               data-etiq
               className="voix-mono"

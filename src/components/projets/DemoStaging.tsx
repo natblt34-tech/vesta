@@ -42,9 +42,6 @@ export default function DemoStaging({ projet }: { projet: Projet }) {
 
   return (
     <section ref={wrap} className="marge py-(--spacing-section)">
-      <p className="voix-mono mb-4" style={{ color: "var(--color-braise-vive)" }}>
-        02 · LE HOME STAGING
-      </p>
       <h2
         className="voix-display max-w-4xl"
         style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)", lineHeight: 0.95 }}

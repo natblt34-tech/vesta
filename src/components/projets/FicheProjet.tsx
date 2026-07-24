@@ -93,11 +93,6 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
          au survol. */}
       <section className="marge grid items-center gap-14 py-(--spacing-section) md:grid-cols-2">
         <div>
-          {projet.briefPhotos?.some((p) => p.apres) ? (
-            <p className="voix-mono mb-3" style={{ color: "var(--color-braise-vive)" }}>
-              SURVOLEZ · LA PHOTO BRUTE DEVIENT LA PHOTO LIVRÉE
-            </p>
-          ) : null}
           <div className="grid grid-cols-2 gap-2">
             {(projet.briefPhotos ?? []).map((p) => (
               <div
