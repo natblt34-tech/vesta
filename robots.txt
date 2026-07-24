@@ -1,0 +1,8 @@
+User-Agent: *
+Allow: /
+Disallow: /espace/
+Disallow: /vesta-studio/
+Disallow: /connexion/
+Disallow: /creer-acces/
+
+Sitemap: https://natblt34-tech.github.io/vesta/sitemap.xml

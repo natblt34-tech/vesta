@@ -1,0 +1,7 @@
+1:"$Sreact.fragment"
+2:I[22196,["/vesta/_next/static/chunks/3vpibktcr9wno.js","/vesta/_next/static/chunks/40sk4yyzs7zku.js","/vesta/_next/static/chunks/14mrh2-p_w84d.js","/vesta/_next/static/chunks/3fwy3_yly69sw.js"],"default"]
+3:I[47042,["/vesta/_next/static/chunks/3vpibktcr9wno.js","/vesta/_next/static/chunks/40sk4yyzs7zku.js","/vesta/_next/static/chunks/14mrh2-p_w84d.js","/vesta/_next/static/chunks/3fwy3_yly69sw.js"],"TransitionLink"]
+4:I[97367,["/vesta/_next/static/chunks/3vpibktcr9wno.js","/vesta/_next/static/chunks/40sk4yyzs7zku.js","/vesta/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+0:{"rsc":["$","$1","c",{"children":[["$","main",null,{"className":"marge flex min-h-svh flex-col items-start justify-center gap-8","children":[["$","p",null,{"className":"voix-mono","style":{"color":"var(--color-bronze)"},"children":"PLAN INTROUVABLE"}],["$","h1",null,{"className":"voix-display","style":{"fontSize":"var(--text-display)","color":"var(--color-pierre)"},"children":[["$","$L2",null,{"children":"Cette pièce"}],["$","$L2",null,{"children":"n'existe pas."}]]}],["$","$L3",null,{"href":"/","className":"voix-mono underline underline-offset-4","style":{"color":"var(--color-pierre)"},"children":"Revenir au film"}]]}],[["$","script","script-0",{"src":"/vesta/_next/static/chunks/3fwy3_yly69sw.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ej1D6mcGmK1tfUKHijLR6"}
+6:null
