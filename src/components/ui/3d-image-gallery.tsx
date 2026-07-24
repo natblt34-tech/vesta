@@ -4,11 +4,12 @@ import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html, Sphere } from "@react-three/drei";
-import { useTransitionNavigate } from "@/components/chrome/Transition";
+import { useTransitionImage } from "@/components/chrome/Transition";
 
 /* L'environnement 3D des projets. Champ de braises rondes (shader), un
-   marqueur-étincelle par projet qui révèle sa carte au survol, et un
-   « voyage dans les braises » au clic vers la fiche. */
+   marqueur-étincelle par projet qui révèle sa carte au survol. Au clic, la
+   carte se détache du champ et grandit jusqu'à devenir le hero de la fiche
+   (morph piloté par le TransitionProvider). */
 
 export type CarteProjet = {
   slug: string;
@@ -235,13 +236,13 @@ function Marqueur({
   position,
   actif,
   onHover,
-  onWarp,
+  onOuvrir,
 }: {
   carte: CarteProjet;
   position: [number, number, number];
   actif: boolean;
   onHover: (slug: string | null) => void;
-  onWarp: (p: [number, number, number], slug: string) => void;
+  onOuvrir: (rect: DOMRect, slug: string) => void;
 }) {
   const groupe = useRef<THREE.Group>(null);
   /* La carte fait face à la caméra en permanence, comme le logo. */
@@ -257,7 +258,10 @@ function Marqueur({
         data-cursor
         onMouseEnter={() => onHover(carte.slug)}
         onMouseLeave={() => onHover(null)}
-        onClick={() => onWarp(position, carte.slug)}
+        onClick={(e) => {
+          const img = e.currentTarget.querySelector("img");
+          if (img) onOuvrir(img.getBoundingClientRect(), carte.slug);
+        }}
         aria-label={`Ouvrir la fiche du projet ${carte.titre}`}
         className="block w-52 select-none overflow-hidden p-2 text-left"
         style={{
@@ -292,41 +296,6 @@ function Marqueur({
       </Html>
     </group>
   );
-}
-
-/* —————————————————— Le voyage (warp caméra) —————————————————— */
-
-function Warp({ onDone }: { onDone: () => void }) {
-  const { camera } = useThree();
-  const dir = useRef<THREE.Vector3 | null>(null);
-  const dist0 = useRef(0);
-  const prog = useRef(0);
-  const fini = useRef(false);
-  const DUREE = 1.5;
-
-  useFrame((_, dt) => {
-    if (fini.current) return;
-    if (!dir.current) {
-      dir.current = camera.position.clone().normalize();
-      dist0.current = camera.position.length();
-    }
-    prog.current = Math.min(1, prog.current + dt / DUREE);
-    const p = prog.current;
-    /* Accélération exponentielle : quasi immobile au départ,
-       ruée très violente sur la fin (easeInExpo). */
-    const e = p === 0 ? 0 : Math.pow(2, 10 * (p - 1));
-    /* Dézoom profond : la caméra recule si loin que l'environnement
-       se réduit à un point puis disparaît, en visant le centre. */
-    const dist = dist0.current + e * 640;
-    camera.position.copy(dir.current).multiplyScalar(dist);
-    camera.lookAt(0, 0, 0);
-    if (p >= 1) {
-      fini.current = true;
-      onDone();
-    }
-  });
-
-  return null;
 }
 
 /* —————————————————— Caméra responsive —————————————————— */
@@ -376,21 +345,31 @@ function positionsPour(n: number): [number, number, number][] {
 export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
   const positions = useMemo(() => positionsPour(cartes.length), [cartes.length]);
   const [survol, setSurvol] = useState<string | null>(null);
-  const [warp, setWarp] = useState<{ slug: string } | null>(null);
+  const [parti, setParti] = useState(false);
   const boost = useRef(1);
   const controls = useRef<React.ComponentRef<typeof OrbitControls>>(null);
-  const naviguer = useTransitionNavigate();
+  const naviguer = useTransitionImage();
 
-  const lancerWarp = (_p: [number, number, number], slug: string) => {
-    if (warp) return;
-    boost.current = 6;
+  /* Au clic : la carte se détache. On fige le champ (plus de rotation ni de
+     survol) et on confie le morph carte -> hero au TransitionProvider. */
+  const ouvrir = (rect: DOMRect, slug: string) => {
+    if (parti) return;
+    const carte = cartes.find((c) => c.slug === slug);
+    if (!carte) return;
+    setParti(true);
     setSurvol(null);
-    setWarp({ slug });
+    naviguer(`/projets/${slug}`, {
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
+      src: carte.imageUrl,
+    });
   };
 
   useEffect(() => {
-    if (controls.current) controls.current.enabled = !warp;
-  }, [warp]);
+    if (controls.current) controls.current.enabled = !parti;
+  }, [parti]);
 
   return (
     <div className="absolute inset-0" style={{ background: "var(--color-basalte)" }}>
@@ -401,7 +380,7 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
            écrasait le GPU (perf mobile ~42). 1.5× suffit visuellement et
            divise par ~2 le travail de rendu. */
         dpr={[1, 1.5]}
-        style={{ pointerEvents: warp ? "none" : "auto" }}
+        style={{ pointerEvents: parti ? "none" : "auto" }}
       >
         <Suspense fallback={null}>
           <CameraRig />
@@ -424,13 +403,9 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
               position={positions[i]}
               actif={survol === c.slug}
               onHover={setSurvol}
-              onWarp={lancerWarp}
+              onOuvrir={ouvrir}
             />
           ))}
-
-          {/* À la fin du voyage : arrivée par le rideau du site, qui
-             s'ouvre sur la fiche — pas de cut sec. */}
-          {warp ? <Warp onDone={() => naviguer(`/projets/${warp.slug}`)} /> : null}
 
           <OrbitControls
             ref={controls}
@@ -440,26 +415,13 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
             maxDistance={38}
             zoomSpeed={0.9}
             enableRotate
-            autoRotate={survol === null && !warp}
+            autoRotate={survol === null && !parti}
             autoRotateSpeed={0.4}
             rotateSpeed={0.5}
             target={[0, 0, 0]}
           />
         </Suspense>
       </Canvas>
-
-      {/* Voile du voyage : la lumière de braise engloutit l'écran. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--color-braise) 22%, transparent) 0%, var(--color-basalte) 55%)",
-          opacity: warp ? 1 : 0,
-          /* Ne couvre que la toute fin : l'environnement a déjà disparu au loin. */
-          transition: warp ? "opacity 0.4s ease-in 1.05s" : "opacity 0s",
-        }}
-      />
     </div>
   );
 }
