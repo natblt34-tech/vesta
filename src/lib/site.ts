@@ -1,5 +1,5 @@
 /* Constantes du site. */
-export const CAL_URL = "https://cal.com/vesta-studio";
+export const CAL_URL = "https://calendly.com/nbellet-vesta-re/30min";
 export const SITE_NAME = "Vesta";
 
 /* Origine publique du site, basePath inclus. Pilotée par l'environnement :

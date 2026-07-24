@@ -22,7 +22,7 @@ npm run typecheck  # tsc --noEmit
 - Seules `transform`, `opacity`, `clip-path`, CSS vars sont animées. Jamais top/left/width/height.
 - Rien n'entre par fade-in-up : révélation par masque/clip ou déplacement avec poids (`--ease-poids`).
 - La voix mono (labels techniques) est en français métier : `TRAVERSÉE 01 · SALON → CUISINE · 6S`.
-- Un seul CTA sur tout le site : « Prendre rendez-vous » → https://cal.com/vesta-studio (placeholder à remplacer).
+- Un seul CTA sur tout le site : « Prendre rendez-vous » → https://calendly.com/nbellet-vesta-re/30min (`CAL_URL` dans `src/lib/site.ts`).
 - Statut scroll : chaque page pilote l'overlay via `useStatus()` (`src/lib/status.tsx`).
 
 ## Budgets (non négociables)
