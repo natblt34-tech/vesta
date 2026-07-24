@@ -1,5 +1,5 @@
 /* Constantes du site. */
-export const CAL_URL = "https://calendly.com/nbellet-vesta-re/30min";
+export const CAL_URL = "https://calendly.com/nbellet-lares-re/30min";
 export const SITE_NAME = "Lares";
 
 /* Origine publique du site. Pilotée par l'environnement (Vercel) :
