@@ -8,12 +8,21 @@ devra servir les mêmes objets.
 
 ## État actuel
 
-Le site est en export statique sur GitHub Pages : **l'API n'existe pas encore**.
-L'espace client tourne en mock navigateur (localStorage), au schéma exact ci-dessous.
-Le jour de l'hébergement réel (Supabase ou petit serveur Node), on implémente :
-1. les 4 endpoints ci-dessous ;
-2. un adaptateur `VestaBackend` réel (une ligne à changer dans `src/lib/client/backend.ts`) ;
-3. les emails réels dans `src/lib/client/notify.ts` (Resend).
+**Implémenté et testé.** L'espace client tourne sur Supabase (Postgres + Auth +
+Storage privé) ; les 4 endpoints ci-dessous existent (Next.js sur Vercel). Base de
+données à Francfort. `PIPELINE_TOKEN` généré et stocké côté serveur (variable
+d'environnement Vercel + `.env.local`).
+
+Base de l'API (au go-live) : `https://vesta-re.com`. En local : `http://localhost:3000`.
+
+Notes de mise en œuvre :
+- Les identifiants de job sont des **UUID** (le pipeline les traite comme opaques).
+- `client` inclut `prenom` (le membre qui a déposé).
+- Les photos sont servies par **URLs signées Supabase** valables 24 h (le pipeline
+  télécharge dans ce délai).
+- `POST .../deliverables` accepte `{ deliverables: [{ kind, url, room? }] }` où `url`
+  est déjà accessible (le pipeline a uploadé de son côté) ; le job passe à `livre`
+  et le client est notifié par email.
 
 ## Authentification
 

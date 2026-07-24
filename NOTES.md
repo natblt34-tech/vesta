@@ -138,6 +138,24 @@ Vercel : `NEXT_PUBLIC_SITE_URL=https://vesta-re.com`, une seule variable).
   vesta-re.com. Reste à faire au go-live : Search Console + soumission sitemap,
   Google Business Profile (action client).
 
+### Backend réel Supabase + Resend (2026-07-24) — testé de bout en bout
+Bascule du mock vers Supabase (Postgres + Auth + Storage privé, Francfort) + Resend.
+- Schéma : `supabase/schema.sql` (agences, profiles, invitations, jobs) + RLS par
+  agence + grants rôles API + 2 buckets privés. Appliqué via `scripts/db.mjs`
+  (pooler eu-central-1). Admin studio créé via `scripts/seed-admin.mjs`.
+- Clients `src/lib/supabase/{client,server,admin}.ts`. Auth réécrit (Supabase Auth,
+  contrat useAuth() inchangé). `backend.ts` = supabaseBackend (lectures RLS
+  navigateur + écritures via routes API clé secrète). Export statique retiré.
+- Routes : /api/inscription, /api/invitations(+[jeton]), /api/notify, /api/aide,
+  /api/jobs/[id]/{status,deliverable,relivraison}, pipeline /api/pipeline/jobs
+  (+[id]/{status,deliverables}, Bearer PIPELINE_TOKEN).
+- Emails Resend best-effort : ÉCHOUENT tant que vesta-re.com n'est pas vérifié dans
+  Resend (étape DNS go-live), non bloquant.
+- Testé réel : login admin, invitation, inscription fondateur, prénom, dépôt demande
+  + upload storage + URLs signées, visibilité studio cross-agence, statut, pipeline.
+- Reste : env vars Vercel + push, DNS vesta-re.com, vérif domaine Resend.
+  [[vesta-golive-plan]]
+
 - Attribution des demandes : prénom demandé à la première connexion (écran
   dédié avant l'espace, `definirPrenom`), stocké sur l'utilisateur et copié
   dans `job.client.prenom` — affiché « PAR X » dans listes et détails, et
