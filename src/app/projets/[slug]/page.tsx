@@ -16,7 +16,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const projet = getProjet(slug);
   if (!projet) return {};
-  const description = `${projet.titre} : ${projet.photos} photos fournies, un film cinématique de ${projet.duree} s livré en 16:9 et 9:16 par Vesta, studio vidéo immobilier à Toulouse.`;
+  const description = `${projet.titre} : ${projet.photos} photos fournies, un film cinématique de ${projet.duree} s livré en 16:9 et 9:16 par Vesta, studio vidéo immobilier en France.`;
   const image = absolu(`media/${projet.poster ?? `${projet.image}.webp`}`);
   const url = `${SITE_URL}/projets/${projet.slug}/`;
   return {

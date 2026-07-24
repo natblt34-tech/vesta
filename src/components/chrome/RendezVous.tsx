@@ -30,7 +30,7 @@ export default function RendezVous({ mention }: { mention?: string }) {
         className="voix-mono flex flex-wrap items-baseline justify-between gap-4"
         style={{ color: "var(--page-fg-2)" }}
       >
-        <span>VESTA · Studio vidéo immobilier · Toulouse</span>
+        <span>VESTA · Studio vidéo immobilier · France</span>
         {mention ? <span>{mention}</span> : null}
         <span>Films générés par IA · montés à la main</span>
       </div>
