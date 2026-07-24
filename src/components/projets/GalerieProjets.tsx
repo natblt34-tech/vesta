@@ -37,7 +37,7 @@ const CARTES: CarteProjet[] = PROJETS.map((p) => ({
     media(p.poster ?? `${p.image}.webp`),
     ...(p.briefPhotos ?? []).map((b) => media(b.src)),
   ],
-  meta: `${p.photos} PHOTOS · ${p.duree} S`,
+  meta: `${p.accroche ?? `${p.photos} PHOTOS`} · ${p.duree} S`,
 }));
 
 function ListeStatique() {

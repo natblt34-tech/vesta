@@ -29,6 +29,9 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
   }, [projet]);
 
   const heroFilm = projet.video && !reduced;
+  /* Cas terrain : pas de photos fournies, pas de retouche/staging. */
+  const terrain = projet.type === "TERRAIN";
+  const accroche = projet.accroche ?? `${projet.photos} PHOTOS`;
 
   return (
     <main ref={racine}>
@@ -40,7 +43,7 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
           posterSrc={projet.poster ? media(projet.poster) : undefined}
           bgImageSrc={projet.poster ? media(projet.poster) : media(`${projet.image}.webp`)}
           title={projet.titre}
-          date={`${projet.photos} PHOTOS · ${projet.duree} S`}
+          date={`${accroche} · ${projet.duree} S`}
         />
       ) : (
         <section className="relative flex h-[86svh] items-end overflow-hidden">
@@ -67,7 +70,7 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
               {projet.titre}
             </h1>
             <p className="voix-mono mt-4" style={{ color: "var(--color-pierre)" }}>
-              {projet.photos} PHOTOS FOURNIES
+              {terrain ? accroche : `${projet.photos} PHOTOS FOURNIES`}
             </p>
           </div>
         </section>
@@ -89,8 +92,28 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
       {/* L'animation vidéo, livrée en 16:9 et 9:16 */}
       <DemoFormats projet={projet} />
 
-      {/* Le brief, le résultat. Les photos révèlent leur version retouchée
-         au survol. */}
+      {/* Terrain : pas de grille photos, un diptyque texte du terrain au bâti. */}
+      {terrain ? (
+        <section className="marge grid items-center gap-14 py-(--spacing-section) md:grid-cols-2">
+          <h2
+            className="voix-display"
+            style={{ fontSize: "var(--text-display)", color: "var(--color-pierre)", lineHeight: 0.95 }}
+          >
+            <Ajuste>Du terrain</Ajuste>
+            <Ajuste>au projet.</Ajuste>
+          </h2>
+          <div>
+            <p className="max-w-md" style={{ color: "var(--color-gris-pierre)" }}>
+              {projet.resultat}
+            </p>
+            <p className="voix-mono mt-8" style={{ color: "var(--color-gris-pierre)" }}>
+              {MENTION_STAGING}
+            </p>
+          </div>
+        </section>
+      ) : (
+      /* Le brief, le résultat. Les photos révèlent leur version retouchée
+         au survol. */
       <section className="marge grid items-center gap-14 py-(--spacing-section) md:grid-cols-2">
         <div>
           <div className="grid grid-cols-2 gap-2">
@@ -150,6 +173,7 @@ export default function FicheProjet({ projet }: { projet: Projet }) {
           ) : null}
         </div>
       </section>
+      )}
 
       <FooterLares />
     </main>

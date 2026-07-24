@@ -9,6 +9,9 @@ export type Projet = {
   photos: number;
   traversees: { nom: string; duree: number }[];
   duree: number;
+  /* Libellé mono court (carte + hero). À défaut : « {photos} PHOTOS ».
+     Sert aux cas hors service photos-vers-film (ex. drone d'un terrain). */
+  accroche?: string;
   image: string;
   posPlate: string;
   brief: string;
@@ -114,6 +117,27 @@ export const PROJETS: Projet[] = [
       "Sept photos d'une maison d'architecte : le séjour noir et blanc, la cuisine ouverte, les circulations, les espaces des enfants. Des volumes forts, une lumière difficile à tenir en photo fixe.",
     resultat:
       "Un film de 32 secondes qui traverse la maison, du séjour à la terrasse, en gardant la ligne graphique. Livré en 16:9 pour les portails et en 9:16 pour les réseaux.",
+  },
+  /* Cas à part : pas le service photos-vers-film, mais un terrain à vendre
+     filmé au drone, dont le film fait naître le bâti en projection. */
+  {
+    slug: "terrain-st-remy",
+    titre: "Terrain à Saint-Rémy",
+    type: "TERRAIN",
+    surface: 0,
+    quartier: "SAINT-RÉMY-DE-PROVENCE",
+    photos: 0,
+    traversees: [],
+    duree: 10,
+    accroche: "TERRAIN À BÂTIR",
+    image: "st-remy-terrain",
+    posPlate: "center 50%",
+    video: "st-remy-terrain.mp4",
+    poster: "st-remy-terrain-poster.jpg",
+    brief:
+      "Un terrain à bâtir à vendre à Saint-Rémy-de-Provence : une parcelle nue, dégagée, en bord de route. Difficile de faire rêver un acheteur devant un rectangle de terre.",
+    resultat:
+      "Le film part de la parcelle filmée au drone, puis fait naître en projection la maison qui pourrait s'y construire. On ne vend plus un terrain, on vend un projet. Livré en 16:9 pour les portails et en 9:16 pour les réseaux.",
   },
 ];
 
