@@ -41,6 +41,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
   const veil = useRef<HTMLDivElement>(null);
   const morph = useRef<HTMLDivElement>(null);
   const morphImg = useRef<HTMLImageElement>(null);
+  const morphVoile = useRef<HTMLDivElement>(null);
   const morphEdge = useRef<HTMLDivElement>(null);
   const pending = useRef<string | null>(null);
   const mode = useRef<"veil" | "morph">("veil");
@@ -88,8 +89,9 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       if (href === pathname || pending.current) return;
       const el = morph.current;
       const img = morphImg.current;
+      const voile = morphVoile.current;
       const edge = morphEdge.current;
-      if (!el || !img || !edge || prefersReducedMotion()) {
+      if (!el || !img || !voile || !edge || prefersReducedMotion()) {
         window.scrollTo(0, 0);
         router.push(href);
         return;
@@ -109,8 +111,11 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
         width: source.width,
         height: source.height,
       });
-      gsap.set(img, { scale: 1.06 });
-      gsap.set(edge, { opacity: 0.55 });
+      /* Départ = l'aspect exact de la carte : image nette, léger sur-cadrage
+         qui se pose (push-in cinéma), aucun voile. */
+      gsap.set(img, { scale: 1.08 });
+      gsap.set(voile, { opacity: 0 });
+      gsap.set(edge, { opacity: 0.5 });
 
       let poussee = false;
       const pousser = () => {
@@ -129,7 +134,8 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
           pending.current = null;
         },
       });
-      /* 1. La carte grandit jusqu'au plein cadre, recadrée en cover. */
+      /* 1. L'image se détache de la carte et grandit jusqu'au plein cadre,
+         recadrée en cover à chaque frame (aucune déformation). */
       tl.to(el, {
         top: 0,
         left: 0,
@@ -139,11 +145,14 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
         ease: gsapEasePierre,
       });
       tl.to(img, { scale: 1, duration: 0.72, ease: gsapEasePierre }, 0);
-      tl.to(edge, { opacity: 0, duration: 0.5, ease: "power2.out" }, 0.16);
-      /* 2. Plein cadre : on bascule vers la fiche (même image en fond). */
+      /* Colorimétrie : on rejoint EXACTEMENT le voile du hero (basalte 45 %),
+         pour que le fondu de raccord soit invisible — pas de saut de teinte. */
+      tl.to(voile, { opacity: 0.45, duration: 0.72, ease: "none" }, 0);
+      tl.to(edge, { opacity: 0, duration: 0.45, ease: "power2.out" }, 0.12);
+      /* 2. Plein cadre, même teinte que le hero : on bascule vers la fiche. */
       tl.call(pousser);
-      /* 3. Le temps que la fiche peigne son poster, puis fondu de raccord. */
-      tl.to(el, { opacity: 0, duration: 0.5, ease: "power2.out" }, "+=0.32");
+      /* 3. Court palier (le poster de la fiche est déjà en cache), puis fondu. */
+      tl.to(el, { opacity: 0, duration: 0.45, ease: "power2.out" }, "+=0.18");
     },
     [pathname, router],
   );
@@ -171,12 +180,14 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       <TransitionImageContext.Provider value={naviguerImage}>
         {children}
 
-        {/* Rideau de basalte (liens ordinaires) */}
+        {/* Rideau de basalte (liens ordinaires). z au-dessus de la plage de
+           drei Html (~1.6e7), sinon le logo/cartes 3D passent devant. */}
         <div
           ref={veil}
           aria-hidden="true"
-          className="fixed inset-0 z-96 hidden"
+          className="fixed inset-0 hidden"
           style={{
+            zIndex: 2147483000,
             background: "var(--color-basalte)",
             clipPath: "inset(100% 0% 0% 0%)",
           }}
@@ -194,8 +205,15 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
         <div
           ref={morph}
           aria-hidden="true"
-          className="fixed z-96 hidden overflow-hidden"
-          style={{ top: 0, left: 0, width: 0, height: 0, willChange: "top, left, width, height, opacity" }}
+          className="fixed hidden overflow-hidden"
+          style={{
+            zIndex: 2147483000,
+            top: 0,
+            left: 0,
+            width: 0,
+            height: 0,
+            willChange: "top, left, width, height, opacity",
+          }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -203,6 +221,12 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
             alt=""
             className="h-full w-full object-cover"
             style={{ willChange: "transform" }}
+          />
+          {/* Voile basalte : rampe jusqu'à la teinte du hero (raccord invisible). */}
+          <div
+            ref={morphVoile}
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "var(--color-basalte)", opacity: 0 }}
           />
           <div
             ref={morphEdge}

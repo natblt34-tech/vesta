@@ -260,7 +260,11 @@ function Marqueur({
         onMouseLeave={() => onHover(null)}
         onClick={(e) => {
           const img = e.currentTarget.querySelector("img");
-          if (img) onOuvrir(img.getBoundingClientRect(), carte.slug);
+          if (!img) return;
+          onOuvrir(img.getBoundingClientRect(), carte.slug);
+          /* La carte disparaît net : seule l'image (le clone plein cadre)
+             reste et s'élève au premier plan. Elle en sort, pas à côté. */
+          e.currentTarget.style.opacity = "0";
         }}
         aria-label={`Ouvrir la fiche du projet ${carte.titre}`}
         className="block w-52 select-none overflow-hidden p-2 text-left"
