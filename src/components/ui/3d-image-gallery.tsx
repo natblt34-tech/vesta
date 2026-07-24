@@ -65,7 +65,9 @@ function ChampDeBraises({ boost }: { boost: React.RefObject<number> }) {
   const groupe = useRef<THREE.Points>(null);
 
   const geometrie = useMemo(() => {
-    const n = 2600;
+    /* Moins de particules sur mobile : le rendu par point coûte cher sur
+       processeur de téléphone. */
+    const n = typeof window !== "undefined" && window.innerWidth < 768 ? 1300 : 2600;
     const positions = new Float32Array(n * 3);
     const colors = new Float32Array(n * 3);
     const sizes = new Float32Array(n);
@@ -394,7 +396,11 @@ export default function GaleriePlans({ cartes }: { cartes: CarteProjet[] }) {
     <div className="absolute inset-0" style={{ background: "var(--color-basalte)" }}>
       <Canvas
         camera={{ position: [0, 0, 38], fov: 55 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        /* Plafond de résolution : sur mobile haute densité, rendre en 3×
+           écrasait le GPU (perf mobile ~42). 1.5× suffit visuellement et
+           divise par ~2 le travail de rendu. */
+        dpr={[1, 1.5]}
         style={{ pointerEvents: warp ? "none" : "auto" }}
       >
         <Suspense fallback={null}>
