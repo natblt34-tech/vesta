@@ -119,6 +119,25 @@ documenté dans **PIPELINE.md** (endpoints, token, schéma job, curl).
   localStorage (« Failed to execute setItem... exceeded the quota », vu par le
   client). Migration automatique des anciens jobs localStorage au premier
   chargement. Photos importées compressées à 1200 px / JPEG 0.78.
+### Socle SEO technique (2026-07-24)
+Construit avant le go-live, compatible export statique, piloté par
+`NEXT_PUBLIC_SITE_URL` (défaut = URL GitHub Pages actuelle ; au go-live sur
+Vercel : `NEXT_PUBLIC_SITE_URL=https://vesta-re.com`, une seule variable).
+- `src/lib/site.ts` : SITE_URL env-driven, helper `absolu()`, `OG_IMAGE`.
+- `app/sitemap.ts` + `app/robots.ts` (les deux avec `dynamic="force-static"`,
+  requis par output:export). Sitemap = home + fiches projets publiques
+  uniquement ; robots bloque le portail (/espace, /vesta-studio, /connexion,
+  /creer-acces) et pointe le sitemap.
+- Metadata enrichies : canonical par page, Open Graph + Twitter card avec
+  image (poster du film), keywords, JSON-LD LocalBusiness+ProfessionalService
+  (logo, image, adresse Toulouse, areaServed, serviceType). Fiches projets :
+  og:type=article + poster en image de partage.
+- Portail déjà en noindex (les 4 routes).
+- LIMITE GitHub Pages : robots.txt/sitemap.xml sortent sous /vesta/ (sous-chemin),
+  pas à la racine du domaine. Correct seulement au go-live sur le domaine racine
+  vesta-re.com. Reste à faire au go-live : Search Console + soumission sitemap,
+  Google Business Profile (action client).
+
 - Attribution des demandes : prénom demandé à la première connexion (écran
   dédié avant l'espace, `definirPrenom`), stocké sur l'utilisateur et copié
   dans `job.client.prenom` — affiché « PAR X » dans listes et détails, et
