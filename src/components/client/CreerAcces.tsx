@@ -19,7 +19,7 @@ import Champ from "./Champ";
 function Formulaire() {
   const router = useRouter();
   const params = useSearchParams();
-  const invite = params.get("invite") ?? "demo-invite";
+  const invite = params.get("invite") ?? "";
   const { creerAcces } = useAuth();
   const [info, setInfo] = useState<Invitation | null | "chargement">("chargement");
   const [erreur, setErreur] = useState("");

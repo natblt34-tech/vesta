@@ -5,8 +5,11 @@ import { FORMULES } from "@/lib/client/types";
 /* Détail d'une invitation (avant inscription) : fondateur -> formule,
    membre -> nom de l'agence rejointe. Lecture via clé secrète (la table
    invitations n'est pas exposée au public). */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function GET(_req: Request, { params }: { params: Promise<{ jeton: string }> }) {
   const { jeton } = await params;
+  if (!UUID.test(jeton)) return NextResponse.json({ erreur: "Invitation invalide." }, { status: 404 });
   const admin = supabaseAdmin();
   const { data: inv } = await admin
     .from("invitations")

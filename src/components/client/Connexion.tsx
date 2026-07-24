@@ -45,9 +45,6 @@ export default function Connexion() {
           >
             ← Retour au site
           </TransitionLink>
-          <p className="voix-mono" style={{ color: "var(--color-filet)", lineHeight: 1.6 }}>
-            Démo : agence@demo / demo · studio@vesta / vesta
-          </p>
         </div>
       }
     >

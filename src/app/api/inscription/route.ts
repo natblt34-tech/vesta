@@ -14,6 +14,7 @@ export async function POST(req: Request) {
   const err = (m: string, s = 400) => NextResponse.json({ erreur: m }, { status: s });
 
   if (!invite || !email || !motDePasse) return err("Champs manquants.");
+  if (!/^[0-9a-f-]{36}$/i.test(invite)) return err("Lien d'invitation invalide ou déjà utilisé.");
   if (motDePasse.length < 6) return err("Le mot de passe doit faire au moins 6 caractères.");
 
   const admin = supabaseAdmin();
