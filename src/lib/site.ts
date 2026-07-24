@@ -2,11 +2,9 @@
 export const CAL_URL = "https://calendly.com/nbellet-vesta-re/30min";
 export const SITE_NAME = "Lares";
 
-/* Origine publique du site, basePath inclus. Pilotée par l'environnement :
-   aujourd'hui GitHub Pages (sous /vesta), demain https://vesta-re.com sur
-   Vercel (sans basePath). Une seule variable à définir au go-live :
-   NEXT_PUBLIC_SITE_URL=https://vesta-re.com */
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://natblt34-tech.github.io/vesta";
+/* Origine publique du site. Pilotée par l'environnement (Vercel) :
+   NEXT_PUBLIC_SITE_URL=https://lares-re.com */
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lares-re.com";
 
 /* URL absolue d'un asset public (partage social, sitemap, canonical). */
 export const absolu = (chemin: string) => `${SITE_URL}/${chemin.replace(/^\//, "")}`;

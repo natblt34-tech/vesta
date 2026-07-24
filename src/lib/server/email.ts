@@ -5,8 +5,8 @@ import { Resend } from "resend";
    vérifié, quota) n'interrompt jamais l'opération métier. L'adresse
    d'expédition et le destinataire studio viennent de l'environnement. */
 
-const FROM = process.env.EMAIL_FROM ?? "Lares <contact@vesta-re.com>";
-export const EMAIL_STUDIO = process.env.ADMIN_EMAIL ?? "contact@vesta-re.com";
+const FROM = process.env.EMAIL_FROM ?? "Lares <contact@lares-re.com>";
+export const EMAIL_STUDIO = process.env.ADMIN_EMAIL ?? "nbellet@lares-re.com";
 
 export async function envoyerEmail(
   to: string,
@@ -21,7 +21,7 @@ export async function envoyerEmail(
   }
   try {
     const resend = new Resend(cle);
-    /* contact@vesta-re.com n'est pas une boîte : les réponses partent
+    /* contact@lares-re.com n'est pas une boîte : les réponses partent
        vers une adresse réelle (studio par défaut, ou le client). */
     const { error } = await resend.emails.send({
       from: FROM,
@@ -37,6 +37,6 @@ export async function envoyerEmail(
 }
 
 export function lienEspace(): string {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vesta-re.com";
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lares-re.com";
   return `${base}/espace`;
 }
